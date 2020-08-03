@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) ED_Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/jake/PhD/Decomposition/Constraint_Decomposition/main_test",
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Input"
+            , "--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9", "--nsga_pop_size=16", "--printLevel=3"
+            ,"--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests"
+            ,"--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps"
+            ,"--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP"
+            ,"--set_ub=40417", "--run_nsga_decomp=true","--nsga_gen=5", "--input_instance_name=thor50dday.mps", "--decomp_type=NSGA","--maxCPU=1000"
+            ,"--set_generic_MIP_time=100" ,"--run_generic_MIP_solver=false", "--run_lapso=false"
+            ,"--MIP_num_var=106261","--MIP_num_cons=53360","--MIP_num_bin=53131","--MIP_num_cont=53130","--MIP_num_int=0","--MIP_num_non_zeroes=212060"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole":  false, 
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+        },
+    ]
+}

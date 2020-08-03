@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/include",
+                "/home/jake/PhD/Decomposition/Constraint_Decomposition/include",
+                "/home/jake/PhD/Coding_Libraries/cplex/include",
+                "/home/jake/PhD/Coding_Libraries/concert/include",
+                "/home/jake/PhD/Coding_Libraries/pagmo2-2.11.4/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
