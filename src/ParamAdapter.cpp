@@ -10,7 +10,7 @@ ParamAdapter::ParamAdapter(const mainParam::Param& p){
 
     createInputFilePaths(p);
     createTestFlags(p);
-   
+    
     if (run_nsga_decomp_flag == true){
         create_nsga_props(p);
     }
@@ -38,6 +38,10 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     string test_random_decomp_string = std::string(p.test_random_decomp);
     boost::algorithm::to_lower(test_random_decomp_string);
     test_random_decomp_flag = char_to_BOOL[test_random_decomp_string];
+
+    string MIP_Parse_Test_Exception_string = std::string(p.MIP_Parse_Test_Exception);
+    boost::algorithm::to_lower(MIP_Parse_Test_Exception_string);
+    MIP_Parse_Test_Exception_flag = char_to_BOOL[MIP_Parse_Test_Exception_string];
 }
 
 void ParamAdapter::create_NSGA_decomp_plot_filename(const mainParam::Param& p){

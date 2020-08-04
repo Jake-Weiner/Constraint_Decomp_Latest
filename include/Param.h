@@ -49,6 +49,7 @@ struct Param {
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";
     const char* random_lb_output = "";
+    const char* MIP_Parse_Test_Exception = "false";
 };
 };
 #endif

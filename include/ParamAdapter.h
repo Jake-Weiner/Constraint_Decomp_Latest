@@ -36,8 +36,12 @@ class ParamAdapter{
             return test_greedy_decomp_flag;
         }
 
-         bool get_test_random_decomp_flag(){
+        bool get_test_random_decomp_flag(){
             return test_random_decomp_flag;
+        }
+
+        bool get_MIP_Parse_Test_Exception_flag(){
+            return MIP_Parse_Test_Exception_flag;
         }
 
         std::vector<double> get_nsga_props(){
@@ -64,6 +68,7 @@ class ParamAdapter{
         bool run_lapso_flag = false;
         bool test_greedy_decomp_flag = false;
         bool test_random_decomp_flag = false;
+        bool MIP_Parse_Test_Exception_flag = false;
         string Problem_File;
 
         std::map<std::string, DecompType> str_to_DT = {{"NSGA", NSGA}, {"CPLEX", CPLEX}};

@@ -10,6 +10,134 @@
 
 using namespace std;
 
+// local function declarations
+void trim(string& s);
+bool checkForConstraint(const vector<string>& line_split);
+bool variablesBegin(vector<string>& line_split);
+bool marker(const vector<string>& line_split);
+bool intOrgCheck(const vector<string>& line_split);
+bool intEndCheck(vector<string>& line_split);
+bool checkForVariable(const vector<string>& line_split);
+bool objFnCheck(const string& word, const string& objFnSymbol);
+bool RHSSectionCheck(vector<string>& line_split);
+bool BoundsSectionCheck(vector<string>& line_split);
+bool ObjFnSymbolCheck(vector<string>& line_split);
+string extractObjSymbol(vector<string>& line_split);
+
+void MIP_Fileparser::parserMps(string filename)
+{
+    ifstream input(filename);
+    unsigned int current_constraint_number = 0u;
+    unsigned int current_var_number = 0u;
+    bool variableLines = false;
+    bool RHSLines = false;
+    bool Bounds = false;
+    bool int_var = false;
+    unsigned int cont_var_count = 0u;
+    unsigned int marker_count = 0u;
+    if (input.is_open()) {
+        while (!input.eof()) {
+            string line;
+            getline(input, line);
+            if (line.empty()) {
+                continue;
+            }
+            if (line[line.size() - 1] == '\r') {
+                line.erase(line.size() - 1);
+            }
+            trim(line);
+            vector<string> line_split;
+            boost::split(line_split, line, boost::is_any_of(" \t"), boost::token_compress_on);
+
+            // ENDATA
+            if (line_split[0].find("ENDATA") != std::string::npos) {
+                break;
+            }
+
+            // COLUMNS
+            //check for objective function column
+            if (ObjFnSymbolCheck(line_split) == true) {
+                obj_function_symbol = extractObjSymbol(line_split);
+            }
+            // check for constraints - Exact, Less, Greater
+            if (checkForConstraint(line_split) == true) {
+                createConstraint(line_split, current_constraint_number);
+            }
+            // ROWS
+            // variables start after COLUMNS line
+            if (variablesBegin(line_split) == true) {
+                variableLines = true;
+                continue;
+            }
+            // if RHS has begun
+            if (RHSSectionCheck(line_split) == true && (RHSLines == false)) {
+                cout << "checking RHS section" << endl;
+                variableLines = false;
+                RHSLines = true;
+                continue;
+            }
+
+            // BOUNDS Section Check
+            if (BoundsSectionCheck(line_split) == true) {
+                cout << "checking bounds section" << endl;
+                RHSLines = false;
+                Bounds = true;
+                continue;
+            }
+
+            if (variableLines == true) {
+                // marker indicates integer variables, otherwise it's just a continuous variable
+                // RHS constraints Section
+
+                // If MARKER is found with INTORG, this indicates variables are Integer variables
+                // once this section finishes, variables are continuous
+                if (marker(line_split) == true && intOrgCheck(line_split) == true) {
+                    // if (marker(line_split) == true) {
+                    // marker_count++;
+                    cout << "int section found" << endl;
+                    int_var = true;
+                    // second marker reached with INTEND flagged, finished integer variable section
+                    // read in the the next line after the first marker
+                    continue;
+                }
+                else if (marker(line_split) == true && intEndCheck(line_split) == true) {
+                    int_var = false;
+                    cout << "int section finished" << endl;
+                    // read in the next line after the second marker
+                    continue;
+                }
+
+                string variable_name = line_split[0];
+                // check if variable name has been seen - create new variable if not
+                if (MII.varNameExists(variable_name) == false) {
+                    MII.addVariableName(variable_name, current_var_number);
+                    MII.addVariableIdx(current_var_number, variable_name);
+                    if (int_var) {
+                        Variable v(current_var_number, Int);
+                        MP.variables.push_back(v);
+                    } else {
+                        cont_var_count++;
+                        Variable v(current_var_number, Cont);
+                        MP.variables.push_back(v);
+                    }
+                    current_var_number++;
+                }
+                extractVariableInfo(line_split, variable_name);
+            }
+
+            if (RHSLines == true) {
+                extractRHSInfo(line_split);
+            }
+
+            if (Bounds == true) {
+                extractBoundsInfo(line_split);
+            }
+        }
+    }
+    MP.number_variables = current_var_number;
+    cout << "cont var count is " << cont_var_count << endl;
+}
+
 void trim(string& s)
 {
     size_t p = s.find_first_not_of(" \t");
@@ -121,24 +249,27 @@ bool variablesBegin(vector<string>& line_split)
     return false;
 }
 
-bool marker(vector<string>& line_split)
+bool marker(const vector<string>& line_split)
 {
+
     for (auto& word : line_split) {
         if (word.find("MARKER") != string::npos) {
+            for (auto& word : line_split) {
+                cout << word << " ";
+            }
+            cout << endl;
             return true;
-             for (auto& word : line_split){
-                 cout << word << " "; 
-             }
-             cout << endl;
+
         }
     }
     return false;
 }
 
-bool intOrgCheck(vector<string>& line_split)
+bool intOrgCheck(const vector<string>& line_split)
 {
     for (auto& word : line_split) {
         if (word.find("INTORG") != string::npos) {
+            cout << "found INTORG" << endl;
             return true;
         }
     }
@@ -163,13 +294,6 @@ bool checkForVariable(const vector<string>& line_split)
     return false;
 }
 
-// bool MIP_Fileparser::constraintInfoCheck(const string& word){
-
-//     if (word[0] == 'c'){
-//         return true;
-//     }
-//     return false;
-// }
 
 bool objFnCheck(const string& word, const string& objFnSymbol)
 {
@@ -214,7 +338,7 @@ string extractObjSymbol(vector<string>& line_split)
     return line_split[1];
 }
 
-void MIP_Fileparser::createConstraint(const vector<string>& line_split, int& current_constraint_number)
+void MIP_Fileparser::createConstraint(const vector<string>& line_split,unsigned int& current_constraint_number)
 {
     string constraint_name = line_split[1];
     MII.addConstraintName(constraint_name, current_constraint_number);
@@ -307,14 +431,11 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
         bt = Lower;
     } else if (line_split[0].find("BV") != std::string::npos) {
         bt = Bool;
-    }
-    else if (line_split[0].find("FX") != std::string::npos) {
+    } else if (line_split[0].find("FX") != std::string::npos) {
         bt = Fix;
-    }
-    else if (line_split[0].find("FR") != std::string::npos) {
+    } else if (line_split[0].find("FR") != std::string::npos) {
         bt = Free;
-    }
-    else if (line_split[0].find("MI") != std::string::npos) {
+    } else if (line_split[0].find("MI") != std::string::npos) {
         bt = FreeNegative;
     }
     for (int i = 1; i < line_split.size(); i++) {
@@ -340,145 +461,30 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
                 } else if (bt == Lower) {
                     MP.variables[var_idx].setLB(bound);
                     // cout << "Lower Bound Set" << endl;
-                }
-                else if(bt == Fix){
+                } else if (bt == Fix) {
                     MP.variables[var_idx].setUB(bound);
                     MP.variables[var_idx].setLB(bound);
-                }
-                else if(bt == Free){
-                    if (MP.variables[var_idx].getVarType() == Int){
+                } else if (bt == Free) {
+                    if (MP.variables[var_idx].getVarType() == Int) {
                         MP.variables[var_idx].setLB(-std::numeric_limits<int>::max());
-                    }
-                    else if (MP.variables[var_idx].getVarType() == Cont){
+                    } else if (MP.variables[var_idx].getVarType() == Cont) {
                         MP.variables[var_idx].setLB(-std::numeric_limits<double>::max());
-                    }       
-                }
-                else if(bt == FreeNegative){
-                    if (MP.variables[var_idx].getVarType() == Int){
+                    }
+                } else if (bt == FreeNegative) {
+                    if (MP.variables[var_idx].getVarType() == Int) {
                         MP.variables[var_idx].setLB(-std::numeric_limits<int>::max());
                         MP.variables[var_idx].setUB(0);
-                    }
-                    else if (MP.variables[var_idx].getVarType() == Cont){
+                    } else if (MP.variables[var_idx].getVarType() == Cont) {
                         MP.variables[var_idx].setLB(-std::numeric_limits<double>::max());
                         MP.variables[var_idx].setUB(0.00);
                     }
-                   
                 }
             }
         }
     }
 }
 
-void MIP_Fileparser::parserMps(string filename)
-{
-    ifstream input(filename);
-    int current_constraint_number = 0;
-    int current_var_number = 0;
-    bool variableLines = false;
-    bool RHSLines = false;
-    bool Bounds = false;
-    bool int_var = false;
-    int marker_count = 0;
-    if (input.is_open()) {
-        while (!input.eof()) {
-            string line;
-            getline(input, line);
-            if (line.empty()) {
-                continue;
-            }
-            if (line[line.size() - 1] == '\r') {
-                line.erase(line.size() - 1);
-            }
-            trim(line);
-            vector<string> line_split;
-            boost::split(line_split, line, boost::is_any_of(" \t"), boost::token_compress_on);
 
-            // ENDATA
-            if (line_split[0].find("ENDATA") != std::string::npos) {
-                break;
-            }
-
-            // COLUMNS
-            //check for objective function column
-            if (ObjFnSymbolCheck(line_split) == true) {
-                obj_function_symbol = extractObjSymbol(line_split);
-            }
-            // check for constraints - Exact, Less, Greater
-            if (checkForConstraint(line_split) == true) {
-                createConstraint(line_split, current_constraint_number);
-            }
-            // ROWS
-            // variables start after COLUMNS line
-            if (variablesBegin(line_split) == true) {
-                variableLines = true;
-                continue;
-            }
-            // if RHS has begun
-            if (RHSSectionCheck(line_split) == true && (RHSLines == false)) {
-                cout << "checking RHS section" << endl;
-                variableLines = false;
-                RHSLines = true;
-                continue;
-            }
-
-            // BOUNDS Section Check
-            if (BoundsSectionCheck(line_split) == true) {
-                cout << "checking bounds section" << endl;
-                RHSLines = false;
-                Bounds = true;
-                continue;
-            }
-
-            if (variableLines == true) {
-                // marker indicates integer variables, otherwise it's just a continuous variable
-                // RHS constraints Section
-
-                // If MARKER is found with INTORG, this indicates variables are Integer variables
-                // once this section finishes, variables are continuous
-                if (marker(line_split) == true && intOrgCheck(line_split) == true) {
-                // if (marker(line_split) == true) {
-                    marker_count++;
-                    int_var = true;
-                    // second marker reached with INTEND flagged, finished integer variable section
-                    // if (marker_count == 2 && intEndCheck(line_split)) {
-                     if (marker_count == 2) {
-                        int_var = false;
-                        // read in the next line after the second marker
-                        continue;
-                    }
-                    // read in the the next line after the first marker
-                    continue;
-                }
-
-                string variable_name = line_split[0];
-
-                // check if variable name has been seen - create new variable if not
-                if (MII.varNameExists(variable_name) == false) {
-                    MII.addVariableName(variable_name, current_var_number);
-                    MII.addVariableIdx(current_var_number, variable_name);
-                    if (int_var) {
-                        Variable v(current_var_number, Int);
-                        MP.variables.push_back(v);
-                    } else {
-                        Variable v(current_var_number, Cont);
-                        MP.variables.push_back(v);
-                    }
-                    current_var_number++;
-                }
-                extractVariableInfo(line_split, variable_name);
-            }
-
-            if (RHSLines == true) {
-                extractRHSInfo(line_split);
-            }
-
-            if (Bounds == true) {
-                extractBoundsInfo(line_split);
-            }
-        }
-    }
-    MP.number_variables = current_var_number;
-}
 
 void MIP_Fileparser::printConstraints()
 {

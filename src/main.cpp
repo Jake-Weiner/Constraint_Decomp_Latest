@@ -256,9 +256,9 @@ int main(int argc, const char** argv)
     MIP_Problem MP = MIP_FP.getMIPProblem();
 
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
-    //variables non_zeroes
+    //variables non_zeroes and the test has not been flagged as an exception
     if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
-        para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false){
+        para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false && (PA.get_MIP_Parse_Test_Exception_flag() == false)){
             cout << "MIP File Parsed Incorrectly" << endl;
             exit(EXIT_FAILURE);
     }

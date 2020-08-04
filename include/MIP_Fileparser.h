@@ -49,8 +49,8 @@ private:
     bool constraintCheck(HG_Edge constraint_to_check);
     void parserUser(string filename);
     void parserMps(string filename);
-    void createConstraint(const vector<string>& line_split, int& current_constraint_number);
-    void createVariable(const vector<string>& line_split, int& current_constraint_number);
+    void createConstraint(const vector<string>& line_split,unsigned int& current_constraint_number);
+    void createVariable(const vector<string>& line_split,unsigned int& current_constraint_number);
     bool constraintInfoCheck(const string& word);
     void extractVariableInfo(vector<string>& line_split, const string& variable_name);
     void extractRHSInfo(const vector<string>& line_split);

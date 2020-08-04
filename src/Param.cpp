@@ -31,6 +31,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("MIP_num_cont"); 
     parser.setOption("MIP_num_int");
     parser.setOption("MIP_num_non_zeroes"); 
+    parser.setOption("MIP_Parse_Test_Exception"); 
+    
     
 
     
@@ -89,7 +91,8 @@ void Param::parse(int argc, const char** argv)
         MIP_num_int = atoi(parser.getValue("MIP_num_int"));
     if (parser.getValue("MIP_num_non_zeroes"))
         MIP_num_non_zeroes = atoi(parser.getValue("MIP_num_non_zeroes"));
-   
+    if (parser.getValue("MIP_Parse_Test_Exception"))
+        MIP_Parse_Test_Exception = (parser.getValue("MIP_Parse_Test_Exception"));
 
         
 }
