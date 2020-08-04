@@ -13,6 +13,11 @@ struct individual_information_struct{
     unsigned int largest_sp;
 };
 
+struct CPLEX_Return_struct{
+    double bound;
+    double obj_val;
+};
+
 struct MIP_problems_to_solve {
     int max_subprobem_size;
     int max_num_subproblems;

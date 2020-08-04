@@ -141,7 +141,6 @@ bool solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     }
 
     bool success_flag;
-    
     std::vector<Partition_Struct> ps;
     // try create partition struct
     success_flag = HG.getPartitionStruct(con_relax_vector, sp_prop,ps);
@@ -271,10 +270,12 @@ int main(int argc, const char** argv)
     }
     
     // solve the input MIP problem to see if it produces the same results
-    bool testMIPProblem = false;
-    if (testMIPProblem == true) {
-        MIP_Problem_CPLEX_Solver MPCS(MP);
+    if (PA.get_generic_MIP_Solver_Flag() == true){
+        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
         MPCS.solve();
+        
+        // output results to a file
+
     }
 
     //convert read MIP to Hypergraph
@@ -361,7 +362,7 @@ int main(int argc, const char** argv)
                         string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_best_" + prop_string + "csv";
                         string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_average_" + prop_string + "csv";
                         cout << "running Lapso: " << prop_string << endl;
-                        bool success_flag = solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.set_generic_MIP_time, "");
+                        bool success_flag = solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
                         if (success_flag == false){
                             cout << "LaPSO not successful" << endl;
                         }
@@ -406,7 +407,7 @@ int main(int argc, const char** argv)
             }
         }
         cout << "solving LaPSO" << endl;
-        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.set_generic_MIP_time, "");
+        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, "");
     }
 
     // run LR with random decompositions
@@ -435,7 +436,7 @@ int main(int argc, const char** argv)
         std::shuffle(con_vec.begin(), con_vec.end(), g);
     
         cout << "solving LaPSO" << endl;
-        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.set_generic_MIP_time
+        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim
         ,string(para.random_lb_output));
     }
 

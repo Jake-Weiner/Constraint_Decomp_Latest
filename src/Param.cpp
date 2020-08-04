@@ -68,6 +68,8 @@ void Param::parse(int argc, const char** argv)
         set_ub = atof(parser.getValue("set_ub"));
     if (parser.getValue("set_generic_MIP_time"))
         set_generic_MIP_time = atof(parser.getValue("set_generic_MIP_time"));
+    if (parser.getValue("subproblem_solver_runtime_lim"))
+        subproblem_solver_runtime_lim = atof(parser.getValue("subproblem_solver_runtime_lim"));
     if (parser.getValue("run_generic_MIP_solver"))
         run_generic_MIP_solver = parser.getValue("run_generic_MIP_solver");
     if (parser.getValue("run_lapso"))

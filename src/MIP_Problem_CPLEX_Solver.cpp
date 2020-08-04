@@ -6,7 +6,7 @@
 using namespace std;
 
 
-void MIP_Problem_CPLEX_Solver::solve()
+CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve()
 {
     IloEnv env;
     IloModel model(env);
@@ -79,6 +79,8 @@ void MIP_Problem_CPLEX_Solver::solve()
 
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
+    cplex.setParam(IloCplex::TiLim, solver_time_lim); // solve for solver_time_lim
+    cplex.setParam(IloCplex::ClockType, 1); // use CPU runtime not wallclock.
     // cplex.setOut(env.getNullStream());
     if (!cplex.solve()) {
         cout << "Failed to optimize LP" << endl;
@@ -87,6 +89,14 @@ void MIP_Problem_CPLEX_Solver::solve()
     cout << "Solution status = " << cplex.getStatus() << endl;
     cout << "Solution value  = " << cplex.getObjValue() << endl;
 
+    //This method returns a bound on the optimal solution value of the problem. When a model has been solved to optimality, 
+    //this value matches the optimal solution value. If a MIP optimization is terminated before optimality has been proven, 
+    //this value is computed for a minimization (maximization) problem as the minimum (maximum) objective function value of 
+    //all remaining unexplored nodes.
+    cout << "Best Bound value  = " << cplex.getBestObjValue() << endl;
+    CPLEX_Return_struct CPLEX_results = {cplex.getBestObjValue(), cplex.getObjValue()};
     cplex.end();
+
+    return CPLEX_results;
 }
 
