@@ -8,7 +8,7 @@
             "name": "(gdb) ED_Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/jake/PhD/Decomposition/Constraint_Decomposition/main_test",
+            "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
             "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Input"
             , "--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9", "--nsga_pop_size=16", "--printLevel=3"
             ,"--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests"
