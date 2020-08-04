@@ -138,7 +138,7 @@ bool marker(vector<string>& line_split)
 bool intOrgCheck(vector<string>& line_split)
 {
     for (auto& word : line_split) {
-        if (word.find("\'INTORG\'") != string::npos) {
+        if (word.find("INTORG") != string::npos) {
             return true;
         }
     }
