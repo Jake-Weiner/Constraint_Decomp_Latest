@@ -6,6 +6,9 @@ using std::string;
 using std::cout;
 using std::vector;
 
+
+        
+
 ParamAdapter::ParamAdapter(const mainParam::Param& p){
 
     createInputFilePaths(p);
@@ -19,30 +22,24 @@ ParamAdapter::ParamAdapter(const mainParam::Param& p){
 }
 
 void ParamAdapter::createTestFlags(const mainParam::Param& p){
-    string run_generic_MIP_solver_string = std::string(p.run_generic_MIP_solver);
-    boost::algorithm::to_lower(run_generic_MIP_solver_string);
-    generic_MIP_Solver_Flag = char_to_BOOL[run_generic_MIP_solver_string];
-    
-    string run_nsga_decomp_string = std::string(p.run_nsga_decomp);
-    boost::algorithm::to_lower(run_nsga_decomp_string);
-    run_nsga_decomp_flag = char_to_BOOL[run_nsga_decomp_string];
-    
-    string run_lapso_string = std::string(p.run_lapso);
-    boost::algorithm::to_lower(run_lapso_string);
-    run_lapso_flag = char_to_BOOL[run_lapso_string];
 
-    string test_greedy_decomp_string = std::string(p.test_greedy_decomp);
-    boost::algorithm::to_lower(test_greedy_decomp_string);
-    test_greedy_decomp_flag = char_to_BOOL[test_greedy_decomp_string];
+    generic_MIP_Solver_Flag = getBoolVal(p.run_generic_MIP_solver);
+    run_nsga_decomp_flag = getBoolVal(p.run_nsga_decomp);
+    run_lapso_flag = getBoolVal(p.run_lapso);
+    test_greedy_decomp_flag = getBoolVal(p.test_greedy_decomp);
+    test_random_decomp_flag = getBoolVal(p.test_random_decomp);
+    MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
 
-    string test_random_decomp_string = std::string(p.test_random_decomp);
-    boost::algorithm::to_lower(test_random_decomp_string);
-    test_random_decomp_flag = char_to_BOOL[test_random_decomp_string];
-
-    string MIP_Parse_Test_Exception_string = std::string(p.MIP_Parse_Test_Exception);
-    boost::algorithm::to_lower(MIP_Parse_Test_Exception_string);
-    MIP_Parse_Test_Exception_flag = char_to_BOOL[MIP_Parse_Test_Exception_string];
 }
+
+// return a bool val from the given input char*
+bool ParamAdapter::getBoolVal(const char* input){
+
+    string temp_string = std::string(input);
+    boost::algorithm::to_lower(temp_string);
+    return char_to_BOOL[temp_string];
+}
+
 
 void ParamAdapter::create_NSGA_decomp_plot_filename(const mainParam::Param& p){
     NSGA_decomp_plot_filename = std::string(p.nsga_vector_root_folder) + "/" + std::string(p.input_instance_name) + "/population_plot.csv";

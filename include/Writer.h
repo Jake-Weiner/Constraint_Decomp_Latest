@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include "Util.h"
+
 class Writer{
 
     struct relaxedConstraintStatistics
@@ -48,9 +50,8 @@ class Writer{
         const int con_orig_prob, const int con_relaxed , const std::string output_filename);
         void writeConVecToFile(const std::vector<double>& con_vec, const std::string& con_vec_filename);
         // void writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
-        void writeRelaxedConstraintStatistics(){
-
-        }
+        void writeRelaxedConstraintStatistics(){};
+        void writeCPLEXResults(const std::string& output_filename, const std::string& instnace_name, const CPLEX_Return_struct& CRS);
     private:
 
 };

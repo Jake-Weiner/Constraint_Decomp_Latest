@@ -528,6 +528,33 @@ src/Problem_Adapter.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Problem_Adapter.cpp.s
 .PHONY : src/Problem_Adapter.cpp.s
 
+src/SolveGenericMIP.o: src/SolveGenericMIP.cpp.o
+
+.PHONY : src/SolveGenericMIP.o
+
+# target to build an object file
+src/SolveGenericMIP.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.o
+.PHONY : src/SolveGenericMIP.cpp.o
+
+src/SolveGenericMIP.i: src/SolveGenericMIP.cpp.i
+
+.PHONY : src/SolveGenericMIP.i
+
+# target to preprocess a source file
+src/SolveGenericMIP.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.i
+.PHONY : src/SolveGenericMIP.cpp.i
+
+src/SolveGenericMIP.s: src/SolveGenericMIP.cpp.s
+
+.PHONY : src/SolveGenericMIP.s
+
+# target to generate assembly for a file
+src/SolveGenericMIP.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.s
+.PHONY : src/SolveGenericMIP.cpp.s
+
 src/SolveLaPSO.o: src/SolveLaPSO.cpp.o
 
 .PHONY : src/SolveLaPSO.o
@@ -690,6 +717,9 @@ help:
 	@echo "... src/Problem_Adapter.o"
 	@echo "... src/Problem_Adapter.i"
 	@echo "... src/Problem_Adapter.s"
+	@echo "... src/SolveGenericMIP.o"
+	@echo "... src/SolveGenericMIP.i"
+	@echo "... src/SolveGenericMIP.s"
 	@echo "... src/SolveLaPSO.o"
 	@echo "... src/SolveLaPSO.i"
 	@echo "... src/SolveLaPSO.s"

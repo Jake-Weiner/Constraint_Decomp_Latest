@@ -2,6 +2,9 @@
 #include <fstream>
 #include <iostream>
 
+using std::endl;
+using std::cout;
+
 void Writer::writeNSGADecompStats(const int var_orig_prob, const int var_largest_sp,
     const int con_orig_prob, const int con_relaxed, const std::string output_filename)
 {
@@ -75,4 +78,18 @@ void Writer::writeBestLBPlot(const int var_in_largest_sp, const int con_relaxed,
     } else {
         std::cout << "Unable to open Best LB Output File" << std::endl;
     }
+}
+
+void Writer::writeCPLEXResults(const std::string& output_filename, const std::string& instance_name, const CPLEX_Return_struct& CRS){
+ 
+    std::ofstream outfile;
+    // append the results to the given filename
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << instance_name << "," << CRS.bound << "," << CRS.obj_val << endl;
+    }
+    else{
+        cout << "unable to open CPLEX Results Output File" << endl;
+    }
+    outfile.close();
 }

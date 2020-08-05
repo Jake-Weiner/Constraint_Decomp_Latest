@@ -8,21 +8,21 @@
 #include <iostream>
 #include <fstream>
 #include "Util.h"
+#include "GenericMIPInterface.h"
 
-using namespace std;
+using std::vector;
 
 
-class MIP_Problem_CPLEX_Solver{
+class MIP_Problem_CPLEX_Solver: public GenericMIPInterface{
     public:
-        MIP_Problem_CPLEX_Solver(const MIP_Problem& MP, const double& solver_time_lim){
+        MIP_Problem_CPLEX_Solver(const MIP_Problem& MP, const double& solver_time_lim) :
+        GenericMIPInterface(solver_time_lim) {
             this->MP = MP;
-            this->solver_time_lim = solver_time_lim;
         }
-        CPLEX_Return_struct solve();
+        // override the base class solve method
+        CPLEX_Return_struct solve(bool randomSeed) override;
     
     private:
-
-        double solver_time_lim = 0;
         MIP_Problem MP;
         vector<double> original_costs;
 };

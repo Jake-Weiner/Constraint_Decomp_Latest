@@ -13,6 +13,7 @@
 #include "ParamAdapter.h"
 #include "Problem_Adapter.h"
 #include "Util.h"
+#include "SolveGenericMIP.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -37,46 +38,6 @@ using std::endl;
 
 using namespace pagmo;
 
-
-void solve_generic_MIP(const char* MIP_filename, const char* output_filename, const double& time_lim)
-{
-
-    bool solve_as_LP = true;
-    IloEnv env;
-    IloModel model(env);
-    IloCplex cplex(env);
-    IloObjective obj;
-    IloNumVarArray vars(env);
-    IloRangeArray rng(env);
-
-    // solve problem as LP not ILP
-    cplex.importModel(model, MIP_filename, obj, vars, rng);
-    if (solve_as_LP){
-        for (int i =0; i<vars.getSize(); i++){
-        model.add(IloConversion(env, vars[i], ILOFLOAT));
-        }
-    }
-   
-    // cplex.setParam(IloCplex::Param::MIP::Limits::Solutions, 1);
-    cplex.setParam(IloCplex::TiLim, time_lim);
-    cplex.setParam(IloCplex::Threads, 1);
-    cplex.setParam(IloCplex::RootAlg,IloCplex::Dual);
-    // cplex.setParam(IloCplex::Param::MIP::Limits::Nodes, 0);
-    cplex.extract(model);
-    // cplex.exportModel(new_filename.c_str());
-    if (!cplex.solve()) {
-        env.error() << "Failed to optimize original problem LP" << endl;
-        env.end();
-        return;
-    }
-    IloNumArray vals(env);
-    cplex.getValues(vals, vars);
-    env.out() << "Solution status = " << cplex.getStatus() << endl;
-    env.out() << "Solution value  = " << cplex.getObjValue() << endl;
-    // double obj_val = double(cplex.getObjValue());
-    env.end();
-    return;
-}
 
 void solveDecompMIP(Hypergraph& HG, const double subproblem_prop, const char* output_filename, bool warm_start, const char* warm_start_filename)
 {
@@ -230,32 +191,33 @@ vector<bool> getNSGAConVec(const string& input_file)
 }
 
 
-
-
 int main(int argc, const char** argv)
-{
+{   
+    // Parse in parameters
     mainParam::Param para;
     para.parse(argc, argv);
+    // Manipulate/transform parameters from char to required values through Adapter
     ParamAdapter PA(para);
     Writer w;
-    string Problem_File = PA.getProblemFilename();
-    string generic_MIP_output_filename = string(para.solve_generic_MIP_output_root_folder) + "/" + string(para.input_instance_name) + "/" + "log.txt";
-
-        
+    string MIP_Problem_File = PA.getProblemFilename();
+    
     // solve generic MIP
     if (PA.get_generic_MIP_Solver_Flag() == true) {
-        cout << "generic mip filename is " << generic_MIP_output_filename.c_str() << endl;
-        solve_generic_MIP(Problem_File.c_str(), generic_MIP_output_filename.c_str(), para.set_generic_MIP_time);
+        cout << "solving generic MIP File" << endl;
+        SolveGenericMIP SGM(MIP_Problem_File, para.set_generic_MIP_time);
+        CPLEX_Return_struct MIP_results = SGM.solve();
+        w.writeCPLEXResults(para.solve_generic_MIP_output_filename, MIP_Problem_File, MIP_results);
     }
 
     // Parse in MIP file into self made structure
     MIP_Fileparser MIP_FP;
     cout << "Parsing MPS File" << endl;
-    MIP_FP.parse(file_type::MPS, Problem_File);
+    MIP_FP.parse(file_type::MPS, MIP_Problem_File);
     MIP_Problem MP = MIP_FP.getMIPProblem();
 
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
+    cout << "testing MIP Parser" << endl;
     if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
         para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false && (PA.get_MIP_Parse_Test_Exception_flag() == false)){
             cout << "MIP File Parsed Incorrectly" << endl;
@@ -272,10 +234,12 @@ int main(int argc, const char** argv)
     // solve the input MIP problem to see if it produces the same results
     if (PA.get_generic_MIP_Solver_Flag() == true){
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-        MPCS.solve();
-        
+        bool random_seed = false;
+        CPLEX_Return_struct MIP_results = MPCS.solve(random_seed);
+        // need to output the results from cplex solver to compare my parsing and the actual solver...
+        w.writeCPLEXResults(para.solve_parsed_MIP_output_filename, MIP_Problem_File, MIP_results);
         // output results to a file
-
+        // i)f (
     }
 
     //convert read MIP to Hypergraph

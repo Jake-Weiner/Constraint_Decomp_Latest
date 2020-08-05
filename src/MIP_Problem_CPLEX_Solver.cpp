@@ -3,10 +3,11 @@
 #include <algorithm>
 
 
-using namespace std;
+using std::cout;
+using std::vector;
 
 
-CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve()
+CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
 {
     IloEnv env;
     IloModel model(env);
@@ -81,6 +82,11 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve()
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     cplex.setParam(IloCplex::TiLim, solver_time_lim); // solve for solver_time_lim
     cplex.setParam(IloCplex::ClockType, 1); // use CPU runtime not wallclock.
+    
+    if (randomSeed == false){
+        cplex.setParam(IloCplex::Param::RandomSeed, 0); // set random seed to 0 for consistency in testing
+    }
+   
     // cplex.setOut(env.getNullStream());
     if (!cplex.solve()) {
         cout << "Failed to optimize LP" << endl;

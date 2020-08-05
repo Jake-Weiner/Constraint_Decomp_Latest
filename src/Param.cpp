@@ -16,11 +16,16 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("nsga_vector_root_folder");
     parser.setOption("cplex_decomp_warmstart_file");
     parser.setOption("cplex_decomp_output_root_folder");
-    parser.setOption("solve_generic_MIP_output_root_folder");
+    parser.setOption("solve_generic_MIP_output_filename");
+    parser.setOption("generic_mip_random_seed");
+    parser.setOption("parsed_mip_random_seed");
+    parser.setOption("solve_parsed_MIP_output_filename");
     parser.setOption("run_nsga_decomp"); 
     parser.setOption("set_ub"); 
-    parser.setOption("set_generic_MIP_time"); 
+    parser.setOption("set_generic_MIP_time");
+    parser.setOption("set_parsed_MIP_time");  
     parser.setOption("run_generic_MIP_solver");
+    parser.setOption("run_parsed_MIP_solver");
     parser.setOption("run_lapso"); 
     parser.setOption("test_greedy_decomp"); 
     parser.setOption("test_random_decomp");
@@ -33,9 +38,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("MIP_num_non_zeroes"); 
     parser.setOption("MIP_Parse_Test_Exception"); 
     
-    
 
-    
     if (argc == -1) // abuse of function
         parser.processFile(*argv);
     else
@@ -60,14 +63,20 @@ void Param::parse(int argc, const char** argv)
         cplex_decomp_warmstart_file = parser.getValue("cplex_decomp_warmstart_file");
     if (parser.getValue("cplex_decomp_output_root_folder"))
         cplex_decomp_output_root_folder = parser.getValue("cplex_decomp_output_root_folder");
-    if (parser.getValue("solve_generic_MIP_output_root_folder"))
-        solve_generic_MIP_output_root_folder = parser.getValue("solve_generic_MIP_output_root_folder");
+    if (parser.getValue("solve_generic_MIP_output_filename"))
+        solve_generic_MIP_output_filename = parser.getValue("solve_generic_MIP_output_filename");
     if (parser.getValue("run_nsga_decomp"))
         run_nsga_decomp = parser.getValue("run_nsga_decomp");
     if (parser.getValue("set_ub"))
         set_ub = atof(parser.getValue("set_ub"));
     if (parser.getValue("set_generic_MIP_time"))
         set_generic_MIP_time = atof(parser.getValue("set_generic_MIP_time"));
+    if (parser.getValue("set_parsed_MIP_time"))
+        set_parsed_MIP_time = atof(parser.getValue("set_parsed_MIP_time"));
+    if (parser.getValue("generic_mip_random_seed"))
+        generic_mip_random_seed = parser.getValue("generic_mip_random_seed");
+    if (parser.getValue("parsed_mip_random_seed"))
+        parsed_mip_random_seed = parser.getValue("parsed_mip_random_seed");
     if (parser.getValue("subproblem_solver_runtime_lim"))
         subproblem_solver_runtime_lim = atof(parser.getValue("subproblem_solver_runtime_lim"));
     if (parser.getValue("run_generic_MIP_solver"))

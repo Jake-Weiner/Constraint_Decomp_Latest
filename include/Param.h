@@ -33,7 +33,17 @@ struct Param {
 
     double set_ub = std::numeric_limits<double>::max();
     double subproblem_solver_runtime_lim = 100;
+  
+    // generic MIP parameters
+    const char* run_generic_MIP_solver = "true";
+    const char* solve_generic_MIP_output_filename = "";
+    const char* generic_mip_random_seed = "true";
     double set_generic_MIP_time = 100;
+
+
+    const char* parsed_mip_random_seed = "true";
+    double set_parsed_MIP_time = 100;
+
 
     const char* input_root_folder;
     const char* subproblem_var_prop = "";
@@ -43,13 +53,14 @@ struct Param {
     const char* nsga_vector_root_folder = "";
     const char* cplex_decomp_warmstart_file = "";
     const char* cplex_decomp_output_root_folder = "";
-    const char* solve_generic_MIP_output_root_folder = "";    
+    
+    const char* solve_parsed_MIP_output_filename = "";   
     const char* run_nsga_decomp = "";
-    const char* run_generic_MIP_solver = "false";
+   
     const char* run_lapso = "true";
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";
-
+    
     const char* random_lb_output = "";
     const char* MIP_Parse_Test_Exception = "false";
 };

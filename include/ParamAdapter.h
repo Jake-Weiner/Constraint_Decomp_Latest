@@ -32,6 +32,14 @@ class ParamAdapter{
             return run_lapso_flag;
         }
 
+        bool get_generic_MIP_randomSeed_flag(){
+            return generic_MIP_randomSeed_flag;
+        }
+
+        bool get_parsed_MIP_randomSeed_flag(){
+            return parsed_MIP_randomSeed_flag;
+        }
+
         bool get_test_greedy_decomp_flag(){
             return test_greedy_decomp_flag;
         }
@@ -69,8 +77,12 @@ class ParamAdapter{
         bool test_greedy_decomp_flag = false;
         bool test_random_decomp_flag = false;
         bool MIP_Parse_Test_Exception_flag = false;
-        string Problem_File;
+        bool generic_MIP_randomSeed_flag = true;
+        bool get_parsed_MIP_randomSeed_flag = true;
 
+        bool getBoolVal(const char* input);
+
+        string Problem_File;
         std::map<std::string, DecompType> str_to_DT = {{"NSGA", NSGA}, {"CPLEX", CPLEX}};
         std::map<std::string, bool> char_to_BOOL = {{"true", true} , {"false" , false}};
 };
