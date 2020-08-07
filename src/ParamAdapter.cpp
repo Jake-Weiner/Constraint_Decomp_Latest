@@ -29,6 +29,7 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     test_greedy_decomp_flag = getBoolVal(p.test_greedy_decomp);
     test_random_decomp_flag = getBoolVal(p.test_random_decomp);
     MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
+    run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
 
 }
 

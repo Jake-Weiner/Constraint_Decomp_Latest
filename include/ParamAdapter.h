@@ -52,6 +52,10 @@ class ParamAdapter{
             return MIP_Parse_Test_Exception_flag;
         }
 
+        bool get_run_MIP_Parse_testing_flag(){
+            return run_MIP_Parse_testing_flag;
+        }
+
         std::vector<double> get_nsga_props(){
             return nsga_props;
         }
@@ -78,8 +82,8 @@ class ParamAdapter{
         bool test_random_decomp_flag = false;
         bool MIP_Parse_Test_Exception_flag = false;
         bool generic_MIP_randomSeed_flag = true;
-        bool get_parsed_MIP_randomSeed_flag = true;
-
+        bool parsed_MIP_randomSeed_flag = true;
+        bool run_MIP_Parse_testing_flag = false;
         bool getBoolVal(const char* input);
 
         string Problem_File;

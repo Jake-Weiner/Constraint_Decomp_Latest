@@ -52,6 +52,7 @@ class Writer{
         // void writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
         void writeRelaxedConstraintStatistics(){};
         void writeCPLEXResults(const std::string& output_filename, const std::string& instnace_name, const CPLEX_Return_struct& CRS);
+        void writeMIPParsingResults(const std::string& output_filename, const MIP_Parsing_Test_struct& MPTS);
     private:
 
 };

@@ -25,6 +25,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("set_generic_MIP_time");
     parser.setOption("set_parsed_MIP_time");  
     parser.setOption("run_generic_MIP_solver");
+    parser.setOption("run_MIP_Parse_testing");
+    parser.setOption("MIP_Parse_testing_output_filename");
     parser.setOption("run_parsed_MIP_solver");
     parser.setOption("run_lapso"); 
     parser.setOption("test_greedy_decomp"); 
@@ -81,6 +83,10 @@ void Param::parse(int argc, const char** argv)
         subproblem_solver_runtime_lim = atof(parser.getValue("subproblem_solver_runtime_lim"));
     if (parser.getValue("run_generic_MIP_solver"))
         run_generic_MIP_solver = parser.getValue("run_generic_MIP_solver");
+    if (parser.getValue("run_MIP_Parse_testing"))
+        run_MIP_Parse_testing = parser.getValue("run_MIP_Parse_testing");
+    if (parser.getValue("MIP_Parse_testing_output_filename"))
+        MIP_Parse_testing_output_filename = parser.getValue("MIP_Parse_testing_output_filename");
     if (parser.getValue("run_lapso"))
         run_lapso = parser.getValue("run_lapso");
     if (parser.getValue("test_greedy_decomp"))

@@ -39,7 +39,7 @@ link_directories("/home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/lib")
 link_directories(${Boost_LIBRARY_DIRS})
 
 
-add_executable(main_test ${src}/SolveGenericMIP.cpp ${src}/Problem_Adapter.cpp ${src}/main.cpp ${src}/Writer.cpp ${src}/ParamAdapter.cpp ${src}/SolveLaPSO.cpp ${src}/Param.cpp ${src}/MIP_Problem_CPLEX_Solver.cpp ${src}/anyoption.cpp ${src}/CpuTimer.cpp ${src}/MIP_Problem.cpp ${src}/LaPSO.cpp ${src}/ConDecomp_LaPSO_Connector.cpp ${src}/DecompMIP.cpp ${src}/Decomp.cpp ${src}/MIP_to_Hypergraph.cpp ${src}/Hypergraph.cpp ${src}/MIP_Fileparser.cpp ${src}/HG_Edge.cpp ${src}/HG_Node.cpp)
+add_executable(main_test ${src}/Util.cpp ${src}/SolveGenericMIP.cpp ${src}/Problem_Adapter.cpp ${src}/main.cpp ${src}/Writer.cpp ${src}/ParamAdapter.cpp ${src}/SolveLaPSO.cpp ${src}/Param.cpp ${src}/MIP_Problem_CPLEX_Solver.cpp ${src}/anyoption.cpp ${src}/CpuTimer.cpp ${src}/MIP_Problem.cpp ${src}/LaPSO.cpp ${src}/ConDecomp_LaPSO_Connector.cpp ${src}/DecompMIP.cpp ${src}/Decomp.cpp ${src}/MIP_to_Hypergraph.cpp ${src}/Hypergraph.cpp ${src}/MIP_Fileparser.cpp ${src}/HG_Edge.cpp ${src}/HG_Node.cpp)
 
 target_link_libraries(main_test Pagmo::pagmo ${Boost_LIBRARIES} concert ilocplex cplex m pthread dl)
 

@@ -200,13 +200,22 @@ int main(int argc, const char** argv)
     ParamAdapter PA(para);
     Writer w;
     string MIP_Problem_File = PA.getProblemFilename();
-    
+    MIP_Parsing_Test_struct MPTS;
     // solve generic MIP
-    if (PA.get_generic_MIP_Solver_Flag() == true) {
+    if (PA.get_generic_MIP_Solver_Flag() == true || PA.get_run_MIP_Parse_testing_flag() == true) {
         cout << "solving generic MIP File" << endl;
+
         SolveGenericMIP SGM(MIP_Problem_File, para.set_generic_MIP_time);
-        CPLEX_Return_struct MIP_results = SGM.solve();
-        w.writeCPLEXResults(para.solve_generic_MIP_output_filename, MIP_Problem_File, MIP_results);
+        bool random_seed = PA.get_generic_MIP_randomSeed_flag();
+        CPLEX_Return_struct MIP_results = SGM.solve(random_seed);
+        // if the results are required for testing purposes with Parsed MIP
+        // store the bound and obj value
+        if(PA.get_run_MIP_Parse_testing_flag() == true){
+            MPTS.instance_name = MIP_Problem_File;
+            MPTS.MPS_bound = MIP_results.bound;
+            MPTS.MPS_obj_val = MIP_results.obj_val;
+        }
+        // w.writeCPLEXResults(para.solve_generic_MIP_output_filename, MIP_Problem_File, MIP_results);
     }
 
     // Parse in MIP file into self made structure
@@ -218,11 +227,48 @@ int main(int argc, const char** argv)
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
     cout << "testing MIP Parser" << endl;
-    if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
-        para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false && (PA.get_MIP_Parse_Test_Exception_flag() == false)){
-            cout << "MIP File Parsed Incorrectly" << endl;
-            exit(EXIT_FAILURE);
+
+    if(PA.get_run_MIP_Parse_testing_flag() == true){
+
+        // solve the Parsed MIP problem
+        // use the same runtime as the MPS file
+        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
+        bool random_seed = false;
+        CPLEX_Return_struct MIP_results = MPCS.solve(random_seed);
+
+        // populate the Mip Parsing Structure with Parsed MIP information
+        MPTS.Parsed_bound = MIP_results.bound;
+        MPTS.Parsed_obj_val = MIP_results.obj_val;
+        MPTS.Parsed_num_bin = MP.getNumBin();
+        MPTS.Parsed_num_cont = MP.getNumCont();
+        MPTS.Parsed_num_int = MP.getNumInt();
+        MPTS.Parsed_non_zeroes = MP.getnumNonZero();
+        MPTS.Parsed_num_var = MP.getNumVariables();
+        MPTS.Parsed_num_const = MP.getNumConstraints();
+
+        // populate the Mip Parsing Structure with MPS information from MIPLIB
+        MPTS.MIP_num_var = para.MIP_num_var;
+        MPTS.MIP_num_const = para.MIP_num_cons;
+        MPTS.MIP_num_bin = para.MIP_num_bin;
+        MPTS.MIP_num_int = para.MIP_num_int;
+        MPTS.MIP_num_cont = para.MIP_num_cont;
+        MPTS.num_non_zeroes = para.MIP_num_non_zeroes;
+
+        cout << "Parsed MIP No. of Variables = " << MPTS.Parsed_num_var << endl;
+        cout << "Parsed MIP No. of Constraints = " << MPTS.Parsed_num_const << endl;
+        // write the results out for actual MIP (MPS file) and parsed MIP
+        w.writeMIPParsingResults(string(para.MIP_Parse_testing_output_filename), MPTS);
+        // MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
+        // para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes)){
+        // cout << "MIP File Parsed Incorrectly" << endl;
+        // exit(EXIT_FAILURE);
+        
     }
+    // if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
+    //     para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false && (PA.get_MIP_Parse_Test_Exception_flag() == false)){
+    //         cout << "MIP File Parsed Incorrectly" << endl;
+    //         exit(EXIT_FAILURE);
+    // }
 
     bool printMIPProblem = false;
     if (printMIPProblem == true) {

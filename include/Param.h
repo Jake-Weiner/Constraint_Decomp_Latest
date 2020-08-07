@@ -44,7 +44,8 @@ struct Param {
     const char* parsed_mip_random_seed = "true";
     double set_parsed_MIP_time = 100;
 
-
+    const char* run_MIP_Parse_testing = "false";
+    const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;
     const char* subproblem_var_prop = "";
     const char* output_root_folder = "";

@@ -4,6 +4,7 @@
 
 using std::endl;
 using std::cout;
+using std::ifstream;
 
 void Writer::writeNSGADecompStats(const int var_orig_prob, const int var_largest_sp,
     const int con_orig_prob, const int con_relaxed, const std::string output_filename)
@@ -93,3 +94,46 @@ void Writer::writeCPLEXResults(const std::string& output_filename, const std::st
     }
     outfile.close();
 }
+
+// if File is empty, create it with the column headers, otherwise append..
+
+
+void Writer::writeMIPParsingResults(const std::string& output_filename, const MIP_Parsing_Test_struct& MPTS){
+
+    cout << "writing MIP Parsing Results to " << output_filename << endl; 
+    if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile){
+            outfile << "Instance Name" << "," << "MIP Bound" << "," << "MIP Objective" << ","
+            << "Parsed Bound" << "," << "Parsed Objective" << "," << "MIP No. Var" 
+            << "," << "Parsed No. Var" << "," << "MIP No. Constr" << "," 
+            << "Parsed No. Constr" << "," << "MIP No. Bin" << "," 
+            << "Parsed No. Bin" << "," << "MIP No. Int" << "," 
+            << "Parsed No. Int" << "," << "MIP No. Cont" << "," << "Parsed No. Cont" 
+            << "," << "MIP No. Non Zero" << "," << "Parsed No. Non Zero" << endl;
+        }
+        else{
+            cout << "unable to create output file for MIP Partsing Results in Writer.cpp" << endl;
+        }
+        outfile.close();
+    }
+    // if file does exist, append the results
+
+    std::ofstream outfile;
+    // append the results to the given filename
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << MPTS.instance_name << "," << MPTS.MPS_bound << "," << MPTS.MPS_obj_val 
+        << "," << MPTS.Parsed_bound << "," << MPTS.Parsed_obj_val << "," << MPTS.MIP_num_var 
+        << "," << MPTS.Parsed_num_var << "," << MPTS.MIP_num_const << "," << MPTS.Parsed_num_const 
+        << "," << MPTS.MIP_num_bin << "," << MPTS.Parsed_num_bin << "," << MPTS.MIP_num_cont 
+        << "," << MPTS.Parsed_num_cont << "," << MPTS.MIP_num_int << "," << MPTS.Parsed_num_int 
+        << "," << MPTS.num_non_zeroes << "," << MPTS.Parsed_non_zeroes << endl;
+    }
+    else{
+        cout << "unable to open MIP Parser Test Output File" << endl;
+    }
+    outfile.close();
+}
+

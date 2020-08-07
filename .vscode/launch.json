@@ -14,8 +14,11 @@
             ,"--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests"
             ,"--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps"
             ,"--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP"
-            ,"--set_ub=40417", "--run_nsga_decomp=true","--nsga_gen=5", "--input_instance_name=thor50dday.mps", "--decomp_type=NSGA","--maxCPU=1000"
-            ,"--set_generic_MIP_time=100" ,"--run_generic_MIP_solver=false", "--run_lapso=false"
+            ,"--set_ub=40417", "--run_nsga_decomp=false","--nsga_gen=5", "--input_instance_name=thor50dday.mps", "--decomp_type=NSGA","--maxCPU=1000"
+            ,"--set_generic_MIP_time=5" ,"--run_generic_MIP_solver=false", "--run_lapso=false"
+            ,"--run_MIP_Parse_testing=true"
+            ,"--parsed_mip_random_seed=false", "generic_mip_random_seed=false"
+            ,"--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/testing/Parser_Tests/test.csv"
             ,"--MIP_num_var=106261","--MIP_num_cons=53360","--MIP_num_bin=53131","--MIP_num_cont=53130","--MIP_num_int=0","--MIP_num_non_zeroes=212060"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

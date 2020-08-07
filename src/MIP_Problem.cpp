@@ -50,6 +50,7 @@ bool return_val = true;
         std::cout << "int count is: " << this_int << " and should be: " << num_int << endl;
     }
 
+
     // number of non-zeros
     int this_non_zero = 0;
 
@@ -63,4 +64,69 @@ bool return_val = true;
     }
 
     return return_val;
+}
+
+// sets the number of variables count to the correct values and sets the boolean flag var_types_counted -> true
+void MIP_Problem::countVarTypes(){
+
+    if (variable_types_counted == true){
+        cout << "error, already counted the number of variable types" << endl;
+        return;
+    }
+    for (auto& var: variables){
+        if (var.getVarType() == Bin){
+            num_bin += 1;
+        }
+        else if(var.getVarType() == Cont){
+            num_cont += 1;
+        }
+        else if(var.getVarType() == Int){
+            num_int += 1;
+        }
+    }
+    variable_types_counted = true;
+}
+
+void MIP_Problem::countNonZeros(){
+
+    if (non_zeros_counted == true){
+        cout << "error, already counted the number of non zeroes" << endl;
+    }
+    for (auto& con: constraints){
+        num_non_zero += con.getNumVar();
+    }
+    
+    non_zeros_counted = true;
+
+}
+
+int MIP_Problem::getNumBin(){
+
+    if (variable_types_counted == false){
+        countVarTypes();
+    }
+    return num_bin;
+}
+
+int MIP_Problem::getNumInt(){
+
+    if (variable_types_counted == false){
+        countVarTypes();
+    }
+    return num_int;
+}
+
+int MIP_Problem::getNumCont(){
+
+    if (variable_types_counted == false){
+        countVarTypes();
+    }
+    return num_cont;
+}
+
+int MIP_Problem::getnumNonZero(){
+    if (non_zeros_counted == false){
+        countNonZeros();
+    }
+    return num_non_zero;
 }

@@ -25,7 +25,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
         // cout << "var idx is " << var.getVarIndx() << endl;
         double var_lb = var.getLB();
         double var_ub = var.getUB();
-        if (var.getVarType() == Int){
+        if (var.getVarType() == Int || var.getVarType() == Bin){
             IloNumVar x(env, var_lb, var_ub, ILOINT);
             subproblem_vars_cplex.add(x);        
         }
