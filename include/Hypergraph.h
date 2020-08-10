@@ -101,8 +101,10 @@ private:
     void printPartitions(vector<vector<int>> partitions);
     void identifyPartitions(const vector<bool>& relaxed_edges);
     void updateNodes(const vector<double>& constraints_selected, vector<HG_Node>& updated_nodes);
-    int largest_partition;
+    int largest_partition = 0;
     vector<Partition_Struct> PS;
+    bool partitioned = false;
+
 };
 
 

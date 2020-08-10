@@ -226,10 +226,10 @@ int main(int argc, const char** argv)
 
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
-    cout << "testing MIP Parser" << endl;
+    
 
     if(PA.get_run_MIP_Parse_testing_flag() == true){
-
+        cout << "testing MIP Parser" << endl;
         // solve the Parsed MIP problem
         // use the same runtime as the MPS file
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
@@ -261,7 +261,7 @@ int main(int argc, const char** argv)
         // MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
         // para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes)){
         // cout << "MIP File Parsed Incorrectly" << endl;
-        // exit(EXIT_FAILURE);
+        exit(0);
         
     }
     // if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
@@ -311,7 +311,7 @@ int main(int argc, const char** argv)
             try
             {
                 std::ofstream outfile;
-                std::string decomposition_output_filename = "/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/decomposition_plot/test.csv";
+                std::string decomposition_output_filename = "/home/jake/PhD/Decomposition/Output/testing/NSGA_Tests.test.csv";
                 outfile.open(decomposition_output_filename);
                 for (auto& ind : nsga_con_relax_info_struct){
                     outfile << ind.number_constraints_relaxed << "," << ind.largest_sp << endl;

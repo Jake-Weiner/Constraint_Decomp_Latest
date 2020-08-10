@@ -107,10 +107,14 @@ void Hypergraph::findPartition(HG_Node starting_node,  vector<bool>& node_idx_se
     // }
     if (node_partition.empty()){
         cout << "empty node partition" << endl;
+        exit(1);
     }
 
     Partition_Struct ps = {node_partition, edge_partition};
     PS.push_back(ps);
+    if (node_partition.size() > largest_partition){
+        largest_partition = node_partition.size();
+    }
     return;
 }
 
@@ -206,7 +210,8 @@ bool Hypergraph::partition(const vector<bool>& constraints_selected){
      // reduce graph edges
     // logic behind a partition -- if you remove edges from the graph, can't reach other nodes... 
 
-    // clear any partitions that exist
+    // clear any partitions that exist and set the largest partition size to 0
+    largest_partition = 0;
     PS.clear();
     // identify partitions with new edges...
     identifyPartitions(constraints_selected);
@@ -221,16 +226,10 @@ bool Hypergraph::partition(const vector<bool>& constraints_selected){
     return partition_success_flag;
 }
 
+// Largest partition is updated during paritioning search
 int Hypergraph::getLargestPartition()
 {   
-    largest_partition = 0;
-    if (!PS.empty()) {
-        for (auto& partition : PS) {
-            if (partition.node_idxs.size() > largest_partition) {
-                largest_partition = partition.node_idxs.size();
-            }
-        }
-    }
+
     return largest_partition;
 }
 

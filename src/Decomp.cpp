@@ -49,6 +49,7 @@ vector_double Decomp::fitness(const vector_double& dv) const
         }
         con_idx++;
     }
+    // create the partition and get the largest partition
     HG.partition(con_vec);
     double largest_partition = double(HG.getLargestPartition());
     double sum_x = sum(dv);
@@ -70,8 +71,9 @@ vector<vector<double>> Decomp::greedy_seeding(){
 
     int total_num_edges = HG.getHGEdges().size();
 
+    // greedily seeded percentages of largest constraints relaxed
     vector<double> percentages = {0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.98, 0.99};
-    // vector<double> percentages = {0.95, 0.96, 0.98, 0.99};
+   
     vector<vector<double>> initial_population;
     for (int i =0; i<percentages.size(); i++){
         vector<double> individual;
@@ -92,10 +94,10 @@ vector<vector<double>> Decomp::greedy_seeding(){
     int individual_idx = 0;
     for (auto& percentage : percentages){
         //assign 1's
-        int count = 0;
-        while(count < (percentage*total_num_edges)){
+        int num_edges_relaxed = 0;
+        while(num_edges_relaxed < (percentage*total_num_edges)){
             for (auto& edge : edges_copy){
-                if (count > (percentage*total_num_edges)){
+                if (num_edges_relaxed > (percentage*total_num_edges)){
                     break;
                 }
                 int edge_idx = edge.getEdgeIdx();
@@ -108,7 +110,7 @@ vector<vector<double>> Decomp::greedy_seeding(){
                 // cout << "probability = " << probability << " random number = " << random_num << endl;
                 if (random_num < probability){
                     initial_population[individual_idx][edge_idx] = 1;
-                    count++;
+                    num_edges_relaxed++;
                 }
             }
         }

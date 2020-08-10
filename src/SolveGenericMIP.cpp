@@ -15,11 +15,11 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed){
     IloObjective obj;
     IloNumVarArray vars(env);
     IloRangeArray rng(env);
-    
+
     // solve problem as LP not ILP
 
     if (!fileExists(MIP_input_filename)){
-        cout << "error, MIP input filename does not exist " << endl;
+        cout << "error,MIP input filename - "<< MIP_input_filename << " does not exist" << endl;
         exit(1);
     }
     cplex.importModel(model, MIP_input_filename.c_str(), obj, vars, rng);

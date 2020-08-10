@@ -94,7 +94,7 @@ void MIP_Fileparser::parserMps(string filename)
                 if (marker(line_split) == true && intOrgCheck(line_split) == true) {
                     // if (marker(line_split) == true) {
                     // marker_count++;
-                    cout << "int section found" << endl;
+                    // cout << "int section found" << endl;
                     int_var = true;
                     // second marker reached with INTEND flagged, finished integer variable section
                     // read in the the next line after the first marker
@@ -102,7 +102,7 @@ void MIP_Fileparser::parserMps(string filename)
                 }
                 else if (marker(line_split) == true && intEndCheck(line_split) == true) {
                     int_var = false;
-                    cout << "int section finished" << endl;
+                    // cout << "int section finished" << endl;
                     // read in the next line after the second marker
                     continue;
                 }
@@ -269,7 +269,7 @@ bool intOrgCheck(const vector<string>& line_split)
 {
     for (auto& word : line_split) {
         if (word.find("INTORG") != string::npos) {
-            cout << "found INTORG" << endl;
+            // cout << "found INTORG" << endl;
             return true;
         }
     }
