@@ -19,17 +19,17 @@ vector<individual_information_struct> Problem_Adapter::createNSGADecomps(Hypergr
 {
     vector<individual_information_struct> ris;
     Decomp udp = Decomp(HG.getNumEdges(), HG);
-    pagmo::problem prob{ udp };
+    pagmo::problem prob{udp};
 
     // single instance
     //algorithm is set to run for 1 generation
-    algorithm algo{ nsga2(1) };
+    algorithm algo{nsga2(1)};
     // print level set to 1
     algo.set_verbosity(1);
     population pop;
     population pop_total;
     // Greedy Seeding of the initial pop
-    bool greedy = false;
+    bool greedy = true;
     if (greedy == true) {
         // there are currently 14 greedily seeded individuals, therefore population size must be at least 14 to accomodate these greedy individuals
         if (pop_size > 14) {
@@ -60,7 +60,7 @@ vector<individual_information_struct> Problem_Adapter::createNSGADecomps(Hypergr
     int gen_counter = 0;
     while (gen_counter < (num_gen - 1)) {
         cout << "number of generations evolved is " << gen_counter << endl;
-        algorithm algo_temp{ nsga2(1) };
+        algorithm algo_temp{nsga2(1)};
         pop = algo.evolve(pop);
         for (int idx = 0; idx < pop.size(); idx++) {
             pop_total.push_back(pop.get_x()[idx], pop.get_f()[idx]);

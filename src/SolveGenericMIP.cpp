@@ -40,20 +40,30 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed){
     // cplex.setParam(IloCplex::Param::MIP::Limits::Nodes, 0);
     cplex.extract(model);
     // cplex.exportModel(new_filename.c_str());
-    if (!cplex.solve()) {
-        env.error() << "Failed to optimize original problem LP" << endl;
+
+    bool solve_status = cplex.solve();
+
+    //default bound and integer solution values
+    double best_int_sol = -999999999999999999;
+    double best_bound_val = -999999999999999999;
+    // cplex.solve() status indicates if a feasible solution was found
+    if (solve_status == false) {
+        best_bound_val = cplex.getBestObjValue();
         env.end();
-        std::cerr << "CPLEX failure in SolveGenericMIP.cpp" << endl;
-        exit(1);
+        std::cerr << "CPLEX failed to find a feasible solution in SolveGenericMIP.cpp" << endl;
     }
-    IloNumArray vals(env);
-    cplex.getValues(vals, vars);
-    env.out() << "Solution status = " << cplex.getStatus() << endl;
+    else{
+        best_int_sol = cplex.getObjValue();
+        best_bound_val = cplex.getBestObjValue();
+    }
+    // if you want to get the values of individual variables
+    // IloNumArray vals(env);
+    // cplex.getValues(vals, vars);
+    // env.out() << "Solution status = " << cplex.getStatus() << endl;
     env.out() << "Solution value  = " << cplex.getObjValue() << endl;
     // double obj_val = double(cplex.getObjValue());
-    CPLEX_Return_struct CPLEX_results = {cplex.getBestObjValue(), cplex.getObjValue()};
+    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol};
     env.end();
-
     
     return CPLEX_results;
 

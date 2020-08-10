@@ -264,11 +264,6 @@ int main(int argc, const char** argv)
         exit(0);
         
     }
-    // if (MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
-    //     para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes ) == false && (PA.get_MIP_Parse_Test_Exception_flag() == false)){
-    //         cout << "MIP File Parsed Incorrectly" << endl;
-    //         exit(EXIT_FAILURE);
-    // }
 
     bool printMIPProblem = false;
     if (printMIPProblem == true) {
@@ -278,17 +273,17 @@ int main(int argc, const char** argv)
     }
     
     // solve the input MIP problem to see if it produces the same results
-    if (PA.get_generic_MIP_Solver_Flag() == true){
-        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-        bool random_seed = false;
-        CPLEX_Return_struct MIP_results = MPCS.solve(random_seed);
-        // need to output the results from cplex solver to compare my parsing and the actual solver...
-        w.writeCPLEXResults(para.solve_parsed_MIP_output_filename, MIP_Problem_File, MIP_results);
-        // output results to a file
-        // i)f (
-    }
+    // if (PA.get_generic_MIP_Solver_Flag() == true){
+    //     MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
+    //     bool random_seed = false;
+    //     CPLEX_Return_struct MIP_results = MPCS.solve(random_seed);
+    //     // need to output the results from cplex solver to compare my parsing and the actual solver...
+    //     w.writeCPLEXResults(para.solve_parsed_MIP_output_filename, MIP_Problem_File, MIP_results);
+    //     // output results to a file
+    //     // i)f (
+    // }
 
-    //convert read MIP to Hypergraph
+    //convert parsed MIP to Hypergraph
     MIP_to_Hypergraph MTH;
     MTH.convertToHypergraph(MP);
     Hypergraph HG(MTH.getHGEdges(), MTH.getHGNodes());
@@ -306,7 +301,7 @@ int main(int argc, const char** argv)
         // write out to a file the different decompositions found
         vector<individual_information_struct> nsga_con_relax_info_struct = ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, desired_subproblem_props, para.nsga_pop_size);
 
-        bool write_decompositions = true;
+        bool write_decompositions = false;
         if (write_decompositions){
             try
             {
@@ -324,8 +319,7 @@ int main(int argc, const char** argv)
             }
             
         }
-        exit(1);
-
+    
     // writes out NSGA Decomps to show pareto fronts NSGA_decomp_plot_filename  std::ofstream outfile;
     // outfile.open(output_filename);
     // vector<pop_size_t> front1 = non_dominated_front_2d(f_vals);

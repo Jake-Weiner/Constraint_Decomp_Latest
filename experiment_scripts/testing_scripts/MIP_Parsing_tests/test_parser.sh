@@ -13,10 +13,11 @@ fi
 
 line_number=0
 
-while IFS=, read instance_name mip_num_var MIP_num_bin MIP_num_int MIP_num_cont MIP_num_cons MIP_num_non_zeroes
+while IFS=, read instance_name MIP_num_var MIP_num_bin MIP_num_int MIP_num_cont MIP_num_cons MIP_num_non_zeroes
 do	
 	if [ ! "$line_number" -eq "0" ]; then
 		echo "starting main_test"
+		echo "$instance_name $MIP_num_var $MIP_num_bin $MIP_num_int $MIP_num_cont $MIP_num_cons $MIP_num_non_zeroes"
 		$executable_path/main_test --input_root_folder=/home/jake/PhD/Decomposition/Input/dataset \
 		--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9 --nsga_pop_size=16 --printLevel=3 \
 		--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
