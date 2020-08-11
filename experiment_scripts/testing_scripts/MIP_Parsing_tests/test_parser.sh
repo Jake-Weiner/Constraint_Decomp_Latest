@@ -24,7 +24,7 @@ do
 		--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps \
 		--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP \
 		--set_ub=40417 --run_nsga_decomp=false --nsga_gen=5 --input_instance_name=$instance_name --decomp_type=NSGA --maxCPU=1000 \
-		--set_generic_MIP_time=100 --run_generic_MIP_solver=false --run_lapso=false \
+		--set_generic_MIP_time=5 --run_generic_MIP_solver=false --run_lapso=false \
 		--run_MIP_Parse_testing=true \
 		--parsed_mip_random_seed=false generic_mip_random_seed=false \
 		--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Output/testing/Parser_Tests/Parser_test_Results.csv \

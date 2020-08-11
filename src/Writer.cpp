@@ -127,8 +127,8 @@ void Writer::writeMIPParsingResults(const std::string& output_filename, const MI
         outfile << MPTS.instance_name << "," << MPTS.MPS_bound << "," << MPTS.MPS_obj_val 
         << "," << MPTS.Parsed_bound << "," << MPTS.Parsed_obj_val << "," << MPTS.MIP_num_var 
         << "," << MPTS.Parsed_num_var << "," << MPTS.MIP_num_const << "," << MPTS.Parsed_num_const 
-        << "," << MPTS.MIP_num_bin << "," << MPTS.Parsed_num_bin << "," << MPTS.MIP_num_cont 
-        << "," << MPTS.Parsed_num_cont << "," << MPTS.MIP_num_int << "," << MPTS.Parsed_num_int 
+        << "," << MPTS.MIP_num_bin << "," << MPTS.Parsed_num_bin << "," << MPTS.MIP_num_int 
+        << "," << MPTS.Parsed_num_int << "," << MPTS.MIP_num_cont << "," << MPTS.Parsed_num_cont 
         << "," << MPTS.num_non_zeroes << "," << MPTS.Parsed_non_zeroes << endl;
     }
     else{

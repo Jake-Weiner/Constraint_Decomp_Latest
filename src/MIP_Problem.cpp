@@ -81,7 +81,14 @@ void MIP_Problem::countVarTypes(){
             num_cont += 1;
         }
         else if(var.getVarType() == Int){
-            num_int += 1;
+            // change var type to BOOL if UB is 1 and LB is 0 (depends on the MPS file format...)
+            if (var.getLB() == 0 && var.getUB() == 1){
+                var.setVarType(Bin);
+                num_bin += 1;
+            }
+            else{
+                num_int += 1;
+            }
         }
     }
     variable_types_counted = true;

@@ -106,7 +106,7 @@ void MIP_Fileparser::parserMps(string filename)
                     // read in the next line after the second marker
                     continue;
                 }
-
+                
                 string variable_name = line_split[0];
                 // check if variable name has been seen - create new variable if not
                 if (MII.varNameExists(variable_name) == false) {
@@ -269,7 +269,7 @@ bool intOrgCheck(const vector<string>& line_split)
 {
     for (auto& word : line_split) {
         if (word.find("INTORG") != string::npos) {
-            // cout << "found INTORG" << endl;
+            cout << "found INTORG" << endl;
             return true;
         }
     }

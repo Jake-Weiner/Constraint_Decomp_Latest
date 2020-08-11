@@ -86,23 +86,32 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
     if (randomSeed == false){
         cplex.setParam(IloCplex::Param::RandomSeed, 0); // set random seed to 0 for consistency in testing
     }
-   
-    // cplex.setOut(env.getNullStream());
-    if (!cplex.solve()) {
-        cout << "Failed to optimize LP" << endl;
-        throw(-1);
+
+
+    bool solve_status = cplex.solve();
+    //default bound and integer solution values
+    double best_int_sol = -999999999999999999;
+    double best_bound_val = -999999999999999999;
+    // cplex.solve() status indicates if a feasible solution was found
+    if (solve_status == false) {
+        best_bound_val = cplex.getBestObjValue();
+        env.end();
+        std::cerr << "CPLEX failed to find a feasible solution in MIP_Problem_CPLEX_Solver.cpp" << endl;
     }
-    cout << "Solution status = " << cplex.getStatus() << endl;
-    cout << "Solution value  = " << cplex.getObjValue() << endl;
+    else{
+        best_int_sol = cplex.getObjValue();
+        best_bound_val = cplex.getBestObjValue();
+        env.out() << "Solution value  = " << cplex.getObjValue() << endl;
+        env.end();
+    }
+   
 
     //This method returns a bound on the optimal solution value of the problem. When a model has been solved to optimality, 
     //this value matches the optimal solution value. If a MIP optimization is terminated before optimality has been proven, 
     //this value is computed for a minimization (maximization) problem as the minimum (maximum) objective function value of 
     //all remaining unexplored nodes.
-    cout << "Best Bound value  = " << cplex.getBestObjValue() << endl;
-    CPLEX_Return_struct CPLEX_results = {cplex.getBestObjValue(), cplex.getObjValue()};
-    cplex.end();
 
+    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol};
     return CPLEX_results;
 }
 

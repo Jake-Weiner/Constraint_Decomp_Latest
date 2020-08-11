@@ -218,7 +218,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
         //     Variable t = OP.getVariable(original_var_idx);
         //     t.printInfo();
         // }
-        cout << "Failed to optimize LP" << endl;
+        cout << "Failed to find feasible/optimal subproblem solution" << endl;
         sp.model.remove(obj_fn);
         cplex.end();
         return -1;

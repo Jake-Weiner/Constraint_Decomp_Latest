@@ -30,7 +30,8 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     test_random_decomp_flag = getBoolVal(p.test_random_decomp);
     MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
     run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
-
+    generic_MIP_randomSeed_flag = getBoolVal(p.generic_mip_random_seed);
+    parsed_MIP_randomSeed_flag = getBoolVal(p.parsed_mip_random_seed);
 }
 
 // return a bool val from the given input char*

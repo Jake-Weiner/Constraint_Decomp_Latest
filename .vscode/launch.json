@@ -9,12 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
-            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Input"
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset"
             , "--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9", "--nsga_pop_size=16", "--printLevel=3"
             ,"--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests"
             ,"--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps"
             ,"--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP"
-            ,"--set_ub=40417", "--run_nsga_decomp=false","--nsga_gen=5", "--input_instance_name=thor50dday.mps", "--decomp_type=NSGA","--maxCPU=1000"
+            ,"--set_ub=40417", "--run_nsga_decomp=false","--nsga_gen=5", "--input_instance_name=proteindesign121hz512p9.mps", "--decomp_type=NSGA","--maxCPU=1000"
             ,"--set_generic_MIP_time=5" ,"--run_generic_MIP_solver=false", "--run_lapso=false"
             ,"--run_MIP_Parse_testing=true"
             ,"--parsed_mip_random_seed=false", "generic_mip_random_seed=false"

@@ -233,9 +233,8 @@ int main(int argc, const char** argv)
         // solve the Parsed MIP problem
         // use the same runtime as the MPS file
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-        bool random_seed = false;
-        CPLEX_Return_struct MIP_results = MPCS.solve(random_seed);
-
+        
+        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag());
         // populate the Mip Parsing Structure with Parsed MIP information
         MPTS.Parsed_bound = MIP_results.bound;
         MPTS.Parsed_obj_val = MIP_results.obj_val;
@@ -326,6 +325,39 @@ int main(int argc, const char** argv)
     // for (auto& idx : front1) {
     //     outfile << f_vals[idx][1] << "," << f_vals[idx][0] << endl;
     // }
+
+    //instance statistics
+    //Binary Var prop
+    //Cont Var prop
+    //Int Var prop
+    //Constraint Types	
+    //Number of non zerores
+    // average density of constraints, stddev of constraints
+
+    //hold the con_relax vec
+    //LSP
+    // constraints statistics
+    //num constraints_relaxed
+    //prop equality constraints/non equality constraints
+    //average perc/non_zeroes stddev nonzeros (in constraints relaxed)
+    //average, stddev largest ratio (RHS/LHS)
+    //average, stddev sum/coefficients (RHS/LHS)
+
+    //solver statistics
+    // LB
+
+    //subproblem statistics
+    // Subproblem Number 
+    //MIP Time 
+    //LP Time 
+    //Problem Reduction (%)
+    // average Bin, cont, int. 
+    // stdev bin, cont, int
+	//average no. constraint, stddev no. constraint
+    //First iteration solve time
+
+
+
 
         // write out decompositions of desired proportions
         for (auto& con_relax_info : nsga_con_relax_info_struct) {

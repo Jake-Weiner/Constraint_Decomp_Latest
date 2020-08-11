@@ -55,15 +55,17 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed){
     else{
         best_int_sol = cplex.getObjValue();
         best_bound_val = cplex.getBestObjValue();
+        env.out() << "Solution value  = " << cplex.getObjValue() << endl;
+        env.end();
     }
     // if you want to get the values of individual variables
     // IloNumArray vals(env);
     // cplex.getValues(vals, vars);
     // env.out() << "Solution status = " << cplex.getStatus() << endl;
-    env.out() << "Solution value  = " << cplex.getObjValue() << endl;
+ 
     // double obj_val = double(cplex.getObjValue());
     CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol};
-    env.end();
+   
     
     return CPLEX_results;
 
