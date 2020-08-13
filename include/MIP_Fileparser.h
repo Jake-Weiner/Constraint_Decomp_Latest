@@ -55,6 +55,7 @@ private:
     void extractVariableInfo(vector<string>& line_split, const string& variable_name);
     void extractRHSInfo(const vector<string>& line_split);
     void extractBoundsInfo(const vector<string>& line_split);
+    
     string obj_function_symbol;
     MIP_Problem MP;
     MIP_Indexing_Info MII;

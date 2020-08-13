@@ -54,6 +54,53 @@ struct NSGA_ii_characteristics {
 };
 
 
+struct NSGA_ii_instance_statistics{
+
+    double bin_prop;
+    double cont_prop;
+    double int_prop;
+    double average_constraint_density;
+    double stddev_constraint_density;
+    double equality_constraints_prop;
+    double inequality_constraints_prop;
+
+    //Cont Var prop
+    //Int Var prop
+    //Constraint Types	
+    //Number of non zerores
+    // average density of constraints, stddev of constraints
+};
+
+struct NSGA_ii_relaxed_constraint_statistics{
+
+    int decomposition_idx;
+    vector<double>* con_vec_ptr;
+    double LSP_prop;
+    double num_constraints_relaxed_prop;
+    // proportion of relaxed constraints which are equality
+    double equality_constaints_relaxed_prop;
+    // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
+    double inequality_constaints_relaxed_prop;
+    // non_zero prop in constraints relaxed
+    double average_nonzero_prop;
+    double stddev_nonzero_prop;
+    // ratio of RHS to largest coeff in constraint
+    double average_largest_ratio;
+    double stddev_largest_ratio;
+};
+
+
+    //con_relax vec
+    //based off NSGA_results
+    //LSP
+    // constraints statistics
+    //num constraints_relaxed
+    //prop equality constraints/non equality constraints
+    //average perc/non_zeroes stddev nonzeros (in constraints relaxed)
+    //average, stddev largest ratio (RHS/LHS)
+    //average, stddev sum/coefficients (RHS/LHS)
+
+
 bool fileExists (const std::string& name);
 
 #endif

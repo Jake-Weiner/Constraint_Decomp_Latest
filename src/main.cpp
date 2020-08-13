@@ -14,6 +14,7 @@
 #include "Problem_Adapter.h"
 #include "Util.h"
 #include "SolveGenericMIP.h"
+#include "MIP_Problem_Probe.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -101,16 +102,19 @@ bool solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
-    bool success_flag;
+    bool success_flag = false;
     std::vector<Partition_Struct> ps;
     // try create partition struct
-    success_flag = HG.getPartitionStruct(con_relax_vector, sp_prop,ps);
+    // partition the HG based on the relaxed constraints which then provides new partitions which forms the subproblems for 
+    // the LaPSO method
+    success_flag = HG.getPartitionStruct(con_relax_vector, sp_prop, ps);
     if (success_flag == true){
 
         ConDecomp_LaPSO_Connector CLC(MP, ps, false, sp_solver_time_limit);
         CLC.maxsolves = 100;
         CLC.nsolves = 0;
 
+        // get the indices of the constraint types
         LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
         SolveLaPSO SL(argc, argv, HG.getNumNodes(), HG.getNumEdges(), best_ub_sol, cti);
         SL.solve(CLC);
@@ -326,15 +330,54 @@ int main(int argc, const char** argv)
     //     outfile << f_vals[idx][1] << "," << f_vals[idx][0] << endl;
     // }
 
-    //instance statistics
+    //instance statistics (based of MIP Parser)
     //Binary Var prop
     //Cont Var prop
     //Int Var prop
     //Constraint Types	
     //Number of non zerores
     // average density of constraints, stddev of constraints
+    
+    MIP_Problem_Probe MPP;
+    NSGA_ii_instance_statistics nis;
 
-    //hold the con_relax vec
+    // fill out the required instance statistics
+    MPP.populateInstanceStatistics(nis, MP);
+    
+
+   
+    // loop through decompositions, assigning a decomposition number
+
+    int decomp_idx = 0;
+    for (auto& decomp: nsga_con_relax_info_struct){
+        NSGA_ii_relaxed_constraint_statistics nrcs;
+        MPP.populateRelaxedConstraintsStatistics(decomp_idx,decomp, nrcs, MP);
+        ++decomp_idx;
+    }   
+    
+    // vector<double> con_vec;
+    // double LSP_prop;
+    // double num_constraints_relaxed_prop;
+    // // proportion of relaxed constraints which are equality
+    // double equality_constaints_relaxed_prop;
+    // // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
+    // double inequality_constaints_relaxed_prop;
+    // // non_zero prop in constraints relaxed
+    // double average_nonzero_prop;
+    // double stddev_nonzero_prop;
+    // // ratio of RHS to largest coeff in constraint
+    // double average_largest_ratio;
+    // double stddev_largest_ratio;
+
+
+    
+
+    // instance_statistics_masterfile.csv
+    // <instance_name>, Binary Var Prop, Cont Var Prop, Int Var Prop, Constraint types(?), Number Non-zeroes, Average density(nonzero/no. constraints), stddev nonzeroes
+
+
+    //con_relax vec
+    //based off NSGA_results
     //LSP
     // constraints statistics
     //num constraints_relaxed
@@ -343,8 +386,18 @@ int main(int argc, const char** argv)
     //average, stddev largest ratio (RHS/LHS)
     //average, stddev sum/coefficients (RHS/LHS)
 
+
+    
+    // output file is <instance_name>_constraint_statistics.csv
+    // Decomp No.,[xxxx], LSP, No. Constraints Relaxed, prop equality constraints, prop inequality constraints, ave prop non zeroes, stddev non zeroes, 
+    // average largest ratio RHS/LHS, stddev largest ration (RHS/LHS), average sum (not sure if we need this feature)
+
+
+
+    //output file is <instance_name>_solver_statistics
     //solver statistics
-    // LB
+    // Decomp No., Max MIP Time, average MIP time, stdev mip time, 
+    // Max LP Time, average LP time, stdev LP time, 
 
     //subproblem statistics
     // Subproblem Number 

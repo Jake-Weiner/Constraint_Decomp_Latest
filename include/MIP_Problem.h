@@ -95,12 +95,21 @@ class MIP_Problem{
             objective_fn.push_back(term);
         }
 
+        bound_type getConstraintType(const int& constaint_idx);
+
         int getNumBin();
         int getNumInt();
         int getNumCont();
         int getnumNonZero();
 
+        double getAverageConstraintDensity();
+        double getStddevConstraintDensity();
+        double getEqualityConstraintProp();
+        double getInequalityConstraintProp();
+
+
         bool testMIPProblem(const int num_con, const int num_var, const int bin, const int cont, const int integer, const int non_zero);
+
 
 
         int number_variables;
@@ -118,7 +127,12 @@ class MIP_Problem{
         int num_int = 0;
         int num_cont = 0;
         int num_non_zero = 0;
+        int equality_constraint_count = 0;
 
+        bool equality_constraints_counted = false;
+        double average_constraint_density = 0;
+        void calculateAverageConstraintDensity();
+        void setEqualityConstraintCount();
         void countVarTypes();
         void countNonZeros();
 };  
