@@ -14,6 +14,9 @@ class MIP_Problem_Probe{
 
     private:
 
+        int getNumberEqualityConstraintsRelaxed(const vector<double>& con_vec, MIP_Problem& MP);
+        double getAverageNonZeroInRelaxedConstraints(const vector<double>& con_vec, MIP_Problem& MP);
+
 };
 
 #endif

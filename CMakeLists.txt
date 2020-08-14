@@ -13,7 +13,7 @@ cmake_policy(SET CMP0074 NEW) # instructs cmake to use new or old functionality
 find_package(Pagmo REQUIRED PATHS /home/jake/PhD/Coding_Libraries/tbb/tbb2019_20191006oss/lib/intel64/gcc4.8)
 find_package(Boost 1.67.0 REQUIRED COMPONENTS filesystem)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17 -g -O0 -m64 -O -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -g -O0 -m64 -O -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 find_package(OpenMP)
@@ -39,7 +39,7 @@ link_directories("/home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/lib")
 link_directories(${Boost_LIBRARY_DIRS})
 
 
-add_executable(main_test ${src}/Util.cpp ${src}/SolveGenericMIP.cpp ${src}/Problem_Adapter.cpp ${src}/main.cpp ${src}/Writer.cpp ${src}/ParamAdapter.cpp ${src}/SolveLaPSO.cpp ${src}/Param.cpp ${src}/MIP_Problem_CPLEX_Solver.cpp ${src}/anyoption.cpp ${src}/CpuTimer.cpp ${src}/MIP_Problem.cpp ${src}/LaPSO.cpp ${src}/ConDecomp_LaPSO_Connector.cpp ${src}/DecompMIP.cpp ${src}/Decomp.cpp ${src}/MIP_to_Hypergraph.cpp ${src}/Hypergraph.cpp ${src}/MIP_Fileparser.cpp ${src}/HG_Edge.cpp ${src}/HG_Node.cpp)
+add_executable(main_test ${src}/MIP_Problem_Probe.cpp ${src}/Util.cpp ${src}/SolveGenericMIP.cpp ${src}/Problem_Adapter.cpp ${src}/main.cpp ${src}/Writer.cpp ${src}/ParamAdapter.cpp ${src}/SolveLaPSO.cpp ${src}/Param.cpp ${src}/MIP_Problem_CPLEX_Solver.cpp ${src}/anyoption.cpp ${src}/CpuTimer.cpp ${src}/MIP_Problem.cpp ${src}/LaPSO.cpp ${src}/ConDecomp_LaPSO_Connector.cpp ${src}/DecompMIP.cpp ${src}/Decomp.cpp ${src}/MIP_to_Hypergraph.cpp ${src}/Hypergraph.cpp ${src}/MIP_Fileparser.cpp ${src}/HG_Edge.cpp ${src}/HG_Node.cpp)
 
 target_link_libraries(main_test Pagmo::pagmo ${Boost_LIBRARIES} concert ilocplex cplex m pthread dl)
 

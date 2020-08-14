@@ -196,13 +196,13 @@ void MIP_Problem::setEqualityConstraintCount()
     }
 }
 
-bound_type MIP_Problem::getConstraintType(const int& constraint_idx){
+bound_type MIP_Problem::getConstraintType(const int& constraint_idx, bool& success_flag){
 
-
-    // if (constraint_idx < getNumConstraints()){
-    //     throw ""
-    //     return constraints[constraint_idx].getBoundType();
-    // }
-    bound_type temp;
-    return temp;
+    // default return type as greater, although discard this if success_flag is false
+    bound_type return_type = Greater;
+    if (constraint_idx < getNumConstraints()){
+        success_flag = true;
+        return_type = constraints[constraint_idx].getBoundType();
+    }
+    return return_type;
 }

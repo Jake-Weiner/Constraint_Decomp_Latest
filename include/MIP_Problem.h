@@ -7,7 +7,9 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::vector;
 
 enum Optimisation_Type{Minimise,Maximise};
 
@@ -95,7 +97,7 @@ class MIP_Problem{
             objective_fn.push_back(term);
         }
 
-        bound_type getConstraintType(const int& constaint_idx);
+        bound_type getConstraintType(const int& constaint_idx, bool& success_flag);
 
         int getNumBin();
         int getNumInt();
