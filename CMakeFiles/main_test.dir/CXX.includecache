@@ -1102,9 +1102,9 @@ ilcplex/ilocplex.h
 algorithm
 -
 
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.cpp
-MIP_Problem_Probe.h
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.cpp
+MIPProblemProbe.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.h
 
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_to_Hypergraph.cpp
 MIP_to_Hypergraph.h
@@ -1149,8 +1149,8 @@ Util.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Util.h
 SolveGenericMIP.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/SolveGenericMIP.h
-MIP_Problem_Probe.h
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.h
+MIPProblemProbe.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.h
 boost/algorithm/string.hpp
 -
 boost/filesystem.hpp
@@ -13450,7 +13450,7 @@ include/Util.h
 GenericMIPInterface.h
 include/GenericMIPInterface.h
 
-include/MIP_Problem_Probe.h
+include/MIPProblemProbe.h
 MIP_Problem.h
 include/MIP_Problem.h
 Util.h

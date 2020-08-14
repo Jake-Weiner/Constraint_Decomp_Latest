@@ -57,18 +57,18 @@ include CMakeFiles/main_test.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/main_test.dir/flags.make
 
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: CMakeFiles/main_test.dir/flags.make
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: src/MIP_Problem_Probe.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.cpp
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: CMakeFiles/main_test.dir/flags.make
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: src/MIPProblemProbe.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.cpp
 
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.cpp > CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.i
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.cpp > CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i
 
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.cpp -o CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.s
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.cpp -o CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s
 
 CMakeFiles/main_test.dir/src/Util.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/Util.cpp.o: src/Util.cpp
@@ -345,7 +345,7 @@ CMakeFiles/main_test.dir/src/HG_Node.cpp.s: cmake_force
 
 # Object files for target main_test
 main_test_OBJECTS = \
-"CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o" \
+"CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o" \
 "CMakeFiles/main_test.dir/src/Util.cpp.o" \
 "CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.o" \
 "CMakeFiles/main_test.dir/src/Problem_Adapter.cpp.o" \
@@ -371,7 +371,7 @@ main_test_OBJECTS = \
 # External object files for target main_test
 main_test_EXTERNAL_OBJECTS =
 
-main_test: CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o
+main_test: CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Util.cpp.o
 main_test: CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Problem_Adapter.cpp.o

@@ -3579,12 +3579,12 @@ CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o: include/MIP_Problem
 CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o: include/Util.h
 CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o: include/Variable.h
 
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: src/MIP_Problem_Probe.cpp
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: include/Constraint.h
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: include/MIP_Problem.h
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: include/MIP_Problem_Probe.h
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: include/Util.h
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o: include/Variable.h
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: src/MIPProblemProbe.cpp
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: include/Constraint.h
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: include/MIP_Problem.h
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: include/MIPProblemProbe.h
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: include/Util.h
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o: include/Variable.h
 
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o: src/MIP_to_Hypergraph.cpp
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o: include/Constraint.h
@@ -6390,7 +6390,7 @@ CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_Fileparser.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_Indexing_Info.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_Problem.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_Problem_CPLEX_Solver.h
-CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_Problem_Probe.h
+CMakeFiles/main_test.dir/src/main.cpp.o: include/MIPProblemProbe.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/MIP_to_Hypergraph.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/Param.h
 CMakeFiles/main_test.dir/src/main.cpp.o: include/ParamAdapter.h

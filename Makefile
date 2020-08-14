@@ -420,32 +420,32 @@ src/MIP_Problem_CPLEX_Solver.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.s
 .PHONY : src/MIP_Problem_CPLEX_Solver.cpp.s
 
-src/MIP_Problem_Probe.o: src/MIP_Problem_Probe.cpp.o
+src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
 
-.PHONY : src/MIP_Problem_Probe.o
+.PHONY : src/MIPProblemProbe.o
 
 # target to build an object file
-src/MIP_Problem_Probe.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o
-.PHONY : src/MIP_Problem_Probe.cpp.o
+src/MIPProblemProbe.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o
+.PHONY : src/MIPProblemProbe.cpp.o
 
-src/MIP_Problem_Probe.i: src/MIP_Problem_Probe.cpp.i
+src/MIPProblemProbe.i: src/MIPProblemProbe.cpp.i
 
-.PHONY : src/MIP_Problem_Probe.i
+.PHONY : src/MIPProblemProbe.i
 
 # target to preprocess a source file
-src/MIP_Problem_Probe.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.i
-.PHONY : src/MIP_Problem_Probe.cpp.i
+src/MIPProblemProbe.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i
+.PHONY : src/MIPProblemProbe.cpp.i
 
-src/MIP_Problem_Probe.s: src/MIP_Problem_Probe.cpp.s
+src/MIPProblemProbe.s: src/MIPProblemProbe.cpp.s
 
-.PHONY : src/MIP_Problem_Probe.s
+.PHONY : src/MIPProblemProbe.s
 
 # target to generate assembly for a file
-src/MIP_Problem_Probe.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.s
-.PHONY : src/MIP_Problem_Probe.cpp.s
+src/MIPProblemProbe.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s
+.PHONY : src/MIPProblemProbe.cpp.s
 
 src/MIP_to_Hypergraph.o: src/MIP_to_Hypergraph.cpp.o
 
@@ -759,9 +759,9 @@ help:
 	@echo "... src/MIP_Problem_CPLEX_Solver.o"
 	@echo "... src/MIP_Problem_CPLEX_Solver.i"
 	@echo "... src/MIP_Problem_CPLEX_Solver.s"
-	@echo "... src/MIP_Problem_Probe.o"
-	@echo "... src/MIP_Problem_Probe.i"
-	@echo "... src/MIP_Problem_Probe.s"
+	@echo "... src/MIPProblemProbe.o"
+	@echo "... src/MIPProblemProbe.i"
+	@echo "... src/MIPProblemProbe.s"
 	@echo "... src/MIP_to_Hypergraph.o"
 	@echo "... src/MIP_to_Hypergraph.i"
 	@echo "... src/MIP_to_Hypergraph.s"

@@ -3579,11 +3579,11 @@ CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o
  include/MIP_Problem_CPLEX_Solver.h
  include/Util.h
  include/Variable.h
-CMakeFiles/main_test.dir/src/MIP_Problem_Probe.cpp.o
- /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Problem_Probe.cpp
+CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o
+ /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.cpp
  include/Constraint.h
  include/MIP_Problem.h
- include/MIP_Problem_Probe.h
+ include/MIPProblemProbe.h
  include/Util.h
  include/Variable.h
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o
@@ -6391,7 +6391,7 @@ CMakeFiles/main_test.dir/src/main.cpp.o
  include/MIP_Indexing_Info.h
  include/MIP_Problem.h
  include/MIP_Problem_CPLEX_Solver.h
- include/MIP_Problem_Probe.h
+ include/MIPProblemProbe.h
  include/MIP_to_Hypergraph.h
  include/Param.h
  include/ParamAdapter.h

@@ -14,7 +14,7 @@
 #include "Problem_Adapter.h"
 #include "Util.h"
 #include "SolveGenericMIP.h"
-#include "MIP_Problem_Probe.h"
+#include "MIPProblemProbe.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -338,7 +338,7 @@ int main(int argc, const char** argv)
     //Number of non zerores
     // average density of constraints, stddev of constraints
     
-    MIP_Problem_Probe MPP;
+    MIPProblemProbe MPP;
     NSGA_ii_instance_statistics nis;
 
     // fill out the required instance statistics

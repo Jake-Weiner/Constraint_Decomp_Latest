@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -76,9 +77,20 @@ class Constraint{
         int getNumVar(){
             return variable_indxs.size();
         }
+
+        double getLargestRHSLHSRatio(){
+            double largest_ratio = 0.00;
+            for (auto& var_coeff : variable_coeffs){
+                if (abs(RHS / var_coeff) > largest_ratio){
+                    largest_ratio = abs(RHS / var_coeff);
+                }
+            }
+            return largest_ratio;
+        }
+        
     private:
         vector<string> boundtypes_strings = {"Equal","Less","Greater"};
-        double RHS = 0;
+        double RHS = 0.00;
         int constraint_idx;
         bound_type bt;
         vector<pair<int,double>> constraint_terms;

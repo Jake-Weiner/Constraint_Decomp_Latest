@@ -156,7 +156,7 @@ double MIP_Problem::getAverageConstraintDensity()
 }
 double MIP_Problem::getStddevConstraintDensity()
 {
-
+    // stddev is sqrt(1/n sum(x_i - x_mean)^2)
     double average_constraint_density_local = getAverageConstraintDensity();
     double variance = 0;
     for (auto& constraint : constraints) {
@@ -197,7 +197,6 @@ void MIP_Problem::setEqualityConstraintCount()
 }
 
 bound_type MIP_Problem::getConstraintType(const int& constraint_idx, bool& success_flag){
-
     // default return type as greater, although discard this if success_flag is false
     bound_type return_type = Greater;
     if (constraint_idx < getNumConstraints()){
@@ -205,4 +204,24 @@ bound_type MIP_Problem::getConstraintType(const int& constraint_idx, bool& succe
         return_type = constraints[constraint_idx].getBoundType();
     }
     return return_type;
+}
+
+int MIP_Problem::getConstraintNumNonZeroes(const int& constraint_idx, bool& success_flag){
+    // default return type as greater, although discard this if success_flag is false
+    int num_nonzeroes = 0;
+    if (constraint_idx < getNumConstraints()){
+        success_flag = true;
+        num_nonzeroes = constraints[constraint_idx].getNumVar();
+    }
+    return num_nonzeroes;
+}
+
+double MIP_Problem::getConstraintLargestRatio(const int& constraint_idx, bool& success_flag){
+
+    double largest_ratio = 0.00;
+     if (constraint_idx < getNumConstraints()){
+        success_flag = true;
+        constraints[constraint_idx].getLargestRHSLHSRatio();
+    }
+    return largest_ratio;   
 }
