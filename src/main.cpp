@@ -90,7 +90,7 @@ vector<double> getCplexConVector(string cplex_filename)
     return test_partition;
 }
 
-bool solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
+void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
     const double& best_ub_sol, const string& output_stats_filename, const string& output_best_lb_filename,
     const string& output_average_lb_filename, const double& sp_prop, const double sp_solver_time_limit
     ,const string& final_lb_filename)
@@ -102,32 +102,30 @@ bool solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
-    bool success_flag = false;
+  
+    bool test_hypergraph_partitioning = false;
     std::vector<Partition_Struct> ps;
     // try create partition struct
     // partition the HG based on the relaxed constraints which then provides new partitions which forms the subproblems for 
     // the LaPSO method
-    success_flag = HG.getPartitionStruct(con_relax_vector, sp_prop, ps);
-    if (success_flag == true){
+    HG.getPartitionStruct(con_relax_vector, sp_prop, ps, test_hypergraph_partitioning);
+    ConDecomp_LaPSO_Connector CLC(MP, ps, false, sp_solver_time_limit);
+    CLC.maxsolves = 100;
+    CLC.nsolves = 0;
 
-        ConDecomp_LaPSO_Connector CLC(MP, ps, false, sp_solver_time_limit);
-        CLC.maxsolves = 100;
-        CLC.nsolves = 0;
+    // get the indices of the constraint types
+    LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
+    SolveLaPSO SL(argc, argv, HG.getNumNodes(), HG.getNumEdges(), best_ub_sol, cti);
+    SL.solve(CLC);
 
-        // get the indices of the constraint types
-        LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
-        SolveLaPSO SL(argc, argv, HG.getNumNodes(), HG.getNumEdges(), best_ub_sol, cti);
-        SL.solve(CLC);
+    int largest_sp = HG.getLargestPartition();
 
-        int largest_sp = HG.getLargestPartition();
-
-        Writer w;
-        w.writeAverageLBPlot(largest_sp, num_con_relaxed,SL.getSolverAverageLBTracking()
-        ,SL.getSolverTimingTracking(), output_average_lb_filename);
-        w.writeBestLBPlot(largest_sp, num_con_relaxed,SL.getSolverBestLBTracking()
-        ,SL.getSolverTimingTracking(), output_best_lb_filename);
-    }
-    return success_flag;
+    Writer w;
+    w.writeAverageLBPlot(largest_sp, num_con_relaxed,SL.getSolverAverageLBTracking()
+    ,SL.getSolverTimingTracking(), output_average_lb_filename);
+    w.writeBestLBPlot(largest_sp, num_con_relaxed,SL.getSolverBestLBTracking()
+    ,SL.getSolverTimingTracking(), output_best_lb_filename);
+    
     
 }
 
@@ -228,10 +226,10 @@ int main(int argc, const char** argv)
     MIP_FP.parse(file_type::MPS, MIP_Problem_File);
     MIP_Problem MP = MIP_FP.getMIPProblem();
 
+    //
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
     
-
     if(PA.get_run_MIP_Parse_testing_flag() == true){
         cout << "testing MIP Parser" << endl;
         // solve the Parsed MIP problem
@@ -268,6 +266,7 @@ int main(int argc, const char** argv)
         
     }
 
+
     bool printMIPProblem = false;
     if (printMIPProblem == true) {
         MP.printObjectiveFn();
@@ -292,6 +291,21 @@ int main(int argc, const char** argv)
     Hypergraph HG(MTH.getHGEdges(), MTH.getHGNodes());
 
 
+    
+    // test the parsed in hypergraph partitioning
+    if (PA.get_run_Hypergraph_Partitioning_testing_flag()){
+        MP.printConstraints();
+        cout << "running hypergraph partitioning test" << endl;
+        vector<bool> test_convec = {true,true,true,false,false};
+        bool test_partitioning = true;
+        // partition function will print error message if partitioing was unsuccessful
+        HG.partition(test_convec, test_partitioning);
+        HG.printPartitions();
+        // partitioning function will 
+    }
+
+
+
     // run NSGA if desired
     if (PA.get_run_nsga_decomp_flag() == true) {
         // start, stop, interval
@@ -302,26 +316,9 @@ int main(int argc, const char** argv)
         Problem_Adapter ProblemAdapter;
 
         // write out to a file the different decompositions found
-        vector<individual_information_struct> nsga_con_relax_info_struct = ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, desired_subproblem_props, para.nsga_pop_size);
-
-        bool write_decompositions = false;
-        if (write_decompositions){
-            try
-            {
-                std::ofstream outfile;
-                std::string decomposition_output_filename = "/home/jake/PhD/Decomposition/Output/testing/NSGA_Tests.test.csv";
-                outfile.open(decomposition_output_filename);
-                for (auto& ind : nsga_con_relax_info_struct){
-                    outfile << ind.number_constraints_relaxed << "," << ind.largest_sp << endl;
-                }
-            
-            }
-            catch(const std::exception& e)
-            {
-                std::cerr << e.what() << '\n';
-            }
-            
-        }
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
+    }
+    
     
     // writes out NSGA Decomps to show pareto fronts NSGA_decomp_plot_filename  std::ofstream outfile;
     // outfile.open(output_filename);
@@ -338,22 +335,22 @@ int main(int argc, const char** argv)
     //Number of non zerores
     // average density of constraints, stddev of constraints
     
-    MIPProblemProbe MPP;
-    NSGA_ii_instance_statistics nis;
+    // MIPProblemProbe MPP;
+    // NSGA_ii_instance_statistics nis;
 
-    // fill out the required instance statistics
-    MPP.populateInstanceStatistics(nis, MP);
+    // // fill out the required instance statistics
+    // MPP.populateInstanceStatistics(nis, MP);
     
 
    
-    // loop through decompositions, assigning a decomposition number
+    // // loop through decompositions, assigning a decomposition number
 
-    int decomp_idx = 0;
-    for (auto& decomp: nsga_con_relax_info_struct){
-        NSGA_ii_relaxed_constraint_statistics nrcs;
-        MPP.populateRelaxedConstraintsStatistics(decomp_idx,decomp, nrcs, MP);
-        ++decomp_idx;
-    }   
+    // int decomp_idx = 0;
+    // for (auto& decomp: nsga_con_relax_info_struct){
+    //     NSGA_ii_relaxed_constraint_statistics nrcs;
+    //     MPP.populateRelaxedConstraintsStatistics(decomp_idx,decomp, nrcs, MP);
+    //     ++decomp_idx;
+    // }   
     
     // vector<double> con_vec;
     // double LSP_prop;
@@ -413,15 +410,15 @@ int main(int argc, const char** argv)
 
 
         // write out decompositions of desired proportions
-        for (auto& con_relax_info : nsga_con_relax_info_struct) {
-            string con_vec_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_vec.csv";
-            string decomp_info_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_info.txt";
+        // for (auto& con_relax_info : nsga_con_relax_info_struct) {
+        //     string con_vec_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_vec.csv";
+        //     string decomp_info_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_info.txt";
            
-            // w.writeConVecToFile(con_relax_info.first, con_vec_filename);
-            // writeConVecToFile(con_relax_info.first, con_vec_filename);
-            // writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
-        }
-    }
+        //     // w.writeConVecToFile(con_relax_info.first, con_vec_filename);
+        //     // writeConVecToFile(con_relax_info.first, con_vec_filename);
+        //     // writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
+        // }
+    
 
     // run normal LR
     if (PA.get_run_lapso_flag() == true) {
@@ -451,10 +448,7 @@ int main(int argc, const char** argv)
                         string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_best_" + prop_string + "csv";
                         string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_average_" + prop_string + "csv";
                         cout << "running Lapso: " << prop_string << endl;
-                        bool success_flag = solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
-                        if (success_flag == false){
-                            cout << "LaPSO not successful" << endl;
-                        }
+                        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
                     }
                 } else
                     cout << p << " exists, but is not a regular file or directory\n";

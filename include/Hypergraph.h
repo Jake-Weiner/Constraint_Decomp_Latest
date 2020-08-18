@@ -52,13 +52,13 @@ public:
     };
     
     void printEdges();
-    void printNodes();
+    
     void printPartitions();
-    bool partitionValidity(const vector<int>& relaxed_edge_idxs);
+    void partitionValidity(const vector<int>& relaxed_edge_idxs);
     int getLargestPartition();
-    bool partition(const vector<bool>& constraints_selected);
+    void partition(const vector<bool>& constraints_selected, bool test_partition_validity);
 
-    bool getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input);
+    void getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity);
     
     int getNumEdges(){
         return HG_edges.size();

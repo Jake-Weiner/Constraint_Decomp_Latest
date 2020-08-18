@@ -30,13 +30,13 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     test_random_decomp_flag = getBoolVal(p.test_random_decomp);
     MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
     run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
+    run_Hypergraph_Partitioning_testing_flag = getBoolVal(p.run_Hypergraph_Partitioning_testing);
     generic_MIP_randomSeed_flag = getBoolVal(p.generic_mip_random_seed);
     parsed_MIP_randomSeed_flag = getBoolVal(p.parsed_mip_random_seed);
 }
 
 // return a bool val from the given input char*
 bool ParamAdapter::getBoolVal(const char* input){
-
     string temp_string = std::string(input);
     boost::algorithm::to_lower(temp_string);
     return char_to_BOOL[temp_string];

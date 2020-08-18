@@ -19,7 +19,7 @@ void Hypergraph::identifyPartitions(const vector<bool>& relaxed_edges)
     // vector<bool> edge_idx_seen;
     // edge_idx_seen.resize(HG_edges.size(), false);
     // List keeping track of nodes seen
-
+   
     bool return_flag = true;
 
     vector<bool> node_idx_seen;
@@ -102,9 +102,6 @@ void Hypergraph::findPartition(HG_Node starting_node,  vector<bool>& node_idx_se
         Q.pop();
     }
 
-    // if (edge_partition.empty()){
-    //     cout << "empty edge partition" << endl;
-    // }
     if (node_partition.empty()){
         cout << "empty node partition" << endl;
         exit(1);
@@ -115,12 +112,10 @@ void Hypergraph::findPartition(HG_Node starting_node,  vector<bool>& node_idx_se
     if (node_partition.size() > largest_partition){
         largest_partition = node_partition.size();
     }
-    return;
 }
 
 void Hypergraph::printEdges()
 {
-    
     for (auto& edge : HG_edges) {
         cout << "edge no. " << edge.getEdgeIdx() << " ";
         edge.printNodes();
@@ -129,7 +124,6 @@ void Hypergraph::printEdges()
 
 void Hypergraph::printPartitions()
 {
-
     for (auto& partition : PS) {
         cout << "Edges in partition: " << endl;
         for (auto& edge_idx : partition.edge_idxs){
@@ -145,35 +139,61 @@ void Hypergraph::printPartitions()
     }
 }
 
-bool Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs){
+// unit testing for Hypergraph validity
+void Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs){
 
-    bool flag = true;
+    bool partition_validity_flag = true;
     vector<bool> nodes_seen;
+    // initialise all nodes and edges as unseen
     nodes_seen.resize(HG_nodes.size(),false);
     vector<bool> edges_seen;
     edges_seen.resize(HG_edges.size(),false);
 
+    // vector containing the indexes of relaxed edges
     for (auto& relaxed_edge_idx : relaxed_edge_idxs){
         edges_seen[relaxed_edge_idx] = true;
     }
 
+    // loop through the various partitions to determine if nodes or edges
+    // appear in multiple partitions
     for (auto& partition : PS) {
         for (auto& node_idx : partition.node_idxs){
             if (nodes_seen[node_idx] == true){
                 cout << "node idx " << node_idx << " appears in multiple partitions " << endl;
-                flag = false;
+                partition_validity_flag = false;
             }
-            nodes_seen[node_idx] = true;
+            else{
+                nodes_seen[node_idx] = true;
+            }
         }
         for (auto& edge_idx : partition.edge_idxs){
             if (edges_seen[edge_idx] == true){
                 cout << "edge idx " << edge_idx << " appears in multiple partitions " << endl;
-                flag = false;
+                partition_validity_flag = false;
             }
-            edges_seen[edge_idx] = true;
+            else{
+                edges_seen[edge_idx] = true;
+            }
         }
     }
-    return flag;
+    // make sure that all edges and nodes have been seen
+    for (int i = 0; i<nodes_seen.size(); i++){
+        if (nodes_seen[i] == false){
+            cout << "error, node_idx: " << nodes_seen[i] << " is unallocated in partitioning " << endl; 
+            partition_validity_flag = false;
+        }
+        
+    }
+
+    for (int i = 0; i<edges_seen.size(); i++){
+        if (edges_seen[i] == false){
+            cout << "error, edge_idx: " << edges_seen[i] << " is unallocated in partitioning " << endl; 
+            partition_validity_flag = false;
+        }
+    }
+    if (partition_validity_flag == false){
+        exit(1);
+    }
 }
 
 /* Reduce the graph by removing edges based on the constraints relaxed */
@@ -191,7 +211,6 @@ void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<
     }
     int edge_idx = 0;
     for (auto& constraint_decision : constraints_selected) {
-
         HG_Edge current_edge = HG_edges[edge_idx];
         // 1 is edge relaxation
         if (constraint_decision == 1) {
@@ -203,33 +222,35 @@ void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<
         edge_idx++;
     }
 }
+//unit testing flag to test if partioning algorithm should be checked
 
-bool Hypergraph::partition(const vector<bool>& constraints_selected){
+// partition the hypergraph based on selected constraints
+void Hypergraph::partition(const vector<bool>& constraints_selected, bool test_partition_validity){
 
-    bool partition_success_flag = false;
+   
      // reduce graph edges
     // logic behind a partition -- if you remove edges from the graph, can't reach other nodes... 
-
     // clear any partitions that exist and set the largest partition size to 0
     largest_partition = 0;
     PS.clear();
     // identify partitions with new edges...
     identifyPartitions(constraints_selected);
-    vector<int> relaxed_constraint_idxs;
-    for (int con_idx=0; con_idx<constraints_selected.size(); con_idx++){
-        if (constraints_selected[con_idx] == true){
-            relaxed_constraint_idxs.push_back(con_idx);
+    if (test_partition_validity){
+        vector<int> relaxed_constraint_idxs;
+        for (int con_idx=0; con_idx<constraints_selected.size(); con_idx++){
+            if (constraints_selected[con_idx] == true){
+                relaxed_constraint_idxs.push_back(con_idx);
+            }
         }
+        // check partition validity
+        partitionValidity(relaxed_constraint_idxs);
     }
-
-    partition_success_flag = partitionValidity(relaxed_constraint_idxs);
-    return partition_success_flag;
 }
+
 
 // Largest partition is updated during paritioning search
 int Hypergraph::getLargestPartition()
 {   
-
     return largest_partition;
 }
 
@@ -267,12 +288,9 @@ void Hypergraph::variableNumberCheck(){
 }
 
 // Two checks for success : 1) Successful partition 2) Correct Proportion found.
- bool Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input){
-
-    bool success_flag = partition(con_relax_vec);
-    if (success_flag == false){
-        cout << "partition unsuccessful" << endl;
-    }
+ void Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity){
+    
+    partition(con_relax_vec, check_partition_validity);
     int num_con_relaxed = 0;
     for (auto&& val: con_relax_vec){
         if (val == true){
@@ -281,14 +299,12 @@ void Hypergraph::variableNumberCheck(){
     }
 
     if (getLargestPartition() > (sp_prop * getNumNodes())) {
-        success_flag = false;
         cout << "decomp proportion not found " << endl;
     }
 
     cout << "finished running HG partitioning" << endl;
     ps_input = PS;
-    return success_flag;
- }
+}
 
 
 

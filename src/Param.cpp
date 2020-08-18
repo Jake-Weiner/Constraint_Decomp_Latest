@@ -38,7 +38,10 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("MIP_num_cont"); 
     parser.setOption("MIP_num_int");
     parser.setOption("MIP_num_non_zeroes"); 
-    parser.setOption("MIP_Parse_Test_Exception"); 
+    parser.setOption("MIP_Parse_Test_Exception");
+    parser.setOption("nsga_decomp_output_file");
+    parser.setOption("run_Hypergraph_Partitioning_testing");  
+    
     
 
     if (argc == -1) // abuse of function
@@ -95,7 +98,11 @@ void Param::parse(int argc, const char** argv)
         test_random_decomp = parser.getValue("test_random_decomp");
     if (parser.getValue("random_lb_output"))
         random_lb_output = parser.getValue("random_lb_output");
-    
+    if (parser.getValue("nsga_decomp_output_file"))
+        nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");
+    if (parser.getValue("run_Hypergraph_Partitioning_testing"))
+        run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");
+
     if (parser.getValue("MIP_num_var"))
         MIP_num_var = atoi(parser.getValue("MIP_num_var"));
     if (parser.getValue("MIP_num_cons"))
@@ -110,7 +117,7 @@ void Param::parse(int argc, const char** argv)
         MIP_num_non_zeroes = atoi(parser.getValue("MIP_num_non_zeroes"));
     if (parser.getValue("MIP_Parse_Test_Exception"))
         MIP_Parse_Test_Exception = (parser.getValue("MIP_Parse_Test_Exception"));
-
+    
         
 }
 };

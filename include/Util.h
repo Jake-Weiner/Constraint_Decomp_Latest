@@ -89,6 +89,17 @@ struct NSGA_ii_relaxed_constraint_statistics{
     double stddev_largest_ratio;
 };
 
+// pair_hash used for hashmaps with pair type as the key. Creates a hash of the pair key.
+struct pair_hash
+{
+	template <class T1, class T2>
+	std::size_t operator() (const std::pair<T1, T2> &pair) const
+	{
+		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+	}
+};
+
+
 
     //con_relax vec
     //based off NSGA_results

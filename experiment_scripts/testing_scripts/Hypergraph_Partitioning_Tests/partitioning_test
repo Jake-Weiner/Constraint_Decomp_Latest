@@ -1,0 +1,26 @@
+#!/bin/bash
+
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing"
+executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
+instance_name="test.mps"
+
+if test -f $INPUT_FILE; then
+    echo "$INPUT_FILE exists."
+else
+    echo "$INPUT_FILE does not exist" 
+    exit 99
+fi
+
+$executable_path/main_test --input_root_folder=$INPUT_DIR \
+--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9 --nsga_pop_size=8 --printLevel=3 \
+--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
+--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps \
+--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP \
+--set_ub=40417 --run_nsga_decomp=true --nsga_gen=5 --input_instance_name=$instance_name --decomp_type=NSGA --maxCPU=1000 \
+--set_generic_MIP_time=100 --run_generic_MIP_solver=false --run_lapso=false \
+--run_Hypergraph_Partitioning_testing=true \
+--run_MIP_Parse_testing=false \
+--parsed_mip_random_seed=false generic_mip_random_seed=false \
+--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Output/testing/Parser_Tests/Parser_test_Results.csv \
+
+

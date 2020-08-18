@@ -50,7 +50,7 @@ vector_double Decomp::fitness(const vector_double& dv) const
         con_idx++;
     }
     // create the partition and get the largest partition
-    HG.partition(con_vec);
+    HG.partition(con_vec, false);
     double largest_partition = double(HG.getLargestPartition());
     double sum_x = sum(dv);
     objective.push_back(largest_partition);

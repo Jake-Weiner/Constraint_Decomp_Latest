@@ -56,6 +56,10 @@ class ParamAdapter{
             return run_MIP_Parse_testing_flag;
         }
 
+        bool get_run_Hypergraph_Partitioning_testing_flag(){
+            return run_Hypergraph_Partitioning_testing_flag;
+        }
+
         std::vector<double> get_nsga_props(){
             return nsga_props;
         }
@@ -84,6 +88,7 @@ class ParamAdapter{
         bool generic_MIP_randomSeed_flag = true;
         bool parsed_MIP_randomSeed_flag = true;
         bool run_MIP_Parse_testing_flag = false;
+        bool run_Hypergraph_Partitioning_testing_flag = false;
         bool getBoolVal(const char* input);
 
         string Problem_File;

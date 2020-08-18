@@ -339,6 +339,33 @@ src/LaPSO.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSO.cpp.s
 .PHONY : src/LaPSO.cpp.s
 
+src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
+
+.PHONY : src/MIPProblemProbe.o
+
+# target to build an object file
+src/MIPProblemProbe.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o
+.PHONY : src/MIPProblemProbe.cpp.o
+
+src/MIPProblemProbe.i: src/MIPProblemProbe.cpp.i
+
+.PHONY : src/MIPProblemProbe.i
+
+# target to preprocess a source file
+src/MIPProblemProbe.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i
+.PHONY : src/MIPProblemProbe.cpp.i
+
+src/MIPProblemProbe.s: src/MIPProblemProbe.cpp.s
+
+.PHONY : src/MIPProblemProbe.s
+
+# target to generate assembly for a file
+src/MIPProblemProbe.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s
+.PHONY : src/MIPProblemProbe.cpp.s
+
 src/MIP_Fileparser.o: src/MIP_Fileparser.cpp.o
 
 .PHONY : src/MIP_Fileparser.o
@@ -419,33 +446,6 @@ src/MIP_Problem_CPLEX_Solver.s: src/MIP_Problem_CPLEX_Solver.cpp.s
 src/MIP_Problem_CPLEX_Solver.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.s
 .PHONY : src/MIP_Problem_CPLEX_Solver.cpp.s
-
-src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
-
-.PHONY : src/MIPProblemProbe.o
-
-# target to build an object file
-src/MIPProblemProbe.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.o
-.PHONY : src/MIPProblemProbe.cpp.o
-
-src/MIPProblemProbe.i: src/MIPProblemProbe.cpp.i
-
-.PHONY : src/MIPProblemProbe.i
-
-# target to preprocess a source file
-src/MIPProblemProbe.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.i
-.PHONY : src/MIPProblemProbe.cpp.i
-
-src/MIPProblemProbe.s: src/MIPProblemProbe.cpp.s
-
-.PHONY : src/MIPProblemProbe.s
-
-# target to generate assembly for a file
-src/MIPProblemProbe.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s
-.PHONY : src/MIPProblemProbe.cpp.s
 
 src/MIP_to_Hypergraph.o: src/MIP_to_Hypergraph.cpp.o
 
@@ -750,6 +750,9 @@ help:
 	@echo "... src/LaPSO.o"
 	@echo "... src/LaPSO.i"
 	@echo "... src/LaPSO.s"
+	@echo "... src/MIPProblemProbe.o"
+	@echo "... src/MIPProblemProbe.i"
+	@echo "... src/MIPProblemProbe.s"
 	@echo "... src/MIP_Fileparser.o"
 	@echo "... src/MIP_Fileparser.i"
 	@echo "... src/MIP_Fileparser.s"
@@ -759,9 +762,6 @@ help:
 	@echo "... src/MIP_Problem_CPLEX_Solver.o"
 	@echo "... src/MIP_Problem_CPLEX_Solver.i"
 	@echo "... src/MIP_Problem_CPLEX_Solver.s"
-	@echo "... src/MIPProblemProbe.o"
-	@echo "... src/MIPProblemProbe.i"
-	@echo "... src/MIPProblemProbe.s"
 	@echo "... src/MIP_to_Hypergraph.o"
 	@echo "... src/MIP_to_Hypergraph.i"
 	@echo "... src/MIP_to_Hypergraph.s"

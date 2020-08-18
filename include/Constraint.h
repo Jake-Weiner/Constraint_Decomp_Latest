@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <cmath>
 
 using namespace std;
 
@@ -81,13 +82,13 @@ class Constraint{
         double getLargestRHSLHSRatio(){
             double largest_ratio = 0.00;
             for (auto& var_coeff : variable_coeffs){
-                if (abs(RHS / var_coeff) > largest_ratio){
-                    largest_ratio = abs(RHS / var_coeff);
+                if (std::abs(RHS / var_coeff) > largest_ratio){
+                    largest_ratio = std::abs(RHS / var_coeff);
                 }
             }
             return largest_ratio;
         }
-        
+
     private:
         vector<string> boundtypes_strings = {"Equal","Less","Greater"};
         double RHS = 0.00;

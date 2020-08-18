@@ -23,8 +23,8 @@ class Problem_Adapter{
 
         Problem_Adapter();
 
-        vector<individual_information_struct> createNSGADecomps(Hypergraph& HG, const int& num_gen, 
-            const vector<double>& subproblem_var_props, const int& pop_size);
+        void createNSGADecomps(Hypergraph& HG, const int& num_gen, 
+        const string& output_file, const int& pop_size);
 };
 
 #endif

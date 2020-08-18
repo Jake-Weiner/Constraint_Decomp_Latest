@@ -45,6 +45,7 @@ struct Param {
     double set_parsed_MIP_time = 100;
 
     const char* run_MIP_Parse_testing = "false";
+    const char* run_Hypergraph_Partitioning_testing = "false";
     const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;
     const char* subproblem_var_prop = "";
@@ -57,7 +58,8 @@ struct Param {
     
     const char* solve_parsed_MIP_output_filename = "";   
     const char* run_nsga_decomp = "";
-   
+    const char* nsga_decomp_output_file = "";
+
     const char* run_lapso = "true";
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";
