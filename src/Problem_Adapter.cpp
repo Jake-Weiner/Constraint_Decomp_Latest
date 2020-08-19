@@ -36,7 +36,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     // print level set to 1
     algo.set_verbosity(1);
     population pop;
-    population pop_total;
+    //population pop_total;
     // Greedy Seeding of the initial pop
 
     // pop size must be at least 14 to greedily seed.
@@ -56,9 +56,6 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     }
 
     cout << "initialised initial population" << endl;
-
-    // pop_total = pop;
-
     cout << "starting to evolve population" << endl;
     
     // use hashmap to help avoid duplicate decompositions which 
@@ -69,30 +66,31 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     std::ofstream outfile;
     outfile.open(output_file);
     if(outfile){
-
         // evolving the population 1 generation at a time in order to capture all solutions (placed into pop_total) that would otherwise be thrown away
         int gen_counter = 0;
-        // write out each generation to the required file
+        
         while (gen_counter < (num_gen - 1)) {
-
             cout << "number of generations evolved is " << gen_counter << endl;
-            algorithm algo_temp{nsga2(1)};
-            pop = algo.evolve(pop);
             for (int pop_idx = 0; pop_idx < pop.size(); pop_idx++) {
-                unsigned int largest_subproblem = int(floor(pop_total.get_f()[pop_idx][largest_sp_idx] + 0.1));
-                unsigned int number_constraints_relaxed = int(floor(pop_total.get_f()[pop_idx][num_con_relaxed_idx] + 0.1));
+                unsigned int largest_subproblem = int(floor(pop.get_f()[pop_idx][largest_sp_idx] + 0.1));
+                unsigned int number_constraints_relaxed = int(floor(pop.get_f()[pop_idx][num_con_relaxed_idx] + 0.1));
                 pair_int map_key = std::make_pair(largest_subproblem, number_constraints_relaxed);
                 // if key doesn't exist, at it to the map and write out the individual to the file
                 if (uo_map.find(map_key) == uo_map.end()){
                     uo_map[map_key] = true;
+                     // write out each generation to the required file
+                    writeDecompToFile(outfile, pop.get_x()[pop_idx], largest_subproblem, number_constraints_relaxed);
                 }
-                writeDecompToFile(outfile, pop.get_x()[pop_idx], largest_subproblem, number_constraints_relaxed);
-                // pop_total.push_back(pop.get_x()[pop_idx], pop.get_f()[pop_idx]);
-
+               
             }
+            // evolve the population
+            pop = algo.evolve(pop); 
             ++gen_counter;
         }
         outfile.close();
+    }
+    else{
+        cout << "NSGA Decomp Output file unable to be created" << endl;
     }
 
     
@@ -162,7 +160,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
 // unit testing scenarios....
 
 void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, const int& LSP, const int& num_constraint_relaxed){
-
+    cout << "writing decomp to file" << endl;
     outfile << "[";
     for (auto& con_val : con_vec){
         outfile << con_val;

@@ -191,6 +191,7 @@ void Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs){
             partition_validity_flag = false;
         }
     }
+    
     if (partition_validity_flag == false){
         exit(1);
     }

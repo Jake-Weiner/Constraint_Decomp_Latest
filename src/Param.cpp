@@ -25,13 +25,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("set_generic_MIP_time");
     parser.setOption("set_parsed_MIP_time");  
     parser.setOption("run_generic_MIP_solver");
-    parser.setOption("run_MIP_Parse_testing");
-    parser.setOption("MIP_Parse_testing_output_filename");
-    parser.setOption("run_parsed_MIP_solver");
-    parser.setOption("run_lapso"); 
-    parser.setOption("test_greedy_decomp"); 
-    parser.setOption("test_random_decomp");
-    parser.setOption("random_lb_output");
+    
+    // MPS File Statistics
     parser.setOption("MIP_num_var"); 
     parser.setOption("MIP_num_cons");
     parser.setOption("MIP_num_bin"); 
@@ -39,10 +34,20 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("MIP_num_int");
     parser.setOption("MIP_num_non_zeroes"); 
     parser.setOption("MIP_Parse_Test_Exception");
-    parser.setOption("nsga_decomp_output_file");
+
+    // testing flags/parameters
     parser.setOption("run_Hypergraph_Partitioning_testing");  
+    parser.setOption("run_NSGA_testing");  
+    parser.setOption("run_MIP_Parse_testing");
+    parser.setOption("MIP_Parse_testing_output_filename");
+    parser.setOption("test_greedy_decomp"); 
+    parser.setOption("test_random_decomp");
     
-    
+    // running flags/parameters
+    parser.setOption("run_parsed_MIP_solver");
+    parser.setOption("run_lapso");
+    parser.setOption("nsga_decomp_output_file");
+    parser.setOption("random_lb_output");
 
     if (argc == -1) // abuse of function
         parser.processFile(*argv);
@@ -102,6 +107,8 @@ void Param::parse(int argc, const char** argv)
         nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");
+    if (parser.getValue("run_NSGA_testing"))
+        run_NSGA_testing = parser.getValue("run_NSGA_testing");
 
     if (parser.getValue("MIP_num_var"))
         MIP_num_var = atoi(parser.getValue("MIP_num_var"));

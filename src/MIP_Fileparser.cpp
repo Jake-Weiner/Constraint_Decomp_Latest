@@ -135,7 +135,6 @@ void MIP_Fileparser::parserMps(string filename)
         }
     }
     MP.number_variables = current_var_number;
-    cout << "cont var count is " << cont_var_count << endl;
 }
 
 void trim(string& s)
@@ -254,10 +253,10 @@ bool marker(const vector<string>& line_split)
 
     for (auto& word : line_split) {
         if (word.find("MARKER") != string::npos) {
-            for (auto& word : line_split) {
-                cout << word << " ";
-            }
-            cout << endl;
+            // for (auto& word : line_split) {
+            //     cout << word << " ";
+            // }
+            // cout << endl;
             return true;
 
         }
@@ -269,7 +268,7 @@ bool intOrgCheck(const vector<string>& line_split)
 {
     for (auto& word : line_split) {
         if (word.find("INTORG") != string::npos) {
-            cout << "found INTORG" << endl;
+            // cout << "found INTORG" << endl;
             return true;
         }
     }

@@ -46,6 +46,7 @@ struct Param {
 
     const char* run_MIP_Parse_testing = "false";
     const char* run_Hypergraph_Partitioning_testing = "false";
+    const char* run_NSGA_testing = "false";
     const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;
     const char* subproblem_var_prop = "";

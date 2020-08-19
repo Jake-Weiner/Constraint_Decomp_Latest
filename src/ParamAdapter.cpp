@@ -22,7 +22,6 @@ ParamAdapter::ParamAdapter(const mainParam::Param& p){
 }
 
 void ParamAdapter::createTestFlags(const mainParam::Param& p){
-
     generic_MIP_Solver_Flag = getBoolVal(p.run_generic_MIP_solver);
     run_nsga_decomp_flag = getBoolVal(p.run_nsga_decomp);
     run_lapso_flag = getBoolVal(p.run_lapso);
@@ -31,6 +30,7 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
     run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
     run_Hypergraph_Partitioning_testing_flag = getBoolVal(p.run_Hypergraph_Partitioning_testing);
+    run_NSGA_testing_flag = getBoolVal(p.run_NSGA_testing);
     generic_MIP_randomSeed_flag = getBoolVal(p.generic_mip_random_seed);
     parsed_MIP_randomSeed_flag = getBoolVal(p.parsed_mip_random_seed);
 }

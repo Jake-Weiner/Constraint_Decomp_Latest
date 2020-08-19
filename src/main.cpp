@@ -263,7 +263,6 @@ int main(int argc, const char** argv)
         // para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes)){
         // cout << "MIP File Parsed Incorrectly" << endl;
         exit(0);
-        
     }
 
 
@@ -301,9 +300,17 @@ int main(int argc, const char** argv)
         // partition function will print error message if partitioing was unsuccessful
         HG.partition(test_convec, test_partitioning);
         HG.printPartitions();
-        // partitioning function will 
+        exit(0);
     }
 
+    // test NSGA writing
+    if (PA.get_run_NSGA_testing_flag()){
+        cout << "running NSGA testing" << endl;
+        Problem_Adapter ProblemAdapter;
+        // Decompositions are written to a file as the population is evolved 
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
+        exit(0);
+    }
 
 
     // run NSGA if desired
@@ -314,7 +321,6 @@ int main(int argc, const char** argv)
 
         // creates all decompositions found in first front. Also returns all decompositions which satisfy the desired proportion
         Problem_Adapter ProblemAdapter;
-
         // write out to a file the different decompositions found
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
     }
