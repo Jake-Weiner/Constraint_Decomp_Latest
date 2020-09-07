@@ -29,6 +29,10 @@ struct Partition_Struct{
         }
         cout << endl;
     }
+
+    int getNumNodes(){
+        return edge_idxs.size();
+    }
     
 };
 
@@ -91,6 +95,10 @@ public:
 
     void constraintNumberCheck(const int& num_constraints_relaxed);
     void variableNumberCheck();
+
+    vector<bool> removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges);
+    
+
     
 private:
     void findPartition(HG_Node starting_node,  vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen);
@@ -104,6 +112,7 @@ private:
     int largest_partition = 0;
     vector<Partition_Struct> PS;
     bool partitioned = false;
+    bool isConstraintRedundant(HG_Edge& edge_to_check);
 
 };
 

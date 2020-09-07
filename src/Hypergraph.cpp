@@ -307,5 +307,52 @@ void Hypergraph::variableNumberCheck(){
     ps_input = PS;
 }
 
+vector<bool> Hypergraph::removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges){
+    
+    vector<bool> new_constraint_vector;
+    new_constraint_vector.resize(relaxed_edges.size());
 
+    // partition the hypergraph
+    partition(relaxed_edges,false);
+    //loop through the constraints and see if the variables in each constraint is contained within any of the subproblems
+
+    for (int con_idx = 0; con_idx < relaxed_edges.size(); ++con_idx){
+        if (relaxed_edges[con_idx] == true){
+            // if relaxed constraint is redundant, set it to false
+            if (isConstraintRedundant(HG_edges[con_idx])){
+                new_constraint_vector[con_idx] = false;
+            }
+            else{
+                new_constraint_vector[con_idx] = true;
+            }
+            //what variables are in the constraint?
+        }
+    }
+    return new_constraint_vector;
+}
+
+// check if the edge in question is contained within one of the subproblem partitions
+bool Hypergraph::isConstraintRedundant(HG_Edge& edge_to_check){
+    bool ret_val = false;
+    for (auto& partition : PS){
+        bool all_nodes_found = true;
+        // number of nodes in partition must be greater than the number of non zeroes/variables in the constraint being tested
+        if (edge_to_check.getNumNodes() < partition.getNumNodes()){
+            // check if each node contained within the edge is also in the partition
+            for (auto& node_idx_to_find : edge_to_check.getNodeIdxs()){
+                std::vector<int>::iterator it = std::find(partition.node_idxs.begin(), partition.node_idxs.end(), node_idx_to_find);
+                if (it == partition.node_idxs.end()){
+                    // node idx is not in the current partition and so move onto the next partition
+                    all_nodes_found = false;
+                    break;   
+                }
+            }
+        }
+        if (all_nodes_found = true){
+            ret_val = true;
+            break;
+        }
+    }
+    return ret_val;
+}
 

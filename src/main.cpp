@@ -226,6 +226,7 @@ int main(int argc, const char** argv)
     MIP_FP.parse(file_type::MPS, MIP_Problem_File);
     MIP_Problem MP = MIP_FP.getMIPProblem();
 
+    // get dual values from solving the MIP problem
     //
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
