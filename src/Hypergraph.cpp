@@ -8,9 +8,8 @@
 #include <string>
 
 using std::cout;
-using std::vector;
 using std::endl;
-
+using std::vector;
 
 void Hypergraph::identifyPartitions(const vector<bool>& relaxed_edges)
 {
@@ -19,22 +18,22 @@ void Hypergraph::identifyPartitions(const vector<bool>& relaxed_edges)
     // vector<bool> edge_idx_seen;
     // edge_idx_seen.resize(HG_edges.size(), false);
     // List keeping track of nodes seen
-   
+
     bool return_flag = true;
 
     vector<bool> node_idx_seen;
     node_idx_seen.resize(HG_nodes.size(), false);
     vector<bool> edge_idx_seen;
     edge_idx_seen.resize(HG_edges.size(), false);
-    for (int edge_idx = 0; edge_idx<relaxed_edges.size(); edge_idx++){
-        if (relaxed_edges[edge_idx] == true){
+    for (int edge_idx = 0; edge_idx < relaxed_edges.size(); edge_idx++) {
+        if (relaxed_edges[edge_idx] == true) {
             edge_idx_seen[edge_idx] = true;
         }
     }
 
     int nodes_seen = 0;
     //perform BFS on Hypergraph - stop when all nodes have been considered
-    while (nodes_seen != node_idx_seen.size()){
+    while (nodes_seen != node_idx_seen.size()) {
 
         // pick first unseen node iff it has an edge attached
         int node_idx_selected;
@@ -58,15 +57,14 @@ void Hypergraph::identifyPartitions(const vector<bool>& relaxed_edges)
     return;
 }
 
-
-void Hypergraph::findPartition(HG_Node starting_node,  vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen)
+void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen)
 {
-    
+
     vector<int> node_partition;
     vector<int> edge_partition;
     node_partition.push_back(starting_node.getNodeIdx());
     queue<HG_Edge> Q;
-    
+
     // for each node, add neighbour nodes to the queue which haven't been seen before
 
     // add edges attached to node which haven't been seen before
@@ -102,14 +100,14 @@ void Hypergraph::findPartition(HG_Node starting_node,  vector<bool>& node_idx_se
         Q.pop();
     }
 
-    if (node_partition.empty()){
+    if (node_partition.empty()) {
         cout << "empty node partition" << endl;
         exit(1);
     }
 
-    Partition_Struct ps = {node_partition, edge_partition};
+    Partition_Struct ps = { node_partition, edge_partition };
     PS.push_back(ps);
-    if (node_partition.size() > largest_partition){
+    if (node_partition.size() > largest_partition) {
         largest_partition = node_partition.size();
     }
 }
@@ -126,13 +124,13 @@ void Hypergraph::printPartitions()
 {
     for (auto& partition : PS) {
         cout << "Edges in partition: " << endl;
-        for (auto& edge_idx : partition.edge_idxs){
+        for (auto& edge_idx : partition.edge_idxs) {
             cout << edge_idx << " ";
         }
         cout << endl;
 
         cout << "Nodes in partition: " << endl;
-        for (auto& node_idx : partition.node_idxs){
+        for (auto& node_idx : partition.node_idxs) {
             cout << node_idx << " ";
         }
         cout << endl;
@@ -140,71 +138,69 @@ void Hypergraph::printPartitions()
 }
 
 // unit testing for Hypergraph validity
-void Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs){
+void Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs)
+{
 
     bool partition_validity_flag = true;
     vector<bool> nodes_seen;
     // initialise all nodes and edges as unseen
-    nodes_seen.resize(HG_nodes.size(),false);
+    nodes_seen.resize(HG_nodes.size(), false);
     vector<bool> edges_seen;
-    edges_seen.resize(HG_edges.size(),false);
+    edges_seen.resize(HG_edges.size(), false);
 
     // vector containing the indexes of relaxed edges
-    for (auto& relaxed_edge_idx : relaxed_edge_idxs){
+    for (auto& relaxed_edge_idx : relaxed_edge_idxs) {
         edges_seen[relaxed_edge_idx] = true;
     }
 
     // loop through the various partitions to determine if nodes or edges
     // appear in multiple partitions
     for (auto& partition : PS) {
-        for (auto& node_idx : partition.node_idxs){
-            if (nodes_seen[node_idx] == true){
+        for (auto& node_idx : partition.node_idxs) {
+            if (nodes_seen[node_idx] == true) {
                 cout << "node idx " << node_idx << " appears in multiple partitions " << endl;
                 partition_validity_flag = false;
-            }
-            else{
+            } else {
                 nodes_seen[node_idx] = true;
             }
         }
-        for (auto& edge_idx : partition.edge_idxs){
-            if (edges_seen[edge_idx] == true){
+        for (auto& edge_idx : partition.edge_idxs) {
+            if (edges_seen[edge_idx] == true) {
                 cout << "edge idx " << edge_idx << " appears in multiple partitions " << endl;
                 partition_validity_flag = false;
-            }
-            else{
+            } else {
                 edges_seen[edge_idx] = true;
             }
         }
     }
     // make sure that all edges and nodes have been seen
-    for (int i = 0; i<nodes_seen.size(); i++){
-        if (nodes_seen[i] == false){
-            cout << "error, node_idx: " << nodes_seen[i] << " is unallocated in partitioning " << endl; 
+    for (int i = 0; i < nodes_seen.size(); i++) {
+        if (nodes_seen[i] == false) {
+            cout << "error, node_idx: " << nodes_seen[i] << " is unallocated in partitioning " << endl;
             partition_validity_flag = false;
         }
-        
     }
 
-    for (int i = 0; i<edges_seen.size(); i++){
-        if (edges_seen[i] == false){
-            cout << "error, edge_idx: " << edges_seen[i] << " is unallocated in partitioning " << endl; 
+    for (int i = 0; i < edges_seen.size(); i++) {
+        if (edges_seen[i] == false) {
+            cout << "error, edge_idx: " << edges_seen[i] << " is unallocated in partitioning " << endl;
             partition_validity_flag = false;
         }
     }
-    
-    if (partition_validity_flag == false){
+
+    if (partition_validity_flag == false) {
         exit(1);
     }
 }
 
 /* Reduce the graph by removing edges based on the constraints relaxed */
-// 
+//
 
 void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<HG_Node>& updated_nodes)
 {
     // copy the original node information
-    for (auto& node : HG_nodes){
-        updated_nodes[node.getNodeIdx()] = HG_Node{node.getNodeIdx(),node.getEdgeIdxs()};
+    for (auto& node : HG_nodes) {
+        updated_nodes[node.getNodeIdx()] = HG_Node{ node.getNodeIdx(), node.getEdgeIdxs() };
     }
     // ensure constraint vector input matches number of edges in HG
     if (constraints_selected.size() != HG_edges.size()) {
@@ -215,7 +211,7 @@ void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<
         HG_Edge current_edge = HG_edges[edge_idx];
         // 1 is edge relaxation
         if (constraint_decision == 1) {
-            for (auto& node_idx : current_edge.getNodeIdxs()){
+            for (auto& node_idx : current_edge.getNodeIdxs()) {
                 //remove edge idx attached to node
                 updated_nodes[node_idx].removeEdgeIdx(current_edge.getEdgeIdx());
             }
@@ -226,20 +222,20 @@ void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<
 //unit testing flag to test if partioning algorithm should be checked
 
 // partition the hypergraph based on selected constraints
-void Hypergraph::partition(const vector<bool>& constraints_selected, bool test_partition_validity){
+void Hypergraph::partition(const vector<bool>& constraints_selected, bool test_partition_validity)
+{
 
-   
-     // reduce graph edges
-    // logic behind a partition -- if you remove edges from the graph, can't reach other nodes... 
+    // reduce graph edges
+    // logic behind a partition -- if you remove edges from the graph, can't reach other nodes...
     // clear any partitions that exist and set the largest partition size to 0
     largest_partition = 0;
     PS.clear();
     // identify partitions with new edges...
     identifyPartitions(constraints_selected);
-    if (test_partition_validity){
+    if (test_partition_validity) {
         vector<int> relaxed_constraint_idxs;
-        for (int con_idx=0; con_idx<constraints_selected.size(); con_idx++){
-            if (constraints_selected[con_idx] == true){
+        for (int con_idx = 0; con_idx < constraints_selected.size(); con_idx++) {
+            if (constraints_selected[con_idx] == true) {
                 relaxed_constraint_idxs.push_back(con_idx);
             }
         }
@@ -248,10 +244,9 @@ void Hypergraph::partition(const vector<bool>& constraints_selected, bool test_p
     }
 }
 
-
 // Largest partition is updated during paritioning search
 int Hypergraph::getLargestPartition()
-{   
+{
     return largest_partition;
 }
 
@@ -266,35 +261,38 @@ void Hypergraph::printPartitions(vector<vector<int>> partitions)
     }
 }
 
-void Hypergraph::constraintNumberCheck(const int& num_constraints_relaxed){
+void Hypergraph::constraintNumberCheck(const int& num_constraints_relaxed)
+{
 
     int num_edges_in_partitions = getNumEdgesInPartitions();
-    if ((num_edges_in_partitions+ num_constraints_relaxed) != getNumEdges()){
+    if ((num_edges_in_partitions + num_constraints_relaxed) != getNumEdges()) {
         cout << "number of constraints in partitions: " << num_edges_in_partitions << endl;
         cout << "number of constraints relaxed: " << num_constraints_relaxed << endl;
-        cout << "total number of constraints " <<  getNumEdges() << endl;
+        cout << "total number of constraints " << getNumEdges() << endl;
         cout << "missing " << (getNumEdges() - (num_edges_in_partitions + num_constraints_relaxed)) << " constraints" << endl;
-    } 
+    }
     return;
 }
 
-void Hypergraph::variableNumberCheck(){
+void Hypergraph::variableNumberCheck()
+{
     int num_nodes_in_partitions = getNumNodesInPartitions();
-     if (num_nodes_in_partitions  != getNumNodes()){
-        cout << "number of nodes in partitions: " << num_nodes_in_partitions  << endl;
-        cout << "total number of nodes " <<  getNumNodes() << endl;
+    if (num_nodes_in_partitions != getNumNodes()) {
+        cout << "number of nodes in partitions: " << num_nodes_in_partitions << endl;
+        cout << "total number of nodes " << getNumNodes() << endl;
         cout << "missing " << (getNumEdges() - (num_nodes_in_partitions)) << " constraints" << endl;
-    } 
+    }
     return;
 }
 
 // Two checks for success : 1) Successful partition 2) Correct Proportion found.
- void Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity){
-    
+void Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity)
+{
+
     partition(con_relax_vec, check_partition_validity);
     int num_con_relaxed = 0;
-    for (auto&& val: con_relax_vec){
-        if (val == true){
+    for (auto&& val : con_relax_vec) {
+        if (val == true) {
             num_con_relaxed++;
         }
     }
@@ -307,52 +305,81 @@ void Hypergraph::variableNumberCheck(){
     ps_input = PS;
 }
 
-vector<bool> Hypergraph::removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges){
-    
+vector<bool> Hypergraph::removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges)
+{
+
     vector<bool> new_constraint_vector;
     new_constraint_vector.resize(relaxed_edges.size());
 
     // partition the hypergraph
-    partition(relaxed_edges,false);
+    partition(relaxed_edges, false);
     //loop through the constraints and see if the variables in each constraint is contained within any of the subproblems
-
-    for (int con_idx = 0; con_idx < relaxed_edges.size(); ++con_idx){
-        if (relaxed_edges[con_idx] == true){
+    for (int con_idx = 0; con_idx < relaxed_edges.size(); ++con_idx) {
+        if (relaxed_edges[con_idx] == true) {
             // if relaxed constraint is redundant, set it to false
-            if (isConstraintRedundant(HG_edges[con_idx])){
+            bool print = false;
+            if (isConstraintRedundant(HG_edges[con_idx], print)) {
+                std::cout << "redundant constraint found " << std::endl;
                 new_constraint_vector[con_idx] = false;
-            }
-            else{
+            } else {
                 new_constraint_vector[con_idx] = true;
             }
-            //what variables are in the constraint?
+
+        } else {
+            new_constraint_vector[con_idx] = false;
         }
     }
     return new_constraint_vector;
 }
 
 // check if the edge in question is contained within one of the subproblem partitions
-bool Hypergraph::isConstraintRedundant(HG_Edge& edge_to_check){
+bool Hypergraph::isConstraintRedundant(HG_Edge& edge_to_check, bool print)
+{
     bool ret_val = false;
-    for (auto& partition : PS){
+    // loop through each partition
+    for (auto& partition : PS) {
         bool all_nodes_found = true;
-        // number of nodes in partition must be greater than the number of non zeroes/variables in the constraint being tested
-        if (edge_to_check.getNumNodes() < partition.getNumNodes()){
+        // number of nodes in partition must be greater/equal than the number of non zeroes/variables in the constraint being tested
+        if (edge_to_check.getNumNodes() <= partition.getNumNodes()) {
+            if (print) {
+                std::cout << "partition nodes are " << std::endl;
+                for (auto& partition_node : partition.node_idxs) {
+                    std::cout << partition_node << " ";
+                }
+                std::cout << std::endl;
+                std::cout << "constraint nodes are " << std::endl;
+                for (auto& node_idx_to_find : edge_to_check.getNodeIdxs()) {
+                    std::cout << node_idx_to_find << " ";
+                }
+                std::cout << std::endl;
+            }
             // check if each node contained within the edge is also in the partition
-            for (auto& node_idx_to_find : edge_to_check.getNodeIdxs()){
+            for (auto& node_idx_to_find : edge_to_check.getNodeIdxs()) {
                 std::vector<int>::iterator it = std::find(partition.node_idxs.begin(), partition.node_idxs.end(), node_idx_to_find);
-                if (it == partition.node_idxs.end()){
+                // node not found
+                if (it == partition.node_idxs.end()) {
                     // node idx is not in the current partition and so move onto the next partition
+                    // without checking the rest of the nodes in the constraint
                     all_nodes_found = false;
-                    break;   
+                    break;
                 }
             }
         }
-        if (all_nodes_found = true){
+        // if number of nodes in partition is not greater/equal than the number of variables
+        // in the constraint then there is no need to check if the constraint is redundant w.r.t
+        // that partition
+        else {
+            all_nodes_found = false;
+            continue;
+        }
+
+        // if constraint nodes are a subset of partition nodes, redundant constaint is found and there is no need to
+        // check the remainin partitions
+        if (all_nodes_found == true) {
             ret_val = true;
             break;
         }
     }
+
     return ret_val;
 }
-

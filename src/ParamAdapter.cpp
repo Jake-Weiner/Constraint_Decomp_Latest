@@ -13,12 +13,10 @@ ParamAdapter::ParamAdapter(const mainParam::Param& p){
 
     createInputFilePaths(p);
     createTestFlags(p);
-    
     if (run_nsga_decomp_flag == true){
         create_nsga_props(p);
     }
     create_NSGA_decomp_plot_filename(p);
-
 }
 
 void ParamAdapter::createTestFlags(const mainParam::Param& p){
@@ -28,11 +26,16 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     test_greedy_decomp_flag = getBoolVal(p.test_greedy_decomp);
     test_random_decomp_flag = getBoolVal(p.test_random_decomp);
     MIP_Parse_Test_Exception_flag = getBoolVal(p.MIP_Parse_Test_Exception);
+   
+    generic_MIP_randomSeed_flag = getBoolVal(p.generic_mip_random_seed);
+    parsed_MIP_randomSeed_flag = getBoolVal(p.parsed_mip_random_seed);
+
+    // testing flags
     run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
     run_Hypergraph_Partitioning_testing_flag = getBoolVal(p.run_Hypergraph_Partitioning_testing);
     run_NSGA_testing_flag = getBoolVal(p.run_NSGA_testing);
-    generic_MIP_randomSeed_flag = getBoolVal(p.generic_mip_random_seed);
-    parsed_MIP_randomSeed_flag = getBoolVal(p.parsed_mip_random_seed);
+    run_constraint_redundancy_testing_flag = getBoolVal(p.run_constraint_redundancy_testing);
+
 }
 
 // return a bool val from the given input char*

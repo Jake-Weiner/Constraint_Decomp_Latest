@@ -206,7 +206,6 @@ int main(int argc, const char** argv)
     // solve generic MIP
     if (PA.get_generic_MIP_Solver_Flag() == true || PA.get_run_MIP_Parse_testing_flag() == true) {
         cout << "solving generic MIP File" << endl;
-
         SolveGenericMIP SGM(MIP_Problem_File, para.set_generic_MIP_time);
         bool random_seed = PA.get_generic_MIP_randomSeed_flag();
         CPLEX_Return_struct MIP_results = SGM.solve(random_seed);
@@ -311,6 +310,25 @@ int main(int argc, const char** argv)
         // Decompositions are written to a file as the population is evolved 
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
         exit(0);
+    }
+
+    //test constraint redundancy for decompositions
+    if (PA.get_run_constraint_redundancy_testing_flag()){
+        cout << "running constraint redundancy testing" << endl;
+        MP.printConstraints();
+        vector<bool> test_convec = {true,true,true,false,false,true};
+        std::cout << "original constraint relaxed vector is " << std::endl;
+        for (const auto& con_val : test_convec){
+            std::cout << con_val;
+        }
+        std::cout << endl;
+        std::cout << "new constraint relaxed vector is " << std::endl;
+        vector<bool> new_test_convec = HG.removeRelaxedConstraintRedundancies(test_convec);
+        for (const auto& con_val : new_test_convec){
+            std::cout << con_val;
+        }
+        std::cout << std::endl;
+        HG.printPartitions();
     }
 
 

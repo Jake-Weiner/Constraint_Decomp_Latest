@@ -31,7 +31,7 @@ struct Partition_Struct{
     }
 
     int getNumNodes(){
-        return edge_idxs.size();
+        return node_idxs.size();
     }
     
 };
@@ -112,7 +112,7 @@ private:
     int largest_partition = 0;
     vector<Partition_Struct> PS;
     bool partitioned = false;
-    bool isConstraintRedundant(HG_Edge& edge_to_check);
+    bool isConstraintRedundant(HG_Edge& edge_to_check, bool print);
 
 };
 

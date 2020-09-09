@@ -64,6 +64,10 @@ class ParamAdapter{
             return run_NSGA_testing_flag;
         }
 
+        bool get_run_constraint_redundancy_testing_flag(){
+            return run_constraint_redundancy_testing_flag;
+        }
+        
         std::vector<double> get_nsga_props(){
             return nsga_props;
         }
@@ -94,6 +98,7 @@ class ParamAdapter{
         bool run_MIP_Parse_testing_flag = false;
         bool run_Hypergraph_Partitioning_testing_flag = false;
         bool run_NSGA_testing_flag = false;
+        bool run_constraint_redundancy_testing_flag = false;
         bool getBoolVal(const char* input);
 
         string Problem_File;

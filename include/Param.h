@@ -35,7 +35,7 @@ struct Param {
     double subproblem_solver_runtime_lim = 100;
   
     // generic MIP parameters
-    const char* run_generic_MIP_solver = "true";
+    const char* run_generic_MIP_solver = "false";
     const char* solve_generic_MIP_output_filename = "";
     const char* generic_mip_random_seed = "true";
     double set_generic_MIP_time = 100;
@@ -47,6 +47,7 @@ struct Param {
     const char* run_MIP_Parse_testing = "false";
     const char* run_Hypergraph_Partitioning_testing = "false";
     const char* run_NSGA_testing = "false";
+    const char* run_constraint_redundancy_testing = "false";
     const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;
     const char* subproblem_var_prop = "";
@@ -61,7 +62,7 @@ struct Param {
     const char* run_nsga_decomp = "";
     const char* nsga_decomp_output_file = "";
 
-    const char* run_lapso = "true";
+    const char* run_lapso = "false";
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";
     

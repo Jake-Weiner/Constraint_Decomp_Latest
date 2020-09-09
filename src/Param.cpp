@@ -39,6 +39,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_Hypergraph_Partitioning_testing");  
     parser.setOption("run_NSGA_testing");  
     parser.setOption("run_MIP_Parse_testing");
+    parser.setOption("run_constraint_redundancy_testing");
     parser.setOption("MIP_Parse_testing_output_filename");
     parser.setOption("test_greedy_decomp"); 
     parser.setOption("test_random_decomp");
@@ -105,11 +106,16 @@ void Param::parse(int argc, const char** argv)
         random_lb_output = parser.getValue("random_lb_output");
     if (parser.getValue("nsga_decomp_output_file"))
         nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");
+
+    // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");
     if (parser.getValue("run_NSGA_testing"))
         run_NSGA_testing = parser.getValue("run_NSGA_testing");
-
+    if (parser.getValue("run_constraint_redundancy_testing"))
+        run_constraint_redundancy_testing = parser.getValue("run_constraint_redundancy_testing");
+    
+    // input MIP parameters
     if (parser.getValue("MIP_num_var"))
         MIP_num_var = atoi(parser.getValue("MIP_num_var"));
     if (parser.getValue("MIP_num_cons"))
