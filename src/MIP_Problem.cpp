@@ -183,7 +183,6 @@ double MIP_Problem::getInequalityConstraintProp()
     return (1 - (double(equality_constraint_count) / getNumConstraints()));
 }
 
-
 void MIP_Problem::setEqualityConstraintCount()
 {
     if (equality_constraints_counted == false) {
@@ -207,7 +206,7 @@ bound_type MIP_Problem::getConstraintType(const int& constraint_idx, bool& succe
 }
 
 int MIP_Problem::getConstraintNumNonZeroes(const int& constraint_idx, bool& success_flag){
-    // default return type as greater, although discard this if success_flag is false
+    // default return is no non-zeroes, although discard this if success_flag is false
     int num_nonzeroes = 0;
     if (constraint_idx < getNumConstraints()){
         success_flag = true;
@@ -224,4 +223,24 @@ double MIP_Problem::getConstraintLargestRatio(const int& constraint_idx, bool& s
         constraints[constraint_idx].getLargestRHSLHSRatio();
     }
     return largest_ratio;   
+}
+
+
+double MIP_Problem::getConstraintSumRatio(const int& constraint_idx, bool& success_flag){
+
+    double sum_RHS_ratio = 0.00;
+     if (constraint_idx < getNumConstraints()){
+        success_flag = true;
+        constraints[constraint_idx].getSumRHSLHSRatio();
+    }
+    return sum_RHS_ratio;   
+}
+
+double MIP_Problem::getConstraintSumObj(const int& constraint_idx, bool& success_flag){
+    double sum_obj_ceoff = 0.00;
+    if (constraint_idx < getNumConstraints()){
+        success_flag = true;
+        constraints[constraint_idx].getSumObjCoeff();
+    }
+    return sum_obj_ceoff;   
 }

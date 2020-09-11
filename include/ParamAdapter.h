@@ -31,41 +31,38 @@ class ParamAdapter{
         bool get_run_lapso_flag(){
             return run_lapso_flag;
         }
-
         bool get_generic_MIP_randomSeed_flag(){
             return generic_MIP_randomSeed_flag;
         }
-
         bool get_parsed_MIP_randomSeed_flag(){
             return parsed_MIP_randomSeed_flag;
         }
-
         bool get_test_greedy_decomp_flag(){
             return test_greedy_decomp_flag;
         }
-
         bool get_test_random_decomp_flag(){
             return test_random_decomp_flag;
         }
-
         bool get_MIP_Parse_Test_Exception_flag(){
             return MIP_Parse_Test_Exception_flag;
         }
-
         bool get_run_MIP_Parse_testing_flag(){
             return run_MIP_Parse_testing_flag;
         }
-
         bool get_run_Hypergraph_Partitioning_testing_flag(){
             return run_Hypergraph_Partitioning_testing_flag;
         }
-
         bool get_run_NSGA_testing_flag(){
             return run_NSGA_testing_flag;
         }
-
         bool get_run_constraint_redundancy_testing_flag(){
             return run_constraint_redundancy_testing_flag;
+        }
+        bool get_run_greedy_decomposition_testing_flag(){
+            return run_greedy_decomposition_testing_flag;
+        }
+        bool get_run_evaluate_decompositions_testing_flag(){
+            return get_run_evaluate_decompositions_testing_flag;
         }
         
         std::vector<double> get_nsga_props(){
@@ -99,6 +96,9 @@ class ParamAdapter{
         bool run_Hypergraph_Partitioning_testing_flag = false;
         bool run_NSGA_testing_flag = false;
         bool run_constraint_redundancy_testing_flag = false;
+        bool run_greedy_decomposition_testing_flag = false;
+        bool run_evaluate_decompositions_testing_flag = false;
+       
         bool getBoolVal(const char* input);
 
         string Problem_File;

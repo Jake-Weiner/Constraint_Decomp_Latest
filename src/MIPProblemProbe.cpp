@@ -12,23 +12,26 @@ void MIPProblemProbe::populateInstanceStatistics(NSGA_ii_instance_statistics& ni
     nis.inequality_constraints_prop = MP.getInequalityConstraintProp();
 }
 
-void MIPProblemProbe::populateRelaxedConstraintsStatistics(const int& decomposition_idx, const individual_information_struct& decomp, NSGA_ii_relaxed_constraint_statistics& nrcs, MIP_Problem& MP)
+void MIPProblemProbe::populateNonruntimeDecompositionStatistics(const int& decomposition_idx, const individual_information_struct& decomp, Nonruntime_Decompositions_Statistics& nds, MIP_Problem& MP)
 {
+
     number_constraints_relaxed = decomp.number_constraints_relaxed;
     // based on the relaxed constraints vector
-    nrcs.LSP_prop = double(decomp.largest_sp) / double(MP.getNumVariables());
-    nrcs.num_constraints_relaxed_prop = double(decomp.number_constraints_relaxed) / double(MP.getNumConstraints());
+    // Largest subproblem size is normalised 
+    nds.LSP_prop = double(decomp.largest_sp) / double(MP.getNumVariables());
+    nds.num_constraints_relaxed_prop = double(decomp.number_constraints_relaxed) / double(MP.getNumConstraints());
     
 
     // this group of statistics requires looping through each constraint in the con_vec to calculate the statistics.
     // To save time these statistical measures are calculated during the same loop.
-    populateStatisticsRequiringIteration(decomp,  MP, nrcs.equality_constaints_relaxed_prop 
-    , nrcs.average_nonzero_prop, nrcs.average_largest_ratio);
+    
+    populateRelaxedConstraintStatistics(decomp,  MP, nds.equality_constaints_relaxed_prop 
+    , nds.average_nonzero_prop, nds.average_largest_ratio);
 
     // nrcs.equality_constaints_relaxed_prop = double(getNumberEqualityConstraintsRelaxed(decomp.con_vec, MP)) / double(decomp.number_constraints_relaxed);
     
     // put this as a parameter into the above function as well..
-    nrcs.inequality_constaints_relaxed_prop = 1.00 - nrcs.equality_constaints_relaxed_prop;
+    nds.inequality_constaints_relaxed_prop = 1.00 - nds.equality_constaints_relaxed_prop;
 
     // get average statistics before stddev 
     //nrcs.average_nonzero_prop = getAverageNonZeroInRelaxedConstraints(decomp.con_vec, MP);
@@ -59,6 +62,8 @@ void MIPProblemProbe::populateRelaxedConstraintsStatistics(const int& decomposit
     // double average_largest_ratio;
     // double stddev_largest_ratio;
 }
+
+
 
 // int MIPProblemProbe::getNumberEqualityConstraintsRelaxed(const vector<double>& con_vec, MIP_Problem& MP)
 // {
@@ -128,14 +133,24 @@ void MIPProblemProbe::populateRelaxedConstraintsStatistics(const int& decomposit
 //     }
 // }
 
-void MIPProblemProbe::populateStatisticsRequiringIteration(const individual_information_struct& decomp, MIP_Problem& MP, double& equality_constaints_relaxed_prop
+// this group of statistics requires looping through each constraint in the con_vec to calculate the statistics.
+// To save time these statistical measures are calculated during the same loop.
+// these features are : 
+// average,min,max non_zeroes in relaxed constraints
+// average,min,max of largest abs(RHS/LHS)
+// average,min,max of sum of constraint coeffs abs(RHS/LHS)
+// average,min,max, objective coefficient/constraint coefficient
+
+void MIPProblemProbe::populateRelaxedConstraintStatistics(const individual_information_struct& decomp, MIP_Problem& MP, double& equality_constaints_relaxed_prop
     , double& average_nonzero_prop, double& average_largest_ratio_prop)
 {
 
     int equality_constraint_count = 0;
     int total_nonzero_count = 0;
     double largest_ratio_sum = 0;
+    double sum_RHS_ratio_sum = 0;
 
+    //get totals for non zeroes, constraint types and largest ratio
     for (int con_idx = 0; con_idx < decomp.con_vec.size(); ++con_idx) {
         // account for potential rounding errors
         if (int(decomp.con_vec[con_idx] + 0.1) == 1) {
@@ -151,15 +166,28 @@ void MIPProblemProbe::populateStatisticsRequiringIteration(const individual_info
                     ++equality_constraint_count;
                 }
             }
-            bool success_flag_ratio = false;
-            double largest_ratio = MP.getConstraintLargestRatio(con_idx, success_flag_ratio);
-            if (success_flag_ratio){
+            bool largest_ratio_success_flag_ratio = false;
+            double largest_ratio = MP.getConstraintLargestRatio(con_idx, largest_ratio_success_flag_ratio);
+            if (largest_ratio_success_flag_ratio){
                 largest_ratio_sum += largest_ratio;
             }
 
+            bool sum_ratio_success_flag_ratio = false;
+            double sum_RHS_ratio = MP.getConstraintSumRatio(con_idx, sum_ratio_success_flag_ratio);
+            if (sum_ratio_success_flag_ratio){
+                sum_RHS_ratio_sum += sum_RHS_ratio;
+            }
+
+            bool sum_obj_coeff_success_flag_ratio = false;
+            double sum_RHS_ratio = MP.getConstraintSumRatio(con_idx, sum_ratio_success_flag_ratio);
+            if (sum_ratio_success_flag_ratio){
+                sum_RHS_ratio_sum += sum_RHS_ratio;
+            }
         }
     }
 
+    double average_non_zeroes = total_nonzero_count / decomp.number_constraints_relaxed;
+    double average_largest_RHS_LHS = largest_ratio_sum / decomp.number_constraints_relaxed;
     //double(getNumberEqualityConstraintsRelaxed(decomp.con_vec, MP)) / double(decomp.number_constraints_relaxed);
     equality_constaints_relaxed_prop = double(equality_constraint_count) / double(decomp.number_constraints_relaxed);
     average_nonzero_prop = double(total_nonzero_count) / double(MP.getNumVariables());

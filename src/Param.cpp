@@ -40,9 +40,14 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_NSGA_testing");  
     parser.setOption("run_MIP_Parse_testing");
     parser.setOption("run_constraint_redundancy_testing");
+    parser.setOption("run_greedy_decomposition_testing");
+    parser.setOption("run_evaluate_decompositions_testing_flag");
     parser.setOption("MIP_Parse_testing_output_filename");
     parser.setOption("test_greedy_decomp"); 
     parser.setOption("test_random_decomp");
+
+
+    
     
     // running flags/parameters
     parser.setOption("run_parsed_MIP_solver");
@@ -114,6 +119,8 @@ void Param::parse(int argc, const char** argv)
         run_NSGA_testing = parser.getValue("run_NSGA_testing");
     if (parser.getValue("run_constraint_redundancy_testing"))
         run_constraint_redundancy_testing = parser.getValue("run_constraint_redundancy_testing");
+    if (parser.getValue("run_greedy_decomposition_testing"))
+        run_greedy_decomposition_testing = parser.getValue("run_greedy_decomposition_testing");
     
     // input MIP parameters
     if (parser.getValue("MIP_num_var"))

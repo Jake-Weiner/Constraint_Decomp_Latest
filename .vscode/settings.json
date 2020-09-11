@@ -58,6 +58,12 @@
         "future": "cpp",
         "mutex": "cpp",
         "string": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "cfenv": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "forward_list": "cpp",
+        "scoped_allocator": "cpp",
+        "valarray": "cpp"
     }
 }

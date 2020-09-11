@@ -86,7 +86,7 @@ vector<vector<double>> Decomp::greedy_seeding(){
     for (auto& edge : edges){
         edges_copy.push_back(HG_Edge{edge.getEdgeIdx(), edge.getNodeIdxs()});
     }
-
+    
     std::sort(edges_copy.begin(),edges_copy.end(), greater <HG_Edge>());
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()

@@ -35,7 +35,8 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     run_Hypergraph_Partitioning_testing_flag = getBoolVal(p.run_Hypergraph_Partitioning_testing);
     run_NSGA_testing_flag = getBoolVal(p.run_NSGA_testing);
     run_constraint_redundancy_testing_flag = getBoolVal(p.run_constraint_redundancy_testing);
-
+    run_greedy_decomposition_testing_flag = getBoolVal(p.run_greedy_decomposition_testing);
+    run_evaluate_decompositions_testing_flag = getBoolVal(p.run_evaluate_decompositions_testing_flag);
 }
 
 // return a bool val from the given input char*

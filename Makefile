@@ -231,6 +231,33 @@ src/DecompMIP.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/DecompMIP.cpp.s
 .PHONY : src/DecompMIP.cpp.s
 
+src/GreedyDecompCreator.o: src/GreedyDecompCreator.cpp.o
+
+.PHONY : src/GreedyDecompCreator.o
+
+# target to build an object file
+src/GreedyDecompCreator.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.o
+.PHONY : src/GreedyDecompCreator.cpp.o
+
+src/GreedyDecompCreator.i: src/GreedyDecompCreator.cpp.i
+
+.PHONY : src/GreedyDecompCreator.i
+
+# target to preprocess a source file
+src/GreedyDecompCreator.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.i
+.PHONY : src/GreedyDecompCreator.cpp.i
+
+src/GreedyDecompCreator.s: src/GreedyDecompCreator.cpp.s
+
+.PHONY : src/GreedyDecompCreator.s
+
+# target to generate assembly for a file
+src/GreedyDecompCreator.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.s
+.PHONY : src/GreedyDecompCreator.cpp.s
+
 src/HG_Edge.o: src/HG_Edge.cpp.o
 
 .PHONY : src/HG_Edge.o
@@ -738,6 +765,9 @@ help:
 	@echo "... src/DecompMIP.o"
 	@echo "... src/DecompMIP.i"
 	@echo "... src/DecompMIP.s"
+	@echo "... src/GreedyDecompCreator.o"
+	@echo "... src/GreedyDecompCreator.i"
+	@echo "... src/GreedyDecompCreator.s"
 	@echo "... src/HG_Edge.o"
 	@echo "... src/HG_Edge.i"
 	@echo "... src/HG_Edge.s"

@@ -55,7 +55,6 @@ struct NSGA_ii_characteristics {
 
 
 struct NSGA_ii_instance_statistics{
-
     double bin_prop;
     double cont_prop;
     double int_prop;
@@ -88,6 +87,24 @@ struct NSGA_ii_relaxed_constraint_statistics{
     double average_largest_ratio;
     double stddev_largest_ratio;
 };
+
+struct Nonruntime_Decompositions_Statistics{
+    int decomposition_idx;
+    vector<double>* con_vec_ptr;
+    double LSP_prop;
+    double num_constraints_relaxed_prop;
+    // proportion of relaxed constraints which are equality
+    double equality_constaints_relaxed_prop;
+    // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
+    double inequality_constaints_relaxed_prop;
+    // non_zero prop in constraints relaxed
+    double average_nonzero_prop;
+    double stddev_nonzero_prop;
+    // ratio of RHS to largest coeff in constraint
+    double average_largest_ratio;
+    double stddev_largest_ratio;
+}
+
 
 // pair_hash used for hashmaps with pair type as the key. Creates a hash of the pair key.
 struct pair_hash

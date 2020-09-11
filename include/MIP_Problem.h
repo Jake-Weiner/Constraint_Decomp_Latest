@@ -100,6 +100,8 @@ class MIP_Problem{
         bound_type getConstraintType(const int& constaint_idx, bool& success_flag);
         int getConstraintNumNonZeroes(const int& constraint_idx, bool& success_flag);
         double getConstraintLargestRatio(const int& constraint_idx, bool& success_flag);
+        double getConstraintSumRatio(const int& constraint_idx, bool& success_flag);
+        double getConstraintSumObj(const int& constraint_idx, bool& success_flag);
         int getNumBin();
         int getNumInt();
         int getNumCont();

@@ -1,20 +1,21 @@
 #include "ConDecomp_LaPSO_Connector.h"
 #include "Decomp.hpp"
 #include "DecompMIP.h"
+#include "GreedyDecompCreator.h"
 #include "Hypergraph.h"
+#include "MIPProblemProbe.h"
 #include "MIP_Fileparser.h"
 #include "MIP_Problem_CPLEX_Solver.h"
 #include "MIP_to_Hypergraph.h"
 #include "Param.h"
-#include "Random.h"
-#include "WriteResults.h"
-#include "SolveLaPSO.h"
-#include "Writer.h"
 #include "ParamAdapter.h"
 #include "Problem_Adapter.h"
-#include "Util.h"
+#include "Random.h"
 #include "SolveGenericMIP.h"
-#include "MIPProblemProbe.h"
+#include "SolveLaPSO.h"
+#include "Util.h"
+#include "WriteResults.h"
+#include "Writer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -25,20 +26,18 @@
 #include <pagmo/problem.hpp>
 #include <pagmo/utils/multi_objective.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-
-using std::vector;
 using std::cout;
-using std::string;
 using std::endl;
+using std::string;
+using std::vector;
 
 using namespace pagmo;
-
 
 void solveDecompMIP(Hypergraph& HG, const double subproblem_prop, const char* output_filename, bool warm_start, const char* warm_start_filename)
 {
@@ -92,21 +91,19 @@ vector<double> getCplexConVector(string cplex_filename)
 
 void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
     const double& best_ub_sol, const string& output_stats_filename, const string& output_best_lb_filename,
-    const string& output_average_lb_filename, const double& sp_prop, const double sp_solver_time_limit
-    ,const string& final_lb_filename)
+    const string& output_average_lb_filename, const double& sp_prop, const double sp_solver_time_limit, const string& final_lb_filename)
 {
     int num_con_relaxed = 0;
     for (auto&& val : con_relax_vector) {
-        if (val == true ) {
+        if (val == true) {
             num_con_relaxed++;
         }
     }
 
-  
     bool test_hypergraph_partitioning = false;
     std::vector<Partition_Struct> ps;
     // try create partition struct
-    // partition the HG based on the relaxed constraints which then provides new partitions which forms the subproblems for 
+    // partition the HG based on the relaxed constraints which then provides new partitions which forms the subproblems for
     // the LaPSO method
     HG.getPartitionStruct(con_relax_vector, sp_prop, ps, test_hypergraph_partitioning);
     ConDecomp_LaPSO_Connector CLC(MP, ps, false, sp_solver_time_limit);
@@ -114,19 +111,15 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     CLC.nsolves = 0;
 
     // get the indices of the constraint types
-    LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
+    LaPSO::constraint_type_indicies cti = { MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds() };
     SolveLaPSO SL(argc, argv, HG.getNumNodes(), HG.getNumEdges(), best_ub_sol, cti);
     SL.solve(CLC);
 
     int largest_sp = HG.getLargestPartition();
 
     Writer w;
-    w.writeAverageLBPlot(largest_sp, num_con_relaxed,SL.getSolverAverageLBTracking()
-    ,SL.getSolverTimingTracking(), output_average_lb_filename);
-    w.writeBestLBPlot(largest_sp, num_con_relaxed,SL.getSolverBestLBTracking()
-    ,SL.getSolverTimingTracking(), output_best_lb_filename);
-    
-    
+    w.writeAverageLBPlot(largest_sp, num_con_relaxed, SL.getSolverAverageLBTracking(), SL.getSolverTimingTracking(), output_average_lb_filename);
+    w.writeBestLBPlot(largest_sp, num_con_relaxed, SL.getSolverBestLBTracking(), SL.getSolverTimingTracking(), output_best_lb_filename);
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -181,7 +174,7 @@ vector<bool> getNSGAConVec(const string& input_file)
                     constraint_val = stod(val);
                     if (floor(constraint_val + 0.1) == 1.0)
                         con_vec.push_back(true);
-                    else{
+                    else {
                         con_vec.push_back(false);
                     }
                 } catch (...) {
@@ -192,9 +185,8 @@ vector<bool> getNSGAConVec(const string& input_file)
     return con_vec;
 }
 
-
 int main(int argc, const char** argv)
-{   
+{
     // Parse in parameters
     mainParam::Param para;
     para.parse(argc, argv);
@@ -211,7 +203,7 @@ int main(int argc, const char** argv)
         CPLEX_Return_struct MIP_results = SGM.solve(random_seed);
         // if the results are required for testing purposes with Parsed MIP
         // store the bound and obj value
-        if(PA.get_run_MIP_Parse_testing_flag() == true){
+        if (PA.get_run_MIP_Parse_testing_flag() == true) {
             MPTS.instance_name = MIP_Problem_File;
             MPTS.MPS_bound = MIP_results.bound;
             MPTS.MPS_obj_val = MIP_results.obj_val;
@@ -229,13 +221,13 @@ int main(int argc, const char** argv)
     //
     //tests MIP was read correctly based on expected number of constraints, variables, bin variables, continuous
     //variables non_zeroes and the test has not been flagged as an exception
-    
-    if(PA.get_run_MIP_Parse_testing_flag() == true){
+
+    if (PA.get_run_MIP_Parse_testing_flag() == true) {
         cout << "testing MIP Parser" << endl;
         // solve the Parsed MIP problem
         // use the same runtime as the MPS file
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-        
+
         CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag());
         // populate the Mip Parsing Structure with Parsed MIP information
         MPTS.Parsed_bound = MIP_results.bound;
@@ -259,12 +251,11 @@ int main(int argc, const char** argv)
         cout << "Parsed MIP No. of Constraints = " << MPTS.Parsed_num_const << endl;
         // write the results out for actual MIP (MPS file) and parsed MIP
         w.writeMIPParsingResults(string(para.MIP_Parse_testing_output_filename), MPTS);
-        // MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin, 
+        // MP.testMIPProblem(para.MIP_num_cons, para.MIP_num_var, para.MIP_num_bin,
         // para.MIP_num_cont, para.MIP_num_int, para.MIP_num_non_zeroes)){
         // cout << "MIP File Parsed Incorrectly" << endl;
         exit(0);
     }
-
 
     bool printMIPProblem = false;
     if (printMIPProblem == true) {
@@ -272,7 +263,7 @@ int main(int argc, const char** argv)
         MP.printVariables();
         MP.printConstraints();
     }
-    
+
     // solve the input MIP problem to see if it produces the same results
     // if (PA.get_generic_MIP_Solver_Flag() == true){
     //     MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
@@ -289,13 +280,11 @@ int main(int argc, const char** argv)
     MTH.convertToHypergraph(MP);
     Hypergraph HG(MTH.getHGEdges(), MTH.getHGNodes());
 
-
-    
     // test the parsed in hypergraph partitioning
-    if (PA.get_run_Hypergraph_Partitioning_testing_flag()){
+    if (PA.get_run_Hypergraph_Partitioning_testing_flag()) {
         MP.printConstraints();
         cout << "running hypergraph partitioning test" << endl;
-        vector<bool> test_convec = {true,true,true,false,false};
+        vector<bool> test_convec = { true, true, true, false, false };
         bool test_partitioning = true;
         // partition function will print error message if partitioing was unsuccessful
         HG.partition(test_convec, test_partitioning);
@@ -304,33 +293,87 @@ int main(int argc, const char** argv)
     }
 
     // test NSGA writing
-    if (PA.get_run_NSGA_testing_flag()){
+    if (PA.get_run_NSGA_testing_flag()) {
         cout << "running NSGA testing" << endl;
         Problem_Adapter ProblemAdapter;
-        // Decompositions are written to a file as the population is evolved 
+        // Decompositions are written to a file as the population is evolved
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
         exit(0);
     }
 
     //test constraint redundancy for decompositions
-    if (PA.get_run_constraint_redundancy_testing_flag()){
+    if (PA.get_run_constraint_redundancy_testing_flag()) {
         cout << "running constraint redundancy testing" << endl;
         MP.printConstraints();
-        vector<bool> test_convec = {true,true,true,false,false,true};
+        vector<bool> test_convec = { true, true, true, false, false, true };
         std::cout << "original constraint relaxed vector is " << std::endl;
-        for (const auto& con_val : test_convec){
+        for (const auto& con_val : test_convec) {
             std::cout << con_val;
         }
         std::cout << endl;
         std::cout << "new constraint relaxed vector is " << std::endl;
         vector<bool> new_test_convec = HG.removeRelaxedConstraintRedundancies(test_convec);
-        for (const auto& con_val : new_test_convec){
+        for (const auto& con_val : new_test_convec) {
             std::cout << con_val;
         }
         std::cout << std::endl;
         HG.printPartitions();
     }
 
+    //test greedy decomposition creation
+    if (PA.get_run_greedy_decomposition_testing_flag()) {
+        //using created Hypergraph to generate greedy decompositions
+        cout << "running greedy decomposition testing" << endl;
+        GreedyDecompCreator GDC;
+       
+        std::ofstream outfile;
+        outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.1.csv");
+        if (outfile) {
+            // creating 1000 decompositions
+            for (int i = 0; i < 10000; ++i) {
+                //std::cout << "creating Decomp number: " << i << std::endl;
+                vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.1);
+                for (const auto& con_val : greedy_decomp) {
+                    outfile << con_val << ",";
+                }
+                outfile << endl;
+            }
+            outfile << MP.getnumNonZero() << endl;
+            outfile.close();
+        }
+
+        outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.2.csv");
+        if (outfile) {
+            // creating 1000 decompositions
+            for (int i = 0; i < 10000; ++i) {
+                //std::cout << "creating Decomp number: " << i << std::endl;
+                vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.2);
+                for (const auto& con_val : greedy_decomp) {
+                    outfile << con_val << ",";
+                }
+                outfile << endl;
+            }
+            outfile << MP.getnumNonZero() << endl;
+            outfile.close();
+        }
+
+        outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.5.csv");
+        if (outfile) {
+            // creating 1000 decompositions
+            for (int i = 0; i < 10000; ++i) {
+                //std::cout << "creating Decomp number: " << i << std::endl;
+                vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.5);
+                for (const auto& con_val : greedy_decomp) {
+                    outfile << con_val << ",";
+                }
+                outfile << endl;
+            }
+            outfile << MP.getnumNonZero() << endl;
+            outfile.close();
+        }
+
+        exit(0);
+    }
 
     // run NSGA if desired
     if (PA.get_run_nsga_decomp_flag() == true) {
@@ -343,8 +386,26 @@ int main(int argc, const char** argv)
         // write out to a file the different decompositions found
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
     }
-    
-    
+
+    // Evaluate Decompositions
+
+    if (PA.get_run_evaluate_decompositions_testing_flag() == true){
+    //non-runtime decompositions statistics 
+
+//         Largest Subproblem as a proportion of total variables
+// proportion of total constraints relaxed
+// proportion of constraints relaxed which are equality constraints
+// proportion of constraints relaxed which are inequality constraints
+// proportion of binary variables in relaxed constraints
+// proportion of integer variables in relaxed constraints
+// proportion of continuous variables in relaxed constraints
+// average, min, max, stddev nonzeros percentage in relaxed constraints 
+// average, min, max, stddev of the largest ratio of each constraint (abs(RHS/LHS)) (e.g for constraint x1 + 2x2 = 3, Largest ratio is 3/1,  2x1 + x3 = 4,  Largest ratio is 4)
+        //read in decompositions from file
+        //for each decomposition, run LR once with LP duals forming the LR values
+        // get the statistics of the constraints
+    }
+
     // writes out NSGA Decomps to show pareto fronts NSGA_decomp_plot_filename  std::ofstream outfile;
     // outfile.open(output_filename);
     // vector<pop_size_t> front1 = non_dominated_front_2d(f_vals);
@@ -356,18 +417,16 @@ int main(int argc, const char** argv)
     //Binary Var prop
     //Cont Var prop
     //Int Var prop
-    //Constraint Types	
+    //Constraint Types
     //Number of non zerores
     // average density of constraints, stddev of constraints
-    
+
     // MIPProblemProbe MPP;
     // NSGA_ii_instance_statistics nis;
 
     // // fill out the required instance statistics
     // MPP.populateInstanceStatistics(nis, MP);
-    
 
-   
     // // loop through decompositions, assigning a decomposition number
 
     // int decomp_idx = 0;
@@ -375,8 +434,8 @@ int main(int argc, const char** argv)
     //     NSGA_ii_relaxed_constraint_statistics nrcs;
     //     MPP.populateRelaxedConstraintsStatistics(decomp_idx,decomp, nrcs, MP);
     //     ++decomp_idx;
-    // }   
-    
+    // }
+
     // vector<double> con_vec;
     // double LSP_prop;
     // double num_constraints_relaxed_prop;
@@ -391,12 +450,8 @@ int main(int argc, const char** argv)
     // double average_largest_ratio;
     // double stddev_largest_ratio;
 
-
-    
-
     // instance_statistics_masterfile.csv
     // <instance_name>, Binary Var Prop, Cont Var Prop, Int Var Prop, Constraint types(?), Number Non-zeroes, Average density(nonzero/no. constraints), stddev nonzeroes
-
 
     //con_relax vec
     //based off NSGA_results
@@ -408,42 +463,34 @@ int main(int argc, const char** argv)
     //average, stddev largest ratio (RHS/LHS)
     //average, stddev sum/coefficients (RHS/LHS)
 
-
-    
     // output file is <instance_name>_constraint_statistics.csv
-    // Decomp No.,[xxxx], LSP, No. Constraints Relaxed, prop equality constraints, prop inequality constraints, ave prop non zeroes, stddev non zeroes, 
+    // Decomp No.,[xxxx], LSP, No. Constraints Relaxed, prop equality constraints, prop inequality constraints, ave prop non zeroes, stddev non zeroes,
     // average largest ratio RHS/LHS, stddev largest ration (RHS/LHS), average sum (not sure if we need this feature)
-
-
 
     //output file is <instance_name>_solver_statistics
     //solver statistics
-    // Decomp No., Max MIP Time, average MIP time, stdev mip time, 
-    // Max LP Time, average LP time, stdev LP time, 
+    // Decomp No., Max MIP Time, average MIP time, stdev mip time,
+    // Max LP Time, average LP time, stdev LP time,
 
     //subproblem statistics
-    // Subproblem Number 
-    //MIP Time 
-    //LP Time 
+    // Subproblem Number
+    //MIP Time
+    //LP Time
     //Problem Reduction (%)
-    // average Bin, cont, int. 
+    // average Bin, cont, int.
     // stdev bin, cont, int
-	//average no. constraint, stddev no. constraint
+    //average no. constraint, stddev no. constraint
     //First iteration solve time
 
+    // write out decompositions of desired proportions
+    // for (auto& con_relax_info : nsga_con_relax_info_struct) {
+    //     string con_vec_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_vec.csv";
+    //     string decomp_info_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_info.txt";
 
-
-
-        // write out decompositions of desired proportions
-        // for (auto& con_relax_info : nsga_con_relax_info_struct) {
-        //     string con_vec_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_vec.csv";
-        //     string decomp_info_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_info.txt";
-           
-        //     // w.writeConVecToFile(con_relax_info.first, con_vec_filename);
-        //     // writeConVecToFile(con_relax_info.first, con_vec_filename);
-        //     // writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
-        // }
-    
+    //     // w.writeConVecToFile(con_relax_info.first, con_vec_filename);
+    //     // writeConVecToFile(con_relax_info.first, con_vec_filename);
+    //     // writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
+    // }
 
     // run normal LR
     if (PA.get_run_lapso_flag() == true) {
@@ -485,10 +532,10 @@ int main(int argc, const char** argv)
     }
 
     // run LR with greedily produced decompositions
-    if (PA.get_test_greedy_decomp_flag() == true){
+    if (PA.get_test_greedy_decomp_flag() == true) {
         cout << "solving greedy decomp" << endl;
         string con_count_string(para.test_greedy_decomp);
-        
+
         string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Greedy_" + con_count_string + ".txt";
         string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_best_" + con_count_string + ".csv";
         string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_average_" + con_count_string + ".csv";
@@ -496,21 +543,20 @@ int main(int argc, const char** argv)
 
         std::vector<HG_Edge> edges_copy;
 
-        for (auto& edge : HG.getHGEdges()){
-            edges_copy.push_back(HG_Edge{edge.getEdgeIdx(), edge.getNodeIdxs()});
+        for (auto& edge : HG.getHGEdges()) {
+            edges_copy.push_back(HG_Edge{ edge.getEdgeIdx(), edge.getNodeIdxs() });
         }
         vector<bool> con_vec;
         con_vec.resize(edges_copy.size(), false);
 
-        //sort by descendig order on constraint size
-        std::sort(edges_copy.begin(),edges_copy.end(), greater <HG_Edge>());
+        //sort by descending order on constraint size
+        std::sort(edges_copy.begin(), edges_copy.end(), greater<HG_Edge>());
         int count = 0;
-        for (int i =0; i<edges_copy.size(); i++){
-            if (count < (stoi(con_count_string))){
+        for (int i = 0; i < edges_copy.size(); i++) {
+            if (count < (stoi(con_count_string))) {
                 con_vec[edges_copy[i].getEdgeIdx()] = 1;
                 count++;
-            }
-            else{
+            } else {
                 break;
             }
         }
@@ -519,7 +565,7 @@ int main(int argc, const char** argv)
     }
 
     // run LR with random decompositions
-    if (PA.get_test_random_decomp_flag() == true){
+    if (PA.get_test_random_decomp_flag() == true) {
         cout << "solving random decomp" << endl;
         string con_count_string(para.test_random_decomp);
         string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Random_" + con_count_string + ".txt";
@@ -533,7 +579,7 @@ int main(int argc, const char** argv)
 
         int count = 0;
         int idx = 0;
-        while (count < (stoi(con_count_string))){
+        while (count < (stoi(con_count_string))) {
             con_vec[idx] = 1;
             count++;
             idx++;
@@ -542,10 +588,9 @@ int main(int argc, const char** argv)
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(con_vec.begin(), con_vec.end(), g);
-    
+
         cout << "solving LaPSO" << endl;
-        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim
-        ,string(para.random_lb_output));
+        solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, string(para.random_lb_output));
     }
 
     return 0;
