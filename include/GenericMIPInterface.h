@@ -9,7 +9,7 @@ class GenericMIPInterface{
         GenericMIPInterface(double solver_time_lim){
             this->solver_time_lim = solver_time_lim;
         };
-        virtual CPLEX_Return_struct solve(bool randomSeed) = 0;
+        virtual CPLEX_Return_struct solve(bool randomSeed, bool LP) = 0;
 
     protected:
         // void setSolverTime(double solver_time_lim){

@@ -39,6 +39,7 @@ class SolveLaPSO{
 		// std::vector<double> timing_tracking;
     private:
         void initSolver(int& argc, const char** argv,int num_var, int num_con, const double& best_ub_sol,LaPSO::constraint_type_indicies& cti);
+        
         LaPSO::Problem solver;
 
 };

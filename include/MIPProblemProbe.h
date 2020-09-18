@@ -8,8 +8,8 @@ class MIPProblemProbe{
 
     public:
         MIPProblemProbe(){};
-        void populateInstanceStatistics(NSGA_ii_instance_statistics& nis, MIP_Problem& MP);
-        void populateNonruntimeDecompositionStatistics(const int& decomposition_idx, const individual_information_struct& decomp, Nonruntime_Decompositions_Statistics& nrcs, MIP_Problem& MP);
+        void populateInstanceStatistics(instance_statistics& is, MIP_Problem& MP);
+        void populateNonruntimeDecompositionStatistics(const int& decomposition_idx, const individual_information_struct& decomp, Nonruntime_Relaxed_Constraint_Statistics& nrcs, MIP_Problem& MP);
         
 
     private:
@@ -20,8 +20,7 @@ class MIPProblemProbe{
         void calculateAverageNonZeroInRelaxedConstraints(const vector<double>& con_vec, MIP_Problem& MP);
         double getAverageLargestRatioInRelaxedConstraints(const vector<double>& con_vec, MIP_Problem& MP);
 
-        void populateRelaxedConstraintStatistics(const individual_information_struct& decomp, MIP_Problem& MP, double& equality_constaints_relaxed_prop
-        , double& average_nonzero_prop, double& average_largest_ratio_prop);
+        void populateNonRuntimeAverages(const individual_information_struct& decomp, MIP_Problem& MP, Nonruntime_Relaxed_Constraint_Statistics& nds);
 
         
         // bool calculate_average_statistics_flag = false;

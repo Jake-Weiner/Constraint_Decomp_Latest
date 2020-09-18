@@ -7,12 +7,16 @@ using std::cout;
 using std::vector;
 
 
-CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
+CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
 {
     IloEnv env;
     IloModel model(env);
     IloNumVarArray subproblem_vars_cplex(env);
     IloRangeArray subproblem_constraints_cplex(env);
+
+    if (LP){
+        cout << "solving MIP Problem as an LP" << endl;
+    }
     // add all variables in original problem to CPLEX environment
     cout << "number of variables in mip are " << MP.getNumVariables() << endl;
 
@@ -21,15 +25,17 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
     vector<Variable> variables = MP.variables;
     sort(variables.begin(),variables.end());
 
+    
     for (auto& var : variables) {
         // cout << "var idx is " << var.getVarIndx() << endl;
         double var_lb = var.getLB();
         double var_ub = var.getUB();
-        if (var.getVarType() == Int || var.getVarType() == Bin){
+        if ((var.getVarType() == Int || var.getVarType() == Bin) && (!LP)){
             IloNumVar x(env, var_lb, var_ub, ILOINT);
             subproblem_vars_cplex.add(x);        
         }
-        else if(var.getVarType() == Cont){
+        // if the problem is to be solved as a LP, set all variables to float types
+        else if(var.getVarType() == Cont || LP){
             IloNumVar x(env, var_lb, var_ub, ILOFLOAT);
             subproblem_vars_cplex.add(x); 
         }
@@ -50,15 +56,15 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
         if (constraint.getBoundType() == Greater) {
             IloRange r1(env, RHS, constraint_exp, 99999999999999);
             subproblem_constraints_cplex.add(r1);
-            constraints_added++;
+            ++constraints_added;
         } else if (constraint.getBoundType() == Equal) {
             IloRange r1(env, RHS, constraint_exp, RHS);
             subproblem_constraints_cplex.add(r1);
-            constraints_added++;
+            ++constraints_added;
         } else if (constraint.getBoundType() == Less) {
             IloRange r1(env, -999999999999,constraint_exp, RHS);
             subproblem_constraints_cplex.add(r1);
-            constraints_added++;
+            ++constraints_added;
         }
       
     }
@@ -80,7 +86,10 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
 
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
-    cplex.setParam(IloCplex::TiLim, solver_time_lim); // solve for solver_time_lim
+    // if solving as a ILP, set a time limit, otherwise solve the LP to optimality
+    if (!LP){
+        cplex.setParam(IloCplex::TiLim, solver_time_lim); // solve for solver_time_lim
+    }
     cplex.setParam(IloCplex::ClockType, 1); // use CPU runtime not wallclock.
     
     if (randomSeed == false){
@@ -89,18 +98,26 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
 
 
     bool solve_status = cplex.solve();
+    vector<double> dual_vals;
+    if (LP){
+        IloNumArray dual_values_arr(env);
+        cplex.getDuals(dual_values_arr,subproblem_constraints_cplex);
+        dual_vals.resize(MP.getNumConstraints(), 0.0);
+        for (int con_idx = 0; con_idx < dual_values_arr.getSize(); ++con_idx){
+            dual_vals[con_idx] = dual_values_arr[con_idx];
+        }
+    }
+   
     //default bound and integer solution values
     double best_int_sol = -999999999999999999;
-    double best_bound_val = -999999999999999999;
+    double best_bound_val = cplex.getBestObjValue();
     // cplex.solve() status indicates if a feasible solution was found
     if (solve_status == false) {
-        best_bound_val = cplex.getBestObjValue();
         env.end();
         std::cerr << "CPLEX failed to find a feasible solution in MIP_Problem_CPLEX_Solver.cpp" << endl;
     }
     else{
         best_int_sol = cplex.getObjValue();
-        best_bound_val = cplex.getBestObjValue();
         env.out() << "Solution value  = " << cplex.getObjValue() << endl;
         env.end();
     }
@@ -111,7 +128,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed)
     //this value is computed for a minimization (maximization) problem as the minimum (maximum) objective function value of 
     //all remaining unexplored nodes.
 
-    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol};
+    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol, dual_vals};
     return CPLEX_results;
 }
 

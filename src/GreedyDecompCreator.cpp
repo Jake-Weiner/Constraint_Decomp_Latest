@@ -27,7 +27,12 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
     double probability_accumulative_count = 0.0;
     for (int con_idx = 0; con_idx < total_num_constraints; ++con_idx) {
         bool con_idx_check = false;
-        int num_non_zeroes_in_constraint = MP.getConstraintNumNonZeroes(con_idx, con_idx_check);
+        Constraint con = MP.getConstraint(con_idx,con_idx_check);
+        int num_non_zeroes_in_constraint = 0;
+        if (con_idx_check){
+            num_non_zeroes_in_constraint = con.getNumVar();
+        }
+   
         // probability accumulative count
         double constraint_probability = (double(num_non_zeroes_in_constraint) / double(total_nonzeroes));
         probability_accumulative_count += constraint_probability;

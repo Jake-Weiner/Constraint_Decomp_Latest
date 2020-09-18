@@ -6,9 +6,8 @@
 using std::cout;
 using std::endl;
 
-CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed){
+CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed, bool LP){
 
-    bool solve_as_LP = false;
     IloEnv env;
     IloModel model(env);
     IloCplex cplex(env);
@@ -23,7 +22,7 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed){
         exit(1);
     }
     cplex.importModel(model, MIP_input_filename.c_str(), obj, vars, rng);
-    if (solve_as_LP){
+    if (LP){
         for (int i =0; i<vars.getSize(); i++){
         model.add(IloConversion(env, vars[i], ILOFLOAT));
         }

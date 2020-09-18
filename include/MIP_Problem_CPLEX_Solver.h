@@ -20,7 +20,7 @@ class MIP_Problem_CPLEX_Solver: public GenericMIPInterface{
             this->MP = MP;
         }
         // override the base class solve method
-        CPLEX_Return_struct solve(bool randomSeed) override;
+        CPLEX_Return_struct solve(bool randomSeed, bool LP);
     
     private:
         MIP_Problem MP;

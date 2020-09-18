@@ -115,18 +115,6 @@ public:
         return sum_RHS_ratio;
     }
 
-// need to get the objective coefficients of the variables from the objective function.
-    double getSumObjCoeff()
-    {
-        double sum_obj_coeff = 0.00;
-        for (auto& var_coeff : variable_coeffs) {
-            sum_RHS_ratio += std::abs(RHS / var_coeff);
-        }
-        return sum_RHS_ratio;
-    }
-
-    // getSumObjCoeff
-
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };
     double RHS = 0.00;

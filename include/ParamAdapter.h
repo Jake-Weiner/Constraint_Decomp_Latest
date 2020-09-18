@@ -62,7 +62,11 @@ class ParamAdapter{
             return run_greedy_decomposition_testing_flag;
         }
         bool get_run_evaluate_decompositions_testing_flag(){
-            return get_run_evaluate_decompositions_testing_flag;
+            return run_evaluate_decompositions_testing_flag;
+        }
+
+        bool get_run_MIP_Duals_testing_flag(){
+            return run_MIP_Duals_testing_flag;
         }
         
         std::vector<double> get_nsga_props(){
@@ -98,6 +102,7 @@ class ParamAdapter{
         bool run_constraint_redundancy_testing_flag = false;
         bool run_greedy_decomposition_testing_flag = false;
         bool run_evaluate_decompositions_testing_flag = false;
+        bool run_MIP_Duals_testing_flag = false;
        
         bool getBoolVal(const char* input);
 

@@ -195,52 +195,31 @@ void MIP_Problem::setEqualityConstraintCount()
     }
 }
 
-bound_type MIP_Problem::getConstraintType(const int& constraint_idx, bool& success_flag){
-    // default return type as greater, although discard this if success_flag is false
-    bound_type return_type = Greater;
+
+
+Constraint MIP_Problem::getConstraint(const int& constraint_idx, bool& success_flag){
+    Constraint ret_val;
     if (constraint_idx < getNumConstraints()){
         success_flag = true;
-        return_type = constraints[constraint_idx].getBoundType();
+        ret_val = constraints[constraint_idx];
     }
-    return return_type;
-}
-
-int MIP_Problem::getConstraintNumNonZeroes(const int& constraint_idx, bool& success_flag){
-    // default return is no non-zeroes, although discard this if success_flag is false
-    int num_nonzeroes = 0;
-    if (constraint_idx < getNumConstraints()){
-        success_flag = true;
-        num_nonzeroes = constraints[constraint_idx].getNumVar();
-    }
-    return num_nonzeroes;
-}
-
-double MIP_Problem::getConstraintLargestRatio(const int& constraint_idx, bool& success_flag){
-
-    double largest_ratio = 0.00;
-     if (constraint_idx < getNumConstraints()){
-        success_flag = true;
-        constraints[constraint_idx].getLargestRHSLHSRatio();
-    }
-    return largest_ratio;   
+    return ret_val;
 }
 
 
-double MIP_Problem::getConstraintSumRatio(const int& constraint_idx, bool& success_flag){
-
-    double sum_RHS_ratio = 0.00;
-     if (constraint_idx < getNumConstraints()){
-        success_flag = true;
-        constraints[constraint_idx].getSumRHSLHSRatio();
-    }
-    return sum_RHS_ratio;   
-}
-
-double MIP_Problem::getConstraintSumObj(const int& constraint_idx, bool& success_flag){
+double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
     double sum_obj_ceoff = 0.00;
+    // get the variables in the constraint
     if (constraint_idx < getNumConstraints()){
-        success_flag = true;
-        constraints[constraint_idx].getSumObjCoeff();
+        for (const auto& variable_index : constraints[constraint_idx].getVarIndxs()){
+            //search through the objective function for the variable 
+            for (const auto& obj_pair : objective_fn){
+                if (obj_pair.first == variable_index){
+                    sum_obj_ceoff += obj_pair.second;
+                    break;
+                }
+            }
+        }
     }
     return sum_obj_ceoff;   
 }

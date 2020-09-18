@@ -15,7 +15,7 @@ class SolveGenericMIP: public GenericMIPInterface{
         GenericMIPInterface(solver_time_lim) {
             this->MIP_input_filename = MIP_input_filename;
         };
-        CPLEX_Return_struct solve(bool randomSeed) override;
+        CPLEX_Return_struct solve(bool randomSeed, bool LP) override;
     private:
        
         string MIP_input_filename = "";
