@@ -103,7 +103,9 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
-    // pp
+
+    
+    // test partition if required
     bool test_hypergraph_partitioning = false;
     std::vector<Partition_Struct> ps;
     // try create partition struct

@@ -64,20 +64,12 @@ void Param::parse(int argc, const char** argv)
         subgradFmult = atof(parser.getValue("subgradFmult"));
     if (parser.getValue("subgradFmin"))
         subgradFmin = atof(parser.getValue("subgradFmin"));
-    if (parser.getValue("perturbFactor"))
-        perturbFactor = atof(parser.getValue("perturbFactor"));
-    if (parser.getValue("velocityFactor"))
-        velocityFactor = atof(parser.getValue("velocityFactor"));
-    if (parser.getValue("globalFactor"))
-        globalFactor = atof(parser.getValue("globalFactor"));
     if (parser.getValue("maxIter"))
         maxIter = atoi(parser.getValue("maxIter"));
     if (parser.getValue("maxCPU"))
         maxCPU = atof(parser.getValue("maxCPU"));
     if (parser.getValue("maxWallTime"))
         maxWallTime = atof(parser.getValue("maxWallTime"));
-    if (parser.getValue("nParticles"))
-        nParticles = atoi(parser.getValue("nParticles"));
     if (parser.getValue("printLevel"))
         printLevel = atoi(parser.getValue("printLevel"));
     if (parser.getValue("printFreq"))
@@ -101,7 +93,6 @@ void Param::parse(const char* filename) { parse(-1, &filename); }
 void Particle::resize(size_t numVar, size_t numConstr)
 {
     dual.resize(numConstr, 0.0);
-    perturb.resize(numVar, 0.0);
     x.resize(numVar, 0);
     viol.resize(numConstr, 0.0);
     rc.resize(numVar, 0.0);
@@ -109,7 +100,6 @@ void Particle::resize(size_t numVar, size_t numConstr)
     dVel.resize(numConstr, 0.0);
     ub = INF;
     lb = -INF;
-    pVel.resize(numVar, 0.0);
 }
 
 Problem::Problem(int nVar, int nConstr)
@@ -123,11 +113,11 @@ Problem::Problem(int nVar, int nConstr)
     best.ub = INF;
     best.lb = -INF;
     best.isFeasible = false;
-    best.perturb.resize(nVar, 0.0);
     best.dual.resize(nConstr, 0.0);
 }
 
-void Problem::initProblem(int nVar, int nConstr){
+void Problem::initProblem(int nVar, int nConstr)
+{
     psize = nVar;
     dsize = nConstr;
     dualLB.resize(dsize, -INF);
@@ -137,7 +127,6 @@ void Problem::initProblem(int nVar, int nConstr){
     best.ub = INF;
     best.lb = -INF;
     best.isFeasible = false;
-    best.perturb.resize(nVar, 0.0);
     best.dual.resize(nConstr, 0.0);
 }
 
@@ -151,7 +140,6 @@ void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 
 void Problem::setDualBoundsLesser(const std::vector<int>& idxs)
 {
-
     for (auto& idx : idxs) {
         dualLB[idx] = -INF;
         dualUB[idx] = 0;
@@ -177,71 +165,62 @@ void Problem::solve(UserHooks& hooks)
         printf("Initialisation:\n");
     // initial dual values
 
-     // update final dual min and max values
-    ParticleIter p1(swarm, 0);
-      
-    initial_dual_min = p1->dual.min();
-	initial_dual_max = p1->dual.max();
+    // update final dual min and max values
 
-    for (int idx = 1; idx < param.nParticles; ++idx) {
-        ParticleIter p(swarm, idx);
-        if (p->dual.min() < initial_dual_min){
-            initial_dual_min = p->dual.min();
-        }
-        if (p->dual.max() > initial_dual_max){
-            initial_dual_max = p1->dual.max();
-        }
+    initial_dual_min = p->dual.min();
+    initial_dual_max = p->dual.max();
+
+    if (p->dual.min() < initial_dual_min) {
+        initial_dual_min = p->dual.min();
     }
-    if (param.printLevel > 1){
-        printf("initial dual min is %f:\n",initial_dual_min);
+    if (p->dual.max() > initial_dual_max) {
+        initial_dual_max = p->dual.max();
+    }
+
+    if (param.printLevel > 1) {
+        printf("initial dual min is %f:\n", initial_dual_min);
         printf("initial dual max is %f:\n", initial_dual_max);
     }
-    DblVec bestLB(param.nParticles);
-    IntVec bestIter(param.nParticles, 0);
-    std::vector<Uniform> rand(param.nParticles); //
+    DblVec bestLB;
+
+    Uniform rand; //
 
     if (param.randomSeed != 0)
-        rand[0].seed(param.randomSeed);
+        rand.seed(param.randomSeed);
     else
-        rand[0].seedTime();
+        rand.seedTime();
 
     Status status = OK;
-#pragma omp parallel for schedule(static, std::max(1, param.nParticles / param.nCPU))
-    for (int idx = 0; idx < param.nParticles; ++idx) {
-        ParticleIter p(swarm, idx);
-        if (p.idx > 0) { // create random seed from previous generator
-            rand[p.idx].seed((uint32_t)rand[p.idx - 1](
-                0, std::numeric_limits<uint32_t>::max()));
-        }
-        for (int i = 0; i < dsize; ++i) { // check initial point is valid
-            //check the dual values...
-            if (p->dual[i] < dualLB[i]) {
-                if (param.printLevel)
-                    printf("ERROR: initial dual[%d] %.2f below LB %.2f\n",
-                        i, p->dual[i], dualLB[i]);
-                p->dual[i] = dualLB[i];
-            }
-            if (p->dual[i] > dualUB[i]) {
-                if (param.printLevel)
-                    printf("ERROR: initial dual[%d] %.2f below UB %.2f\n",
-                        i, p->dual[i], dualUB[i]);
-                p->dual[i] = dualUB[i];
-            }
-        }
 
-        if (hooks.reducedCost(*p, p->rc) == ABORT) {
-            status = ABORT;
+    for (int i = 0; i < dsize; ++i) { // check initial point is valid
+        //check the dual values...
+        if (p->dual[i] < dualLB[i]) {
+            if (param.printLevel)
+                printf("ERROR: initial dual[%d] %.2f below LB %.2f\n",
+                    i, p->dual[i], dualLB[i]);
+            p->dual[i] = dualLB[i];
         }
-        /*
+        if (p->dual[i] > dualUB[i]) {
+            if (param.printLevel)
+                printf("ERROR: initial dual[%d] %.2f below UB %.2f\n",
+                    i, p->dual[i], dualUB[i]);
+            p->dual[i] = dualUB[i];
+        }
+    }
+
+    if (hooks.reducedCost(*p, p->rc) == ABORT) {
+        status = ABORT;
+    }
+    /*
         for (int i = 0; i < dsize; ++i) { // check initial point is vali
             printf("dual value is %f\n",p->dual[i]);
 
         }*/
-        p->rc += p->perturb;
-        if (hooks.solveSubproblem(*p) == ABORT) {
-            status = ABORT;
-        }
-        /*
+
+    if (hooks.solveSubproblem(*p) == ABORT) {
+        status = ABORT;
+    }
+    /*
          printf("solved\n");
         for (int i = 0; i < dsize; ++i) { // check initial point is valid
  
@@ -249,24 +228,21 @@ void Problem::solve(UserHooks& hooks)
         }
         */
 
-        printf("Status is %d", status);
-        bestLB[p.idx] = p->lb;
-        if (param.printLevel > 1) {
-            printf("\tp%02d: LB=%g UB=%g feas=%d viol=%g -- %g\n",
-                p.idx, p->lb, p->ub, p->isFeasible,
-                p->viol.min(), p->viol.max());
-            if (param.printLevel > 2) {
-                printf("\t\tRedCst %g - %g\n", p->rc.min(), p->rc.max());
-                printf("\t\tdVel %g - %g\n", p->dVel.min(), p->dVel.max());
-                printf("\t\tpVel %g - %g\n", p->pVel.min(), p->pVel.max());
-                printf("\t\tdual %g - %g\n", p->dual.min(), p->dual.max());
-                printf("\t\tpert %g - %g\n",
-                    p->perturb.min(), p->perturb.max());
-            }
+    printf("Status is %d", status);
+    bestLB = p->lb;
+    if (param.printLevel > 1) {
+        printf("\tp%02d: LB=%g UB=%g feas=%d viol=%g -- %g\n",
+            p.idx, p->lb, p->ub, p->isFeasible,
+            p->viol.min(), p->viol.max());
+        if (param.printLevel > 2) {
+            printf("\t\tRedCst %g - %g\n", p->rc.min(), p->rc.max());
+            printf("\t\tdVel %g - %g\n", p->dVel.min(), p->dVel.max());
+            printf("\t\tdual %g - %g\n", p->dual.min(), p->dual.max());
         }
-        p->pVel = 0;
-        p->dVel = 0;
     }
+
+    p->dVel = 0;
+
     best.x.resize(psize, 0);
     updateBest(hooks, 0);
     if (status == ABORT)
@@ -283,21 +259,21 @@ void Problem::solve(UserHooks& hooks)
     double last_lb_comparison;
 
     best_lb_tracking.push_back(best.lb);
-        double average_lb = 0;
-        for (int idx = 0; idx < param.nParticles; ++idx) {
-            ParticleIter p(swarm, idx);
-            average_lb += (p->lb / param.nParticles);
-        }
+    double average_lb = 0;
+    for (int idx = 0; idx < param.nParticles; ++idx) {
+        ParticleIter p(swarm, idx);
+        average_lb += (p->lb / param.nParticles);
+    }
     average_lb_tracking.push_back(average_lb);
     timing_tracking.push_back(cpuTime());
     for (nIter = 1; nIter < param.maxIter && cpuTime() < param.maxCPU && wallTime() < param.maxWallTime && status == OK && (best.lb + param.absGap <= best.ub) && fabs(best.ub - best.lb / best.ub) > param.relGap;
          ++nIter) {
-        
-        if (param.printLevel > 1 && nIter % param.printFreq == 0){
+
+        if (param.printLevel > 1 && nIter % param.printFreq == 0) {
             printf("iter num = %d\n", nIter);
             printf("best lower bound so far is %f \n", best.lb);
         }
-       
+
         // cpu time is within the limit
         best_lb_tracking.push_back(best.lb);
         double average_lb = 0;
@@ -488,14 +464,14 @@ void Problem::solve(UserHooks& hooks)
     // update final dual min and max values
     ParticleIter p2(swarm, 0);
     final_dual_min = p2->dual.min();
-	final_dual_max = p2->dual.max();
+    final_dual_max = p2->dual.max();
 
     for (int idx = 1; idx < param.nParticles; ++idx) {
         ParticleIter p(swarm, idx);
-        if (p->dual.min() < final_dual_min){
+        if (p->dual.min() < final_dual_min) {
             final_dual_min = p->dual.min();
         }
-        if (p->dual.max() > final_dual_max){
+        if (p->dual.max() > final_dual_max) {
             final_dual_max = p1->dual.max();
         }
     }
@@ -518,13 +494,10 @@ void Problem::initialise(UserHooks& hooks)
     omp_set_num_threads(param.nCPU);
     _wallTime = omp_get_wtime();
     timer.reset();
-    if (swarm.size() >= (size_t)param.nParticles)
-        return; // all done
+
     // figure out what range of duals makes sense
     if (best.dual.size() < (size_t)dsize)
         best.dual.resize(dsize, 0.0);
-    if (best.perturb.size() < (size_t)psize)
-        best.perturb.resize(psize, 0.0);
     if (best.rc.size() < (size_t)psize)
         best.rc.resize(psize, 0.0);
     hooks.reducedCost(best, best.rc);
@@ -532,142 +505,69 @@ void Problem::initialise(UserHooks& hooks)
     const double maxCost = std::max(
         *std::max_element(best.rc.begin(), best.rc.end()),
         -*std::min_element(best.rc.begin(), best.rc.end()));
-    swarm.reserve(param.nParticles);
+
+    Particle* p = new Particle(psize, dsize);
     Uniform rand;
     rand.seed(1);
-    while (swarm.size() < (size_t)param.nParticles) {
-        Particle* p = new Particle(psize, dsize);
-        swarm.push_back(p);
-        for (int j = 0; j < dsize; ++j) { // generate values up to maxCost
-            if (param.zeroInitial == false) {
-                p->dual[j] = rand(std::max(dualLB[j], -maxCost),
-                    std::min(dualUB[j], maxCost));
-            } else {
-                p->dual[j] = 0.0;
-            }
+
+    for (int j = 0; j < dsize; ++j) { // generate values up to maxCost
+        if (param.zeroInitial == false) {
+            p->dual[j] = rand(std::max(dualLB[j], -maxCost),
+                std::min(dualUB[j], maxCost));
+        } else {
+            p->dual[j] = 0.0;
         }
-        p->perturb = 0.0;
-        p->dVel = 0.0;
-        p->pVel = 0.0;
     }
+    p->dVel = 0.0;
+}
 }
 bool Problem::updateBest(UserHooks& hooks, int nIter)
 {
-    Particle* bestP = 0;
-    bool improved = false;
-    for (ParticleIter p(swarm); !p.done(); ++p) {
-        if (p->isFeasible && p->ub < best.ub) {
-            best.ub = p->ub;
-            best.isFeasible = true;
-            best.x = p->x;
-            best.best_ub_sol = p->best_ub_sol;
-            best.perturb = p->perturb; // perturbation gives good feasible
-            bestP = &(*p);
-            if (param.nParticles == 1) {
-                best_particles_primal_time = best_particles;
-            } else {
-                swarm_primal_time = swarm;
-            }
-            primal_cpu_time = cpuTime();
-            best_nIter = nIter;
-            if (p->lb > best.lb) {
-                lb_primal_cpu_time = p->lb;
-            } else {
-                lb_primal_cpu_time = best.lb;
-            }
-        }
+    // Particle* bestP = 0;
+    // bool improved = false;
+    // for (ParticleIter p(swarm); !p.done(); ++p) {
+    //     if (p->isFeasible && p->ub < best.ub) {
+    //         best.ub = p->ub;
+    //         best.isFeasible = true;
+    //         best.x = p->x;
+    //         best.best_ub_sol = p->best_ub_sol;
+    //         best.perturb = p->perturb; // perturbation gives good feasible
+    //         bestP = &(*p);
+    //         if (param.nParticles == 1) {
+    //             best_particles_primal_time = best_particles;
+    //         } else {
+    //             swarm_primal_time = swarm;
+    //         }
+    //         primal_cpu_time = cpuTime();
+    //         best_nIter = nIter;
+    //         if (p->lb > best.lb) {
+    //             lb_primal_cpu_time = p->lb;
+    //         } else {
+    //             lb_primal_cpu_time = best.lb;
+    //         }
+    //     }
 
-        if (p->lb > best.lb) {
-            best.lb = p->lb;
-            best.dual = p->dual;
-            best.viol = p->viol;
-            improved = true;
-            dual_cpu_time = cpuTime();
-        }
-        if (p->lb >= best.lb) {
-            Particle p1 = *(p);
-            if (param.nParticles == 1) {
-                best_particles.push_back(&(p1));
-            }
-        }
-    }
+    //     if (p->lb > best.lb) {
+    //         best.lb = p->lb;
+    //         best.dual = p->dual;
+    //         best.viol = p->viol;
+    //         improved = true;
+    //         dual_cpu_time = cpuTime();
+    //     }
+    //     if (p->lb >= best.lb) {
+    //         Particle p1 = *(p);
+    //         if (param.nParticles == 1) {
+    //             best_particles.push_back(&(p1));
+    //         }
+    //     }
+    // }
 
-    if (bestP) // only call once if current swarm improved optimum
-        hooks.updateBest(*bestP);
-    return improved || (bestP != 0);
+    // if (bestP) // only call once if current swarm improved optimum
+    //     hooks.updateBest(*bestP);
+    // return improved || (bestP != 0);
 }
-
-/** Calculate a direction for the perturbation that is likely
-		to lead to more feasible solutions (using hooks.fixConstraint) */
-void Problem::perturbationDirection(UserHooks& hooks, const Particle& p,
-    DblVec& dir) const
-{
-    const double eps = param.eps;
-    dir = 0.0; // set all to zero
-    for (int i = 0; i < dsize; ++i) {
-        if ((p.viol[i] > eps && dualLB[i] < -eps) || (p.viol[i] < -eps && dualUB[i] > eps)) { // constraint violated
-            SparseVec feas;
-            hooks.fixConstraint(i, p, feas);
-            for (SparseVec::iterator x = feas.begin(); x != feas.end(); ++x) {
-                if (x->second >= 1)
-                    dir[x->first] -= 1;
-                if (x->second <= 0)
-                    dir[x->first] += 1;
-            }
-        }
-    }
 }
-
-double Problem::euclideanDistance(vector<Particle*> swarm, std::string component)
-{
-
-    double euclidean_dist = 0.0;
-
-    if (component.compare("dual") == 0) {
-        for (int idx = 0; idx < param.nParticles; ++idx) {
-            ParticleIter p1(swarm, idx);
-            for (int idx_2 = idx + 1; idx_2 < param.nParticles; ++idx_2) {
-                double pair_euclid = 0.0;
-                ParticleIter p2(swarm, idx_2);
-                for (int i = 0; i < p1->dual.size(); i++) {
-                    pair_euclid += (p1->dual[i] - p2->dual[i]) * (p1->dual[i] - p2->dual[i]);
-                    //printf("pair euclid is %f\n",pair_euclid);
-                }
-                euclidean_dist += std::sqrt(pair_euclid);
-            }
-        }
-
-    }
-
-    else if (component.compare("perturb") == 0) {
-        for (int idx = 0; idx < param.nParticles; ++idx) {
-            ParticleIter p1(swarm, idx);
-            for (int idx_2 = idx + 1; idx_2 < param.nParticles; ++idx_2) {
-                double pair_euclid = 0.0;
-                ParticleIter p2(swarm, idx_2);
-                for (int i = 0; i < p1->perturb.size(); i++) {
-                    pair_euclid += (p1->perturb[i] - p2->perturb[i]) * (p1->perturb[i] - p2->perturb[i]);
-                }
-                euclidean_dist += std::sqrt(pair_euclid);
-            }
-        }
-    }
-
-    else {
-        printf("error in eucld dist - method not set properly");
-        exit(1);
-    }
-
-    if (component.compare("dual") == 0) {
-        euclidean_dist = (euclidean_dist / dsize) / ((param.nParticles * (param.nParticles - 1) / 2));
-    } else if (component.compare("perturb") == 0) {
-        euclidean_dist = (euclidean_dist / psize) / ((param.nParticles * (param.nParticles - 1) / 2));
-    }
-
-    return euclidean_dist;
-}
-
-}; // end namespace
+; // end namespace
 
 /* Stuff for emacs/xemacs to conform to the "Visual Studio formatting standard"
  * Local Variables:
