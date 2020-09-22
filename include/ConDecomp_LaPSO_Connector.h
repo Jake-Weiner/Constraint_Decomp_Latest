@@ -20,10 +20,10 @@ class IloSmartPointer {
 public: 
     // Constructor: Refer https:// www.geeksforgeeks.org/g-fact-93/ 
     // for use of explicit keyword 
-    explicit IloSmartPointer(IloEnv* p = NULL) { ptr = p; } 
+    explicit IloSmartPointer(IloEnv* s = NULL) { ptr = s; } 
     
-    void setPtr(IloEnv* p){
-        ptr = p;
+    void setPtr(IloEnv* s){
+        ptr = s;
     }
     // Destructor 
     ~IloSmartPointer() {
@@ -85,39 +85,41 @@ public:
 private:
 };
 
-class ConDecomp_LaPSO_ConnectorParticle : public LaPSO::Particle {
+class ConDecomp_LaPSO_Connector_Solution : public LaPSO::Solution {
 public:
-    ConDecomp_LaPSO_ConnectorParticle(int num_var, int num_con)
-        : LaPSO::Particle(num_var, num_con)
+    ConDecomp_LaPSO_Connector_Solution(int num_var, int num_con)
+        : LaPSO::Solution(num_var, num_con)
     {
     }
     // set bounds for different dual variables based on indexes given
 };
 
+// this is the general method class which implements solve, reduced costs, heursistic for this particular
+// constraint relaxation problem
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 
 public:
     ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const bool printing, const double sp_solve_time_limit);
-    //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &p);
+    //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
     ~ConDecomp_LaPSO_Connector(){};
 
-    Status reducedCost(const Particle& p, DblVec& redCost);
-    Status solveSubproblem(Particle& p);
-    //void randomiseMethod(ConDecomp_LaPSO_ConnectorParticle &p);
+    Status reducedCost(Solution& s);
+    Status solveSubproblem(Solution& s);
+    //void randomiseMethod(ConDecomp_LaPSO_ConnectorParticle &s);
     Status fixConstraint(const int constraint,
-        const Particle& p,
+        const Solution& s,
         SparseVec& feas);
-    Status heuristics(Particle& p);
-    Status updateBest(Particle& p);
+    Status heuristics(Solution& s);
+    Status updateBest(Solution& s);
 
     void setPrinting(bool p) { printing = p; }
     void endCplexEnvs();
 
 private:
-    void updateParticleLB(ConDecomp_LaPSO_ConnectorParticle& p);
-    void updateParticleViol(ConDecomp_LaPSO_ConnectorParticle& p);
+    void updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s);
+    void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);
     vector<CPLEX_MIP_Subproblem> MS;
     void initSubproblems(const vector<Partition_Struct>&);
     void initOriginalCosts();

@@ -1,5 +1,5 @@
 /// Generic solver for combinatorial optimisation problems using a combination
-/// of Wedelin's lagrangian relaxation heuristic and particle swarm
+/// of Wedelin's lagrangian relaxation heuristic and Solution swarm
 /// optimisation. This header file follows the general pattern of the Volume
 /// Algorithm implementation in the COIN-OR library to make it easy to swap
 /// algorithms and make comparisons between the two methods.
@@ -15,6 +15,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -90,17 +91,51 @@ void Param::parse(int argc, const char** argv)
         LBOutputFilename = parser.getValue("LBOutputFilename");
 }
 void Param::parse(const char* filename) { parse(-1, &filename); }
-void Particle::resize(size_t numVar, size_t numConstr)
+void Solution::resize(size_t numVar, size_t numConstr)
 {
     dual.resize(numConstr, 0.0);
     x.resize(numVar, 0);
     viol.resize(numConstr, 0.0);
     rc.resize(numVar, 0.0);
     isFeasible = false;
-    dVel.resize(numConstr, 0.0);
     ub = INF;
     lb = -INF;
 }
+
+Solution::Solution(const Solution& other){
+    this->dual = other.dual;
+    this->x = other.x;
+    this->viol = other.viol;
+    this->rc =other.rc;
+    this->isFeasible = other.isFeasible;
+    this->ub = other.ub;
+    this->lb = other.lb;
+}
+
+// Solution& Solution::operator=(const Solution& other){
+
+
+//     // this->dual = other.dual;
+//     // this->x = other.x;
+//     // this->viol = other.viol;
+//     // this->rc =other.rc;
+//     // this->isFeasible = other.isFeasible;
+//     // this->ub = other.ub;
+//     // this->lb = other.lb;
+// }
+
+// void Solution::swap(Solution& rhs){
+
+
+//     std::swap(this->dual, rhs.dual);
+
+
+//     rhs.dual = this->dual;
+
+
+
+
+// }
 
 Problem::Problem(int nVar, int nConstr)
     : psize(nVar)
@@ -110,24 +145,35 @@ Problem::Problem(int nVar, int nConstr)
     , nIter(-1)
 {
     _wallTime = omp_get_wtime();
-    best.ub = INF;
-    best.lb = -INF;
-    best.isFeasible = false;
-    best.dual.resize(nConstr, 0.0);
+    best->ub = INF;
+    best->lb = -INF;
+    best->isFeasible = false;
+    best->dual.resize(nConstr, 0.0);
 }
 
-void Problem::initProblem(int nVar, int nConstr)
+void Problem::initProblem(const LaPSORequirements& LR)
 {
-    psize = nVar;
-    dsize = nConstr;
+    psize = LR.nVar;
+    dsize = LR.nConstr;
     dualLB.resize(dsize, -INF);
     dualUB.resize(dsize, INF);
     nIter = -1;
     _wallTime = omp_get_wtime();
-    best.ub = INF;
-    best.lb = -INF;
-    best.isFeasible = false;
-    best.dual.resize(nConstr, 0.0);
+    best->ub = INF;
+    best->lb = -INF;
+    best->isFeasible = false;
+    best->dual.resize(LR.nConstr, 0.0);
+    
+    // use a predetermined ub?
+    if (LR.benchmark_ub_flag){
+        this->best_ub = LR.best_ub;
+        this->benchmark_ub_flag = LR.benchmark_ub_flag;
+    }
+
+    setDualBoundsEqual(LR.cti.equality_idxs);
+    setDualBoundsLesser(LR.cti.less_than_idxs);
+    setDualBoundsGreater(LR.cti.greater_than_idxs);
+
 }
 
 void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
@@ -167,21 +213,21 @@ void Problem::solve(UserHooks& hooks)
 
     // update final dual min and max values
 
-    initial_dual_min = p->dual.min();
-    initial_dual_max = p->dual.max();
+    initial_dual_min = s->dual.min();
+    initial_dual_max = s->dual.max();
 
-    if (p->dual.min() < initial_dual_min) {
-        initial_dual_min = p->dual.min();
+    if (s->dual.min() < initial_dual_min) {
+        initial_dual_min = s->dual.min();
     }
-    if (p->dual.max() > initial_dual_max) {
-        initial_dual_max = p->dual.max();
+    if (s->dual.max() > initial_dual_max) {
+        initial_dual_max = s->dual.max();
     }
 
     if (param.printLevel > 1) {
         printf("initial dual min is %f:\n", initial_dual_min);
         printf("initial dual max is %f:\n", initial_dual_max);
     }
-    DblVec bestLB;
+    double bestLB;
 
     Uniform rand; //
 
@@ -194,293 +240,182 @@ void Problem::solve(UserHooks& hooks)
 
     for (int i = 0; i < dsize; ++i) { // check initial point is valid
         //check the dual values...
-        if (p->dual[i] < dualLB[i]) {
+        if (s->dual[i] < dualLB[i]) {
             if (param.printLevel)
                 printf("ERROR: initial dual[%d] %.2f below LB %.2f\n",
-                    i, p->dual[i], dualLB[i]);
-            p->dual[i] = dualLB[i];
+                    i, s->dual[i], dualLB[i]);
+            s->dual[i] = dualLB[i];
         }
-        if (p->dual[i] > dualUB[i]) {
+        if (s->dual[i] > dualUB[i]) {
             if (param.printLevel)
                 printf("ERROR: initial dual[%d] %.2f below UB %.2f\n",
-                    i, p->dual[i], dualUB[i]);
-            p->dual[i] = dualUB[i];
+                    i, s->dual[i], dualUB[i]);
+            s->dual[i] = dualUB[i];
         }
     }
 
-    if (hooks.reducedCost(*p, p->rc) == ABORT) {
+    // update the reduced costs
+    if (hooks.reducedCost(*s) == ABORT) {
         status = ABORT;
     }
-    /*
-        for (int i = 0; i < dsize; ++i) { // check initial point is vali
-            printf("dual value is %f\n",p->dual[i]);
+   
 
-        }*/
-
-    if (hooks.solveSubproblem(*p) == ABORT) {
+    if (hooks.solveSubproblem(*s) == ABORT) {
         status = ABORT;
     }
-    /*
-         printf("solved\n");
-        for (int i = 0; i < dsize; ++i) { // check initial point is valid
- 
-            printf("dual value is %f\n",p->dual[i]);
-        }
-        */
+
 
     printf("Status is %d", status);
-    bestLB = p->lb;
+    bestLB = s->lb;
     if (param.printLevel > 1) {
-        printf("\tp%02d: LB=%g UB=%g feas=%d viol=%g -- %g\n",
-            p.idx, p->lb, p->ub, p->isFeasible,
-            p->viol.min(), p->viol.max());
+        printf("\t LB=%g UB=%g feas=%d viol=%g -- %g\n",
+            s->lb, s->ub, s->isFeasible,
+            s->viol.min(), s->viol.max());
         if (param.printLevel > 2) {
-            printf("\t\tRedCst %g - %g\n", p->rc.min(), p->rc.max());
-            printf("\t\tdVel %g - %g\n", p->dVel.min(), p->dVel.max());
-            printf("\t\tdual %g - %g\n", p->dual.min(), p->dual.max());
+            printf("\t\tRedCst %g - %g\n", s->rc.min(), s->rc.max());
+            printf("\t\tdual %g - %g\n", s->dual.min(), s->dual.max());
         }
     }
 
-    p->dVel = 0;
-
-    best.x.resize(psize, 0);
+    best->x.resize(psize, 0);
     updateBest(hooks, 0);
     if (status == ABORT)
         return;
-    DblVec subgradFactor(param.nParticles, param.subgradFactor);
-    DblVec perturbFactor(param.nParticles, param.perturbFactor);
-    for (int i = 0; i < param.nParticles; ++i)
-        perturbFactor[i] = i * param.perturbFactor / param.nParticles;
+
+    double subgradFactor = param.subgradFactor;
+
     if (param.printLevel > 1)
-        printf("Initial LB=%g UB=%g\n", best.lb, best.ub);
+        printf("Initial LB=%g UB=%g\n", best->lb, best->ub);
     int noImproveIter = 0, nReset = 0, maxNoImprove = 1000;
 
     int current_lb_time_limits_idx = 0;
     double last_lb_comparison;
 
-    best_lb_tracking.push_back(best.lb);
-    double average_lb = 0;
-    for (int idx = 0; idx < param.nParticles; ++idx) {
-        ParticleIter p(swarm, idx);
-        average_lb += (p->lb / param.nParticles);
-    }
+    best_lb_tracking.push_back(best->lb);
+    double average_lb = s->lb;
     average_lb_tracking.push_back(average_lb);
     timing_tracking.push_back(cpuTime());
-    for (nIter = 1; nIter < param.maxIter && cpuTime() < param.maxCPU && wallTime() < param.maxWallTime && status == OK && (best.lb + param.absGap <= best.ub) && fabs(best.ub - best.lb / best.ub) > param.relGap;
+    for (nIter = 1; nIter < param.maxIter && cpuTime() < param.maxCPU && wallTime() < param.maxWallTime && status == OK && (best->lb + param.absGap <= best->ub) && fabs(best->ub - best->lb / best->ub) > param.relGap;
          ++nIter) {
 
         if (param.printLevel > 1 && nIter % param.printFreq == 0) {
             printf("iter num = %d\n", nIter);
-            printf("best lower bound so far is %f \n", best.lb);
+            printf("best lower bound so far is %f \n", best->lb);
         }
 
         // cpu time is within the limit
-        best_lb_tracking.push_back(best.lb);
-        double average_lb = 0;
-        for (int idx = 0; idx < param.nParticles; ++idx) {
-            ParticleIter p(swarm, idx);
-            average_lb += (p->lb / param.nParticles);
-        }
+        best_lb_tracking.push_back(best->lb);
+        double average_lb = s->lb;
         average_lb_tracking.push_back(average_lb);
         timing_tracking.push_back(cpuTime());
         if (param.printLevel > 1 && nIter % param.printFreq == 0)
             printf("Iteration %d --------------------\n", nIter);
-#pragma omp parallel for schedule(static, std::max(1, param.nParticles / param.nCPU))
-        for (int idx = 0; idx < param.nParticles; ++idx) {
-            ParticleIter p(swarm, idx);
 
-            // --------- calculate step size/direction ----------
-            double norm = 0;
-            for (int i = 0; i < dsize; ++i)
-                norm += p->viol[i] * p->viol[i];
-            DblVec perturbDir(psize, 0.0);
-            perturbationDirection(hooks, *p, perturbDir);
+        // --------- calculate step size/direction ----------
+        double norm = 0;
+        for (int i = 0; i < dsize; ++i)
+            norm += s->viol[i] * s->viol[i];
 
-            const double stepSize = rand[p.idx](
-                                        subgradFactor[p.idx] / 2.0, subgradFactor[p.idx])
-                * (best.ub - bestLB[p.idx]) / norm;
-            // 		const double stepSize = randAscent * param.subgradFactor *
-            // 					(best.ub-best.lb)  / norm;
-            //-------------- update velocity (step) --------------
-            double randGlobal = rand[p.idx]() * param.globalFactor;
+        // calculate the step size
+        const double stepSize = (best_ub - bestLB) / norm;
 
-            for (int i = 0; i < dsize; ++i)
-                p->dVel[i] = param.velocityFactor * p->dVel[i] + stepSize * p->viol[i] + randGlobal * (best.dual[i] - p->dual[i]);
-
-            for (int i = 0; i < psize; ++i) {
-                double randAscent = rand[p.idx](); // 0,1 uniform
-                randGlobal = rand[p.idx]() * param.globalFactor;
-
-                p->pVel[i] = param.velocityFactor * p->pVel[i] + randAscent * perturbFactor[p.idx] * perturbDir[i]
-                    + perturbFactor[p.idx] * randGlobal * (1 - 2 * best.x[i]) + randGlobal * (best.perturb[i] - p->perturb[i]);
-            }
-            //---------- make a step ------------------------------
-            for (int i = 0; i < dsize; ++i) {
-                p->dual[i] += p->dVel[i];
-                p->dual[i] = std::max(dualLB[i], std::min(dualUB[i], p->dual[i]));
-            }
-
-            p->perturb *= 0.5;
-            p->perturb += p->pVel; // add step in perturbation velocity
-            //---------- solve subproblems -------------------------
-            if (hooks.reducedCost(*p, p->rc) == ABORT) {
-                status = ABORT;
-                continue;
-            }
-
-            if (nIter % lbCheckFreq != 0) {
-                p->rc += p->perturb; // if we care more about ub than lb
-                if (hooks.solveSubproblem(*p) == ABORT)
-                    status = ABORT;
-            } else { // temporarily set pertubation to zero
-                DblVec zero(p->perturb.size(), 0.0);
-                std::swap(p->perturb, zero);
-                if (hooks.solveSubproblem(*p) == ABORT)
-                    status = ABORT;
-                std::swap(p->perturb, zero); // swap back
-            }
-
-            if (status == ABORT)
-                continue;
-            //if( p->isFeasible ){
-            //    // make sure our next step reduces perturbation
-            //    p->pVel = p->perturb;
-            //    p->pVel *= -0.5/param.velocityFactor;
-            //}
-            //if( p->lb < bestLB[p.idx]) // downplay current velocity
-            //    p->dVel *= 0.5;
-            if (nIter % lbCheckFreq == 0) {
-                if (p->lb > bestLB[p.idx]) {
-                    bestLB[p.idx] = p->lb;
-                    bestIter[p.idx] = nIter;
-                    //subgradFactor[p.idx] *= 1.1;
-                    // 			printf("\tsubgradFactor[%d] increased to %.4f (bestLB = %.2f)\n",
-                    // 			       p.idx,subgradFactor[p.idx],bestLB[p.idx]);
-                } else { //if( (nIter - bestIter[p.idx]) % 2 == 0 ){
-                    subgradFactor[p.idx] = // slow down
-                        std::max(param.subgradFmin,
-                            param.subgradFmult * subgradFactor[p.idx]);
-                    // 			printf("\tsubgradFactor[%d] decreased to %.4f\n",
-                    // 			       p.idx,subgradFactor[p.idx]);
-                }
-            }
-            if (param.heurFreq > 0 && nIter % param.heurFreq == 0
-                && !p->isFeasible) { // only run heuristic if not alreay feas.
-                if (hooks.heuristics(*p) == ABORT) {
-                    status = ABORT;
-                    continue;
-                }
-            }
-            if (param.printLevel > 1 && nIter % param.printFreq == 0) {
-                printf("\tp%02d: LB=%g UB=%g feas=%d minViol=%g\n",
-                    p.idx, p->lb, p->ub, p->isFeasible,
-                    p->viol.min());
-                if (param.printLevel > 2) {
-                    printf("\t\tstepSize=%g randGlobal=%g\n",
-                        stepSize, randGlobal);
-                    printf("\t\tRedCst %g - %g\n", p->rc.min(), p->rc.max());
-                    printf("\t\tdVel %g - %g\n", p->dVel.min(), p->dVel.max());
-                    printf("\t\tpDir %g - %g\n", perturbDir.min(), perturbDir.max());
-                    printf("\t\tpVel %g - %g\n", p->pVel.min(), p->pVel.max());
-                    printf("\t\tdual %g - %g\n", p->dual.min(), p->dual.max());
-                    printf("\t\tpert %g - %g\n",
-                        p->perturb.min(), p->perturb.max());
-                }
-            }
+        //---------- make a step ------------------------------
+        for (int i = 0; i < dsize; ++i) {
+            s->dual[i] += stepSize * s->viol[i];
+            s->dual[i] = std::max(dualLB[i], std::min(dualUB[i], s->dual[i]));
+        }
+        //---------- solve subproblems -------------------------
+        if (hooks.reducedCost(*s) == ABORT) {
+            status = ABORT;
+            continue;
         }
 
-        if (updateBest(hooks, nIter)) {
-            noImproveIter = 0;
-        } else {
-            if (++noImproveIter > maxNoImprove) { // reset duals
-                ++nReset;
-                swarm[0]->dual = 0;
-                double minLB = INF, maxLB = -INF;
-                for (int idx = 0; idx < param.nParticles; ++idx) {
-                    if (swarm[idx]->lb < minLB)
-                        minLB = swarm[idx]->lb;
-                    if (swarm[idx]->lb > maxLB)
-                        maxLB = swarm[idx]->lb;
-                }
-                hooks.reducedCost(*swarm[0], swarm[0]->rc);
-                double maxdual = std::max(0.0, swarm[0]->rc.max()) - std::min(0.0, swarm[0]->rc.min());
-                if (maxdual < 1e-9)
-                    maxdual = 1;
-#pragma omp parallel for schedule(static, std::max(1, param.nParticles / param.nCPU))
-                for (int idx = 0; idx < param.nParticles; ++idx) {
-                    ParticleIter p(swarm, idx);
-                    for (int j = 0; j < dsize; ++j) { // generate pertubation about
-                        if (p->dual[j] == 0 && rand[idx]() < 2.0 / dsize) {
-                            p->dual[j] = rand[idx](
-                                std::max(dualLB[j], -maxdual),
-                                std::min(dualUB[j], maxdual));
-                        } else
-                            p->dual[j] = best.dual[j] * rand[idx](1 - 0.2 / nReset, 1 + 0.2 / nReset);
-                        p->dual[j] = std::max(
-                            dualLB[j], std::min(dualUB[j], p->dual[j]));
-                    }
-                    p->perturb = 0.0;
-                    p->dVel = 0.0;
-                    p->pVel = 0.0;
+        if (hooks.solveSubproblem(*s) == ABORT) {
+            status = ABORT;
+            continue;
+        }
 
-                    for (int i = 0; i < psize; ++i) // discourage current best
-                        if (rand[idx](0, 1) < 0.1) // try to get diversity
-                            p->pVel[i] = rand[idx](0, 1) * perturbFactor[idx]
-                                * maxdual * (2 * best.x[i] - 1);
-
-                    subgradFactor[p.idx] = param.subgradFactor / nReset;
-                    perturbFactor[p.idx] *= 1.1;
-                    if (hooks.reducedCost(*p, p->rc) == ABORT) {
-                        status = ABORT;
-                    }
-                    if (hooks.solveSubproblem(*p) == ABORT) {
-                        status = ABORT;
-                    }
-                }
-                param.heurFreq = std::max(param.heurFreq / 2, 1);
-                param.subgradFmin *= 0.5;
-                updateBest(hooks, nIter);
-                noImproveIter = 0;
-                maxNoImprove += 1000;
-                if (param.printLevel > 0) {
-                    printf("%2d: Reset swarm LBs were %.2f - %.2f now",
-                        nIter, minLB, maxLB);
-                    minLB = INF;
-                    maxLB = -INF;
-                    for (int idx = 0; idx < param.nParticles; ++idx) {
-                        if (swarm[idx]->lb < minLB)
-                            minLB = swarm[idx]->lb;
-                        if (swarm[idx]->lb > maxLB)
-                            maxLB = swarm[idx]->lb;
-                    }
-                    printf(" %.2f - %.2f\n", minLB, maxLB);
-                }
+        //
+        if (nIter % lbCheckFreq == 0) {
+            if (s->lb > bestLB) {
+                bestLB = s->lb;
+            }
+            // slow down
+            else {
+                subgradFactor = std::max(param.subgradFmin, param.subgradFmult * subgradFactor);
             }
         }
-        if (param.printLevel && nIter % param.printFreq == 0)
-            printf("%2d: LB=%.2f UB=%.2f\n", nIter, best.lb, best.ub);
+        // no heuristic is run
+
+        // if (param.heurFreq > 0 && nIter % param.heurFreq == 0
+        //     && !s->isFeasible) { // only run heuristic if not alreay feas.
+        //     if (hooks.heuristics(*s) == ABORT) {
+        //         status = ABORT;
+        //         continue;
+        //     }
+        // }
+        if (param.printLevel > 1 && nIter % param.printFreq == 0) {
+            printf("\t: LB=%g UB=%g feas=%d minViol=%g\n",
+                s->lb, s->ub, s->isFeasible,
+                s->viol.min());
+            if (param.printLevel > 2) {
+                printf("\t\tstepSize=%g\n", stepSize);
+                printf("\t\tRedCst %g - %g\n", s->rc.min(), s->rc.max());
+                printf("\t\tdual %g - %g\n", s->dual.min(), s->dual.max());
+            }
+        }
     }
+
+    if (updateBest(hooks, nIter)) {
+        noImproveIter = 0;
+    }
+    // go through code reset criteria...
+    else {
+        if (++noImproveIter > maxNoImprove) { // reset duals
+            ++nReset;
+            s->dual = 0;
+            double minLB = s->lb, maxLB = s->lb;
+            hooks.reducedCost(*s);
+            double maxdual = std::max(0.0, s->rc.max()) - std::min(0.0, s->rc.min());
+            if (maxdual < 1e-9)
+                maxdual = 1;
+
+            for (int j = 0; j < dsize; ++j) { // generate pertubation about
+                if (s->dual[j] == 0 && rand() < 2.0 / dsize) {
+                    s->dual[j] = rand(
+                        std::max(dualLB[j], -maxdual),
+                        std::min(dualUB[j], maxdual));
+                } else
+                    s->dual[j] = best->dual[j] * rand(1 - 0.2 / nReset, 1 + 0.2 / nReset);
+                s->dual[j] = std::max(
+                    dualLB[j], std::min(dualUB[j], s->dual[j]));
+            }
+
+            subgradFactor = param.subgradFactor / nReset;
+
+            if (hooks.reducedCost(*s) == ABORT) {
+                status = ABORT;
+            }
+            if (hooks.solveSubproblem(*s) == ABORT) {
+                status = ABORT;
+            }
+
+            param.heurFreq = std::max(param.heurFreq / 2, 1);
+            param.subgradFmin *= 0.5;
+            updateBest(hooks, nIter);
+            noImproveIter = 0;
+            maxNoImprove += 1000;
+        }
+    }
+
+    if (param.printLevel && nIter % param.printFreq == 0)
+        printf("%2d: LB=%.2f UB=%.2f\n", nIter, best->lb, best->ub);
 
     // update final dual min and max values
-    ParticleIter p2(swarm, 0);
-    final_dual_min = p2->dual.min();
-    final_dual_max = p2->dual.max();
 
-    for (int idx = 1; idx < param.nParticles; ++idx) {
-        ParticleIter p(swarm, idx);
-        if (p->dual.min() < final_dual_min) {
-            final_dual_min = p->dual.min();
-        }
-        if (p->dual.max() > final_dual_max) {
-            final_dual_max = p1->dual.max();
-        }
-    }
+    final_dual_min = s->dual.min();
+    final_dual_max = s->dual.max();
 }
-
-double Problem::swarmRadius() const
-{
-    return 0;
-} // not yet implemented
 
 double Problem::wallTime() const
 {
@@ -495,44 +430,59 @@ void Problem::initialise(UserHooks& hooks)
     _wallTime = omp_get_wtime();
     timer.reset();
 
+    s = new Solution(psize, dsize);
+    // create the best and s Solution objects
+    best = new Solution(psize, dsize);
     // figure out what range of duals makes sense
-    if (best.dual.size() < (size_t)dsize)
-        best.dual.resize(dsize, 0.0);
-    if (best.rc.size() < (size_t)psize)
-        best.rc.resize(psize, 0.0);
-    hooks.reducedCost(best, best.rc);
+    if (best->dual.size() < (size_t)dsize)
+        best->dual.resize(dsize, 0.0);
+    if (best->rc.size() < (size_t)psize)
+        best->rc.resize(psize, 0.0);
+    hooks.reducedCost(*best);
+
+
+    // initialuse the dual variables if wanted..
+
     // find biggest absolute value reduced cost
     const double maxCost = std::max(
-        *std::max_element(best.rc.begin(), best.rc.end()),
-        -*std::min_element(best.rc.begin(), best.rc.end()));
+        *std::max_element(best->rc.begin(), best->rc.end()),
+        -*std::min_element(best->rc.begin(), best->rc.end()));
 
-    Particle* p = new Particle(psize, dsize);
+   
     Uniform rand;
     rand.seed(1);
 
-    for (int j = 0; j < dsize; ++j) { // generate values up to maxCost
-        if (param.zeroInitial == false) {
-            p->dual[j] = rand(std::max(dualLB[j], -maxCost),
-                std::min(dualUB[j], maxCost));
-        } else {
-            p->dual[j] = 0.0;
-        }
-    }
-    p->dVel = 0.0;
+ 
+    // for (int j = 0; j < dsize; ++j) { // generate values up to maxCost
+    //     if (param.zeroInitial == false) {
+    //         s->dual[j] = rand(std::max(dualLB[j], -maxCost),
+    //             std::min(dualUB[j], maxCost));
+    //     } else {
+    //         s->dual[j] = 0.0;
+    //     }
+    // }
 }
-}
+
 bool Problem::updateBest(UserHooks& hooks, int nIter)
 {
-    // Particle* bestP = 0;
-    // bool improved = false;
-    // for (ParticleIter p(swarm); !p.done(); ++p) {
-    //     if (p->isFeasible && p->ub < best.ub) {
-    //         best.ub = p->ub;
-    //         best.isFeasible = true;
-    //         best.x = p->x;
-    //         best.best_ub_sol = p->best_ub_sol;
-    //         best.perturb = p->perturb; // perturbation gives good feasible
-    //         bestP = &(*p);
+   
+    bool improved = false;
+    if (s->lb > best->lb) {
+        delete best;
+        best = new Solution(*s);
+        improved = true;
+    }
+
+    return improved;
+
+    // for (ParticleIter s(swarm); !s.done(); ++s) {
+    //     if (s->isFeasible && s->ub < best->ub) {
+    //         best->ub = s->ub;
+    //         best->isFeasible = true;
+    //         best->x = s->x;
+    //         best->best_ub_sol = s->best_ub_sol;
+    //         best->perturb = s->perturb; // perturbation gives good feasible
+    //         bestP = &(*s);
     //         if (param.nParticles == 1) {
     //             best_particles_primal_time = best_particles;
     //         } else {
@@ -540,22 +490,22 @@ bool Problem::updateBest(UserHooks& hooks, int nIter)
     //         }
     //         primal_cpu_time = cpuTime();
     //         best_nIter = nIter;
-    //         if (p->lb > best.lb) {
-    //             lb_primal_cpu_time = p->lb;
+    //         if (s->lb > best->lb) {
+    //             lb_primal_cpu_time = s->lb;
     //         } else {
-    //             lb_primal_cpu_time = best.lb;
+    //             lb_primal_cpu_time = best->lb;
     //         }
     //     }
 
-    //     if (p->lb > best.lb) {
-    //         best.lb = p->lb;
-    //         best.dual = p->dual;
-    //         best.viol = p->viol;
+    //     if (s->lb > best->lb) {
+    //         best->lb = s->lb;
+    //         best->dual = s->dual;
+    //         best->viol = s->viol;
     //         improved = true;
     //         dual_cpu_time = cpuTime();
     //     }
-    //     if (p->lb >= best.lb) {
-    //         Particle p1 = *(p);
+    //     if (s->lb >= best->lb) {
+    //         Solution p1 = *(s);
     //         if (param.nParticles == 1) {
     //             best_particles.push_back(&(p1));
     //         }
@@ -566,8 +516,7 @@ bool Problem::updateBest(UserHooks& hooks, int nIter)
     //     hooks.updateBest(*bestP);
     // return improved || (bestP != 0);
 }
-}
-; // end namespace
+}; // end namespace
 
 /* Stuff for emacs/xemacs to conform to the "Visual Studio formatting standard"
  * Local Variables:

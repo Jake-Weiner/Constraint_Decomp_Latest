@@ -151,11 +151,12 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
     return;
 }
 
-Status ConDecomp_LaPSO_Connector::reducedCost(const Particle& p, DblVec& redCost)
+Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 {
 
-    for (int i = 0; i < redCost.size(); i++) {
-        redCost[i] = original_costs[i];
+    //reset the reduced costs to the original costs
+    for (int i = 0; i < s.rc.size(); i++) {
+        s.rc[i] = original_costs[i];
     }
 
     // for each constraint, update the red cost by dual[i] * coeff in constraint
@@ -164,7 +165,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(const Particle& p, DblVec& redCost
         for (auto& con_term : constraint.getConTerms()) {
             int var_idx = con_term.first;
             double var_coeff = con_term.second;
-            redCost[var_idx] += p.dual[constraint_idx] * (-1 * var_coeff);
+            s.rc[var_idx] += s.dual[constraint_idx] * (-1 * var_coeff);
         }
     }
     return OK;
@@ -253,37 +254,38 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     return 0;
 }
 
-void ConDecomp_LaPSO_Connector::updateParticleLB(ConDecomp_LaPSO_ConnectorParticle& p)
+void ConDecomp_LaPSO_Connector::updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s)
 {
+    // lb = s.rc * s.x?
     //(the reduced costs * x ) +  1b  +  2 e +  3 g
     double lb = 0;
-    for (int var_idx = 0; var_idx < p.x.size(); var_idx++) {
-        lb += (p.x[var_idx] * p.rc[var_idx]);
+    for (int var_idx = 0; var_idx < s.x.size(); var_idx++) {
+        lb += (s.x[var_idx] * s.rc[var_idx]);
     }
-    for (int dual_idx = 0; dual_idx < p.dual.size(); dual_idx++) {
+    for (int dual_idx = 0; dual_idx < s.dual.size(); dual_idx++) {
         double constraint_bound = OP.constraints[dual_idx].getRHS();
-        lb += (p.dual[dual_idx] * constraint_bound);
+        lb += (s.dual[dual_idx] * constraint_bound);
     }
-    p.lb = lb;
+    s.lb = lb;
 
     // double lb_test = 0;
-    // for (int var_idx = 0; var_idx < p.x.size(); var_idx++){
-    //     lb_test += (p.x[var_idx] * original_costs[var_idx]);
+    // for (int var_idx = 0; var_idx < s.x.size(); var_idx++){
+    //     lb_test += (s.x[var_idx] * original_costs[var_idx]);
     // }
 
-    // for (int dual_idx = 0; dual_idx < p.dual.size(); dual_idx++){
+    // for (int dual_idx = 0; dual_idx < s.dual.size(); dual_idx++){
     //     double constraint_bound = OP.constraints[dual_idx].getRHS();
-    //     lb_test += (p.dual[dual_idx] * p.viol[dual_idx]);
+    //     lb_test += (s.dual[dual_idx] * s.viol[dual_idx]);
     // }
 
-    // cout << "reduced costs lb = " << p.lb << " : violation lb = " << lb_test << endl ;
+    // cout << "reduced costs lb = " << s.lb << " : violation lb = " << lb_test << endl ;
     // check that ~cx + \lambda(bounds) = cx + \lambda(viol)
 }
 
 // loop through all constraints, calculate Ax, viol = bound - Ax
-void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_ConnectorParticle& p)
+void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s)
 {
-    p.viol = 0;
+    s.viol = 0;
     for (int constraint_idx = 0; constraint_idx < OP.getNumConstraints(); constraint_idx++) {
         Constraint con = OP.constraints[constraint_idx];
         double constraint_bound = con.getRHS();
@@ -293,47 +295,41 @@ void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_ConnectorPart
         for (auto& con_term : con.getConTerms()) {
             int var_idx = con_term.first;
             double var_coeff = con_term.second;
-            constraint_value += (var_coeff * p.x[var_idx]);
+            constraint_value += (var_coeff * s.x[var_idx]);
         }
         // cout << "constraint value is "<< constraint_value << " constraint bound is " << constraint_bound << endl;
-        p.viol[constraint_idx] = constraint_bound - constraint_value;
+        s.viol[constraint_idx] = constraint_bound - constraint_value;
     }
 }
 
-Status ConDecomp_LaPSO_Connector::solveSubproblem(Particle& p_)
+Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
 {
 
     ++nsolves;
-    ConDecomp_LaPSO_ConnectorParticle& p(static_cast<ConDecomp_LaPSO_ConnectorParticle&>(p_));
+    ConDecomp_LaPSO_Connector_Solution& s(static_cast<ConDecomp_LaPSO_Connector_Solution&>(p_));
 
     //reset previous primal sol
-    p.x = 0;
+    s.x = 0;
 
     int subproblem_solve_error = 0;
     // for each subproblem, feed in new objective function, solve and update x
     for (auto& subproblem : MS) {
 
-        int subproblem_status = solveSubproblemCplex(subproblem, p.rc, p.x);
+        int subproblem_status = solveSubproblemCplex(subproblem, s.rc, s.x);
         if (subproblem_status == 1) {
             subproblem_solve_error = 1;
             break;
         }
     }
 
-    updateParticleViol(p);
-    updateParticleLB(p);
-    //update best particle
-    if (p.lb > p_.best_lb) {
-        p_.best_lb = p.lb;
-    }
+    updateParticleViol(s);
+    updateParticleLB(s);
 
     if (printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "
-                  << " lb=" << p.lb << " ub=" << p.ub
-                  << "\trange of dual = " << p.dual.min() << " to " << p.dual.max() << std::endl
-                  << "\trange of viol = " << p.viol.min() << " to " << p.viol.max() << std::endl;
-        if (!p.perturb.empty())
-            std::cout << "\trange of perturb = " << p.perturb.min() << " to " << p.perturb.max() << std::endl;
+                  << " lb=" << s.lb << " ub=" << s.ub
+                  << "\trange of dual = " << s.dual.min() << " to " << s.dual.max() << std::endl
+                  << "\trange of viol = " << s.viol.min() << " to " << s.viol.max() << std::endl;
         std::cout << std::endl;
     }
 
@@ -347,27 +343,22 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Particle& p_)
 }
 
 Status ConDecomp_LaPSO_Connector::fixConstraint(const int constraint,
-    const Particle& p,
+    const Solution& s,
     SparseVec& feas) { return OK; }
 
-Status ConDecomp_LaPSO_Connector::heuristics(Particle& p_)
+Status ConDecomp_LaPSO_Connector::heuristics(Solution& p_)
 {
     nsolves++;
     return (nsolves < maxsolves) ? OK : ABORT;
 }
 
-Status ConDecomp_LaPSO_Connector::updateBest(Particle& p_)
+Status ConDecomp_LaPSO_Connector::updateBest(Solution& p_)
 {
-    ConDecomp_LaPSO_ConnectorParticle& p(static_cast<ConDecomp_LaPSO_ConnectorParticle&>(p_));
-
-    // if (printing == true)
-    //     cout << "################## " << solution_cost << " ############\n";
     return OK;
 }
 
 void ConDecomp_LaPSO_Connector::endCplexEnvs()
 {
-
     for (auto& subproblem : MS) {
         if (subproblem.envPtr != nullptr) {
             if ((*(subproblem.envPtr)).getImpl() != nullptr) {
