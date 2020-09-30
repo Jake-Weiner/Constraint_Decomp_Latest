@@ -9,7 +9,7 @@
 /// The current implementation only allows for binary variables and assumes
 /// wer are solving a minimisation problem.
 ///
-/// Autor: Andreas Ernst   $ Date: January 2010 $  $ Revision: 0.0 $
+/// Author: Andreas Ernst   $ Date: January 2010 $  $ Revision: 0.0 $
 #ifndef __LaPSO_H__
 #define __LaPSO_H__
 
@@ -23,9 +23,8 @@
 #include <utility> // for std::pair<>
 #include <vector>
 
-typedef std::pair<int, int> Edge;
-typedef std::vector<int> EdgeVec;
-typedef EdgeVec::const_iterator EdgeIter;
+
+typedef std::pair<int,double> initial_daul_value_pair;
 
 namespace LaPSO {
 
@@ -113,11 +112,15 @@ namespace LaPSO {
     };
 
     struct LaPSORequirements{
-        constraint_type_indicies cti;
+        constraint_type_indicies* cti;
         int nVar = 0;
         int nConstr = 0;
         double best_ub = 0.0;
         bool benchmark_ub_flag = false;
+        double best_lb = -INF;
+        std::vector<initial_daul_value_pair>* intial_dual_value_pairs;
+        bool set_initial_dual_values = false;
+
     };
 
     /** integer vector with  some extra convenience methods */
@@ -329,7 +332,8 @@ namespace LaPSO {
         Problem(int nVar, int nConstr);
         ~Problem()
         { // clear out particles
-            delete s;
+            delete current_solution;
+            delete best_solution;
         }
 
         void initProblem(const LaPSORequirements& LR);
@@ -340,20 +344,23 @@ namespace LaPSO {
         DblVec dualLB;
         /// The dual upper bound (0 for <= constraints otherwise +INF)
         DblVec dualUB;
-        IntVec x_total;
-        DblVec dual;
+
+
+        // IntVec x_total;
+        // DblVec dual;
 
         // if a benchmark upperbound (primal solution is known)
         double best_ub;
         bool benchmark_ub_flag;
+        double best_lb;
         /// Solutions: swarm contains all particles
         /// swarm is stored as pointers to allow it to contain subclasses of
         /// Particle. The particles are deleted by the Problem destructor.
         /// If the swarm is initialised by the user it should have each
         /// particle of the correct size and with dual vectors forming a
         /// suitably diverse initial distribution of starting points.
-        Solution* s;
-        Solution* best; ///< best solution found so far
+        Solution* current_solution;
+        Solution* best_solution; ///< best solution found so far
 
 
         std::vector<Solution*> swarm_primal_time;

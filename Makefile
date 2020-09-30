@@ -366,6 +366,33 @@ src/LaPSO.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSO.cpp.s
 .PHONY : src/LaPSO.cpp.s
 
+src/LaPSOHandler.o: src/LaPSOHandler.cpp.o
+
+.PHONY : src/LaPSOHandler.o
+
+# target to build an object file
+src/LaPSOHandler.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o
+.PHONY : src/LaPSOHandler.cpp.o
+
+src/LaPSOHandler.i: src/LaPSOHandler.cpp.i
+
+.PHONY : src/LaPSOHandler.i
+
+# target to preprocess a source file
+src/LaPSOHandler.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.i
+.PHONY : src/LaPSOHandler.cpp.i
+
+src/LaPSOHandler.s: src/LaPSOHandler.cpp.s
+
+.PHONY : src/LaPSOHandler.s
+
+# target to generate assembly for a file
+src/LaPSOHandler.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.s
+.PHONY : src/LaPSOHandler.cpp.s
+
 src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
 
 .PHONY : src/MIPProblemProbe.o
@@ -609,33 +636,6 @@ src/SolveGenericMIP.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.s
 .PHONY : src/SolveGenericMIP.cpp.s
 
-src/SolveLaPSO.o: src/SolveLaPSO.cpp.o
-
-.PHONY : src/SolveLaPSO.o
-
-# target to build an object file
-src/SolveLaPSO.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveLaPSO.cpp.o
-.PHONY : src/SolveLaPSO.cpp.o
-
-src/SolveLaPSO.i: src/SolveLaPSO.cpp.i
-
-.PHONY : src/SolveLaPSO.i
-
-# target to preprocess a source file
-src/SolveLaPSO.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveLaPSO.cpp.i
-.PHONY : src/SolveLaPSO.cpp.i
-
-src/SolveLaPSO.s: src/SolveLaPSO.cpp.s
-
-.PHONY : src/SolveLaPSO.s
-
-# target to generate assembly for a file
-src/SolveLaPSO.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveLaPSO.cpp.s
-.PHONY : src/SolveLaPSO.cpp.s
-
 src/Util.o: src/Util.cpp.o
 
 .PHONY : src/Util.o
@@ -780,6 +780,9 @@ help:
 	@echo "... src/LaPSO.o"
 	@echo "... src/LaPSO.i"
 	@echo "... src/LaPSO.s"
+	@echo "... src/LaPSOHandler.o"
+	@echo "... src/LaPSOHandler.i"
+	@echo "... src/LaPSOHandler.s"
 	@echo "... src/MIPProblemProbe.o"
 	@echo "... src/MIPProblemProbe.i"
 	@echo "... src/MIPProblemProbe.s"
@@ -807,9 +810,6 @@ help:
 	@echo "... src/SolveGenericMIP.o"
 	@echo "... src/SolveGenericMIP.i"
 	@echo "... src/SolveGenericMIP.s"
-	@echo "... src/SolveLaPSO.o"
-	@echo "... src/SolveLaPSO.i"
-	@echo "... src/SolveLaPSO.s"
 	@echo "... src/Util.o"
 	@echo "... src/Util.i"
 	@echo "... src/Util.s"

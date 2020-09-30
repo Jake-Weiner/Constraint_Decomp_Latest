@@ -286,7 +286,7 @@ void Hypergraph::variableNumberCheck()
 }
 
 // Two checks for success : 1) Successful partition 2) Correct Proportion found.
-void Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity)
+vector<Partition_Struct> Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, bool check_partition_validity)
 {
 
     partition(con_relax_vec, check_partition_validity);
@@ -297,12 +297,12 @@ void Hypergraph::getPartitionStruct(const vector<bool>& con_relax_vec, const dou
         }
     }
 
-    if (getLargestPartition() > (sp_prop * getNumNodes())) {
-        cout << "decomp proportion not found " << endl;
-    }
+    // if (getLargestPartition() > (sp_prop * getNumNodes())) {
+    //     cout << "decomp proportion not found " << endl;
+    // }
 
     cout << "finished running HG partitioning" << endl;
-    ps_input = PS;
+    return PS;
 }
 
 vector<bool> Hypergraph::removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges)

@@ -12,7 +12,7 @@
 #include "Problem_Adapter.h"
 #include "Random.h"
 #include "SolveGenericMIP.h"
-#include "SolveLaPSO.h"
+#include "LaPSOHandler.h"
 #include "Util.h"
 #include "WriteResults.h"
 #include "Writer.h"
@@ -91,11 +91,11 @@ vector<double> getCplexConVector(string cplex_filename)
 }
 
 void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
-    const double& best_ub_sol, const string& output_stats_filename, const string& output_best_lb_filename,
-    const string& output_average_lb_filename, const double& sp_prop, const double sp_solver_time_limit, const string& final_lb_filename)
+    const double& best_ub_sol, const LaPSOOutputFilenames& LOF,
+    const double sp_solver_time_limit, std::vector<initial_daul_value_pair>* intial_dual_value_pairs, bool set_initial_dual_values)
 {
 
-    // calculate number of constraints relaxewd
+    // calculate number of constraints relaxed
     int num_con_relaxed = 0;
     for (auto&& val : con_relax_vector) {
         if (val == true) {
@@ -103,29 +103,41 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
-
-    
     // test partition if required
     bool test_hypergraph_partitioning = false;
-    std::vector<Partition_Struct> ps;
+    std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
     // try create partition struct
     // partition the HG based on the relaxed constraints which then provides new partitions which forms the subproblems for
     // the LaPSO method
-    HG.getPartitionStruct(con_relax_vector, sp_prop, ps, test_hypergraph_partitioning);
-    ConDecomp_LaPSO_Connector CLC(MP, ps, false, sp_solver_time_limit);
+    bool debug_printing = true;
+    ConDecomp_LaPSO_Connector CLC(MP, ps,con_relax_vector, debug_printing, sp_solver_time_limit);
     CLC.maxsolves = 100;
     CLC.nsolves = 0;
-
+   
     // get the indices of the constraint types
-    LaPSO::constraint_type_indicies cti = { MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds() };
-    SolveLaPSO SL(argc, argv, HG.getNumNodes(), HG.getNumEdges(), best_ub_sol, cti);
-    SL.solve(CLC);
+    LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
 
-    int largest_sp = HG.getLargestPartition();
+    // set up the initial requirements for LaPSO initialisation
+    LaPSO::LaPSORequirements LR = {};
+    LR.cti = &cti;
+    LR.nVar = HG.getNumNodes();
+    LR.nConstr = num_con_relaxed;
+    LR.best_ub = best_ub_sol;
+    LR.benchmark_ub_flag = true;
+    LR.intial_dual_value_pairs = intial_dual_value_pairs;
+    LR.set_initial_dual_values = set_initial_dual_values;
+  
 
-    Writer w;
-    w.writeAverageLBPlot(largest_sp, num_con_relaxed, SL.getSolverAverageLBTracking(), SL.getSolverTimingTracking(), output_average_lb_filename);
-    w.writeBestLBPlot(largest_sp, num_con_relaxed, SL.getSolverBestLBTracking(), SL.getSolverTimingTracking(), output_best_lb_filename);
+    // Create the LaPSO Handler object which controls LaPSO process
+    LaPSOHandler LH(argc, argv, LR);
+    // solve Lagrangian Relaxation
+    LH.solve(CLC);
+
+    // int largest_sp = HG.getLargestPartition();
+
+    // Writer w;
+    // w.writeAverageLBPlot(largest_sp, num_con_relaxed, LH.getSolverAverageLBTracking(), LH.getSolverTimingTracking(), output_average_lb_filename);
+    // w.writeBestLBPlot(largest_sp, num_con_relaxed, LH.getSolverBestLBTracking(), LH.getSolverTimingTracking(), output_best_lb_filename);
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -440,7 +452,49 @@ int main(int argc,const char** argv)
                 // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
             }
         }
-    }      
+    }    
+
+    if (PA.get_run_LR_testing_flag() == true) { 
+
+        //test_instance 1, relaxing constraint 1
+        cout << "running LR testing" << endl;
+        MP.printConstraints();
+        LaPSOOutputFilenames LOF = {};
+        vector<bool> test_convec1 = { true, false, false };
+        std::cout << "original constraint relaxed vector is " << std::endl;
+        for (const auto& con_val : test_convec1) {
+            std::cout << con_val << " ";
+        }  
+        std::cout << std::endl;
+        //void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
+    //const double& best_ub_sol, const LaPSOOutputFilenames& LOF, const double sp_solver_time_limit)
+        solveLapso(argc, argv, MP, HG, test_convec1, para.set_ub, LOF, 100, {}, false);
+
+        vector<bool> test_convec2 = { false, true, true };
+        std::cout << "original constraint relaxed vector is " << std::endl;
+        for (const auto& con_val : test_convec2) {
+            std::cout << con_val << " ";
+        }
+
+        std::vector<initial_daul_value_pair> idvp_2;
+        idvp_2.push_back({0,-11});
+        idvp_2.push_back({1,0});
+        solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, 100, &idvp_2, true);
+        std::cout << std::endl;
+        exit(0);
+
+    } 
+
+
+    // flow pattern of the whole process
+
+    // generate decomposition
+    // run through constraint redundancy
+    // get constraint decomposition statistics
+    // run through a single iteration of LR to get subproblem solver statistics
+
+
+
             //     std::vector<std::string> result;
             //     std::string line;
             
@@ -602,7 +656,7 @@ int main(int argc,const char** argv)
                             string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_best_" + prop_string + "csv";
                             string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_average_" + prop_string + "csv";
                             cout << "running Lapso: " << prop_string << endl;
-                            solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
+                            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
                         }
                     } else
                         cout << p << " exists, but is not a regular file or directory\n";
@@ -643,7 +697,7 @@ int main(int argc,const char** argv)
                 }
             }
             cout << "solving LaPSO" << endl;
-            solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, "");
+            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, "");
         }
 
         // run LR with random decompositions
@@ -672,7 +726,7 @@ int main(int argc,const char** argv)
             std::shuffle(con_vec.begin(), con_vec.end(), g);
 
             cout << "solving LaPSO" << endl;
-            solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, string(para.random_lb_output));
+            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, string(para.random_lb_output));
         }
 
         return 0;

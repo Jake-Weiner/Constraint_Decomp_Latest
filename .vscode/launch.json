@@ -9,18 +9,14 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
-            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset"
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/Unit_Testing/LR"
             , "--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9", "--nsga_pop_size=8", "--printLevel=3"
             ,"--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests"
             ,"--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps"
             ,"--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP"
-            ,"--set_ub=40417", "--run_nsga_decomp=false","--nsga_gen=5", "--input_instance_name=neos-787933.mps", "--decomp_type=NSGA","--maxCPU=1000"
+            ,"--set_ub=20", "--run_nsga_decomp=false","--nsga_gen=5", "--input_instance_name=LR_test1.mps", "--decomp_type=NSGA","--maxCPU=1000"
             ,"--set_generic_MIP_time=200" ,"--run_generic_MIP_solver=false", "--run_lapso=false"
-            ,"--nsga_decomp_output_file=/home/jake/PhD/Decomposition/Output/testing/NSGA_Tests/neos-787933.mps"
-            ,"--run_MIP_Parse_testing=false" , "--run_NSGA_testing=true"
-            ,"--parsed_mip_random_seed=false", "generic_mip_random_seed=false"
-            ,"--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/testing/Parser_Tests/test.csv"
-            ,"--MIP_num_var=106261","--MIP_num_cons=53360","--MIP_num_bin=53131","--MIP_num_cont=53130","--MIP_num_int=0","--MIP_num_non_zeroes=212060"],
+            ,"--run_LR_testing=true"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

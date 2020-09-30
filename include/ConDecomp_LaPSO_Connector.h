@@ -99,7 +99,7 @@ public:
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 
 public:
-    ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const bool printing, const double sp_solve_time_limit);
+    ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<bool>& con_vec,const bool printing, const double sp_solve_time_limit);
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
@@ -113,21 +113,23 @@ public:
         SparseVec& feas);
     Status heuristics(Solution& s);
     Status updateBest(Solution& s);
-
-    void setPrinting(bool p) { printing = p; }
+    void setPrinting(bool p) { debug_printing = p; }
     void endCplexEnvs();
+    int getOriginalConIdx(int dual_idx);
 
 private:
     void updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s);
     void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);
     vector<CPLEX_MIP_Subproblem> MS;
-    void initSubproblems(const vector<Partition_Struct>&);
+    void initSubproblems(const vector<Partition_Struct>& ps);
     void initOriginalCosts();
     int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, DblVec& rc, DblVec& x);
-    bool printing;
+    bool debug_printing;
+    void populateDualIdxToOrigIdxMap(const vector<bool>& con_relax_vector);
     MIP_Problem OP;
     DblVec original_costs;
     double sp_solve_time_limit;
+    unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
 };
 
 #endif

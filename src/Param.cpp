@@ -42,6 +42,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_constraint_redundancy_testing");
     parser.setOption("run_greedy_decomposition_testing");
     parser.setOption("run_MIP_Duals_testing");
+    parser.setOption("run_LR_testing");
 
 
 
@@ -127,6 +128,9 @@ void Param::parse(int argc, const char** argv)
         run_greedy_decomposition_testing = parser.getValue("run_greedy_decomposition_testing");
     if (parser.getValue("run_MIP_Duals_testing"))
         run_MIP_Duals_testing = parser.getValue("run_MIP_Duals_testing");
+    if (parser.getValue("run_LR_testing"))
+        run_LR_testing = parser.getValue("run_LR_testing");
+
     
     // input MIP parameters
     if (parser.getValue("MIP_num_var"))

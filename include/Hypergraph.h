@@ -62,7 +62,7 @@ public:
     int getLargestPartition();
     void partition(const vector<bool>& constraints_selected, bool test_partition_validity);
 
-    void getPartitionStruct(const vector<bool>& con_relax_vec, const double& sp_prop, vector<Partition_Struct>& ps_input, bool check_partition_validity);
+    vector<Partition_Struct> getPartitionStruct(const vector<bool>& con_relax_vec, bool check_partition_validity);
     
     int getNumEdges(){
         return HG_edges.size();

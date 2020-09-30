@@ -58,14 +58,19 @@ struct NSGA_ii_characteristics {
     bool greedy;
 };
 
+struct LaPSOOutputFilenames{
+    string output_stats_filename; 
+    string output_best_lb_filename;
+    string output_average_lb_filename;
+    string final_lb_filename;
+};
+
 struct solveLapsoStruct{
     int argc;
     char** argv;
     vector<bool>* con_relax_vector_ptr;
     double best_ub_sol;
-    string output_stats_filename; 
-    string output_best_lb_filename;
-    string output_average_lb_filename;
+    
     double sp_prop; 
     double sp_solver_time_limit;
     string final_lb_filename;
