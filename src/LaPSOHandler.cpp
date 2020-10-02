@@ -1,8 +1,9 @@
 #include "LaPSOHandler.h"
 #include "Random.h"
 
+
 LaPSOHandler::LaPSOHandler(int& argc, const char** argv, LaPSO::LaPSORequirements& lr){
-    
+
     initSolver(argc, argv, lr);
 
 }
@@ -41,7 +42,7 @@ void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequireme
 void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
 
     solver.solve(CLC);
-
+    // // // // // // // // // // // \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
     // end all CPLEX environments and clear all subproblem information
     CLC.endCplexEnvs();
 

@@ -5,6 +5,7 @@
 #include "ConDecomp_LaPSO_Connector.h"
 #include "LaPSO.hpp"
 #include "MIP_Problem.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ class LaPSOHandler{
     private:
         void initSolver(int& argc, const char** argv,LaPSO::LaPSORequirements& LR);
         
+       
         LaPSO::Problem solver;
 
 };

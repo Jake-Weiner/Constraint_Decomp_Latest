@@ -25,6 +25,37 @@ struct CPLEX_Return_struct{
     vector<double> dual_vals;
 };
 
+struct Common_Statistical_Measures{
+    
+    // proportion of relaxed constraints which are equality
+    double equality_constaints_relaxed_prop;
+    // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
+    double inequality_constaints_relaxed_prop;
+    // non_zero prop in constraints relaxed
+    double average_nonzero_prop;
+    double stddev_nonzero_prop;
+
+    // ratio of abs(RHS/largest coeff in constraint)
+    double average_largest_ratio;
+    double stddev_largest_ratio;
+    double max_largest_ratio;
+    double min_largest_ratio;
+
+    // sum of all abs(RHS/LHS) values
+    double average_sum_ratio;
+    double stddev_sum_ratio;
+    double max_sum_ratio;
+    double min_sum_ratio;
+
+    // sum of all abs(obj) values
+    double average_sum_obj;
+    double stddev_sum_obj;
+    double max_sum_obj;
+    double min_sum_obj;
+};
+
+
+
 struct MIP_Parsing_Test_struct{
     string instance_name;
     double MPS_bound;
@@ -128,111 +159,60 @@ struct NSGA_ii_relaxed_constraint_statistics{
     double stddev_largest_ratio;
 };
 
-struct Nonruntime_Relaxed_Constraint_Statistics{
+struct Nonruntime_Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
     int decomposition_idx;
     vector<double>* con_vec_ptr;
     double LSP_prop;
     double constraints_relaxed_prop;
-    // proportion of relaxed constraints which are equality
-    double equality_constaints_relaxed_prop;
-    // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
-    double inequality_constaints_relaxed_prop;
-    // non_zero prop in constraints relaxed
-    double average_nonzero_prop;
-    double stddev_nonzero_prop;
-
-    // ratio of abs(RHS/largest coeff in constraint)
-    double average_largest_ratio;
-    double stddev_largest_ratio;
-    double max_largest_ratio;
-    double min_largest_ratio;
-
-    // sum of all abs(RHS/LHS) values
-    double average_sum_ratio;
-    double stddev_sum_ratio;
-    double max_sum_ratio;
-    double min_sum_ratio;
-
-    // sum of all abs(obj) values
-    double average_sum_obj;
-    double stddev_sum_obj;
-    double max_sum_obj;
-    double min_sum_obj;
-
+   
     double bin_prop;
     double int_prop;
     double cont_prop;
-
 };
 
-struct Subproblem_Statistics{
+
+struct Subproblem_Statistics : public Common_Statistical_Measures{
     int decomposition_idx;
     vector<double>* con_vec_ptr;
     
-
     // runtime statistics:
-    //
 
+    vector<double> mip_times;
     double average_mip_time;
     double max_mip_time;
     double min_mip_time;
     double stddev_mip_time;
     
+    vector<double> lp_times;
     double average_lp_time;
     double max_lp_time;
     double min_lp_time; 
     
+    // variable statistics
+    vector<double> variable_props;
+    double average_variable_prop;
+    double stddev_variable_prop;
+    vector<double> bin_props;
     double average_bin_prop;
     double stddev_bin_prop;
+    vector<double> int_props;
     double average_int_prop;
     double stddev_int_prop;
+    vector<double> cont_props;
     double average_cont_prop;
     double stddev_cont_prop;
 
+    // constraint statistics
+    vector<double> equality_prop;
     double average_equality_prop;
     double stddev_equality_prop;
     double average_inequality_prop;
     double stddev_inequality_prop;
-
-    double average_variable_prop;
-    double stddev_variable_prop;
-
     double average_total_constraint_prop;
     double stddev_total_constraint_prop;
-
     
-
-  
-    double LSP_prop;
-    double constraints_relaxed_prop;
-    // proportion of relaxed constraints which are equality
-    double equality_constaints_relaxed_prop;
-    // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
-    double inequality_constaints_relaxed_prop;
-    // non_zero prop in constraints relaxed
-    double average_nonzero_prop;
-    double stddev_nonzero_prop;
-
-    // ratio of abs(RHS/largest coeff in constraint)
-    double average_largest_ratio;
-    double stddev_largest_ratio;
-    double max_largest_ratio;
-    double min_largest_ratio;
-
-    // sum of all abs(RHS/LHS) values
-    double average_sum_ratio;
-    double stddev_sum_ratio;
-    double max_sum_ratio;
-    double min_sum_ratio;
-
-    // sum of all abs(obj) values
-    double average_sum_obj;
-    double stddev_sum_obj;
-    double max_sum_obj;
-    double min_sum_obj;
-
-    
-
+    // double LSP_prop;
+    // double constraints_relaxed_prop;
 };
 
 

@@ -43,6 +43,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_greedy_decomposition_testing");
     parser.setOption("run_MIP_Duals_testing");
     parser.setOption("run_LR_testing");
+    parser.setOption("run_statistic_testing_flag");
+ 
 
 
 
@@ -130,8 +132,9 @@ void Param::parse(int argc, const char** argv)
         run_MIP_Duals_testing = parser.getValue("run_MIP_Duals_testing");
     if (parser.getValue("run_LR_testing"))
         run_LR_testing = parser.getValue("run_LR_testing");
+    if (parser.getValue("run_statistic_testing_flag"))
+        run_statistic_testing_flag = parser.getValue("run_statistic_testing_flag");
 
-    
     // input MIP parameters
     if (parser.getValue("MIP_num_var"))
         MIP_num_var = atoi(parser.getValue("MIP_num_var"));

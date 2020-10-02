@@ -7,10 +7,12 @@
 #include "MIP_Problem.h"
 #include "Subproblem_Constraints.h"
 #include "Variable.h"
+#include "Util.h"
 #include <ilcplex/ilocplex.h>
 #include <map>
 #include <string>
 #include <unordered_map>
+
 
 using namespace LaPSO;
 using namespace std;
@@ -99,7 +101,8 @@ public:
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 
 public:
-    ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<bool>& con_vec,const bool printing, const double sp_solve_time_limit);
+    ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<bool>& con_vec,const bool printing, const double sp_solve_time_limit, 
+    Subproblem_Statistics* subproblem_statistics_ptr);
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
@@ -130,6 +133,7 @@ private:
     DblVec original_costs;
     double sp_solve_time_limit;
     unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
+    Subproblem_Statistics* subproblem_statistics_ptr;
 };
 
 #endif

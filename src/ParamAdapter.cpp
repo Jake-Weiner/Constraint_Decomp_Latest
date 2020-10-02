@@ -39,6 +39,7 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     run_evaluate_decompositions_testing_flag = getBoolVal(p.run_evaluate_decompositions_testing_flag);
     run_MIP_Duals_testing_flag = getBoolVal(p.run_MIP_Duals_testing);
     run_LR_testing_flag = getBoolVal(p.run_LR_testing);
+    run_statistic_testing_flag = getBoolVal(p.run_statistic_testing_flag);
 }
 
 // return a bool val from the given input char*

@@ -88,6 +88,11 @@ public:
         return run_LR_testing_flag;
     }
 
+    bool get_run_statistic_testing_flag()
+    {
+        return run_statistic_testing_flag;
+    }
+
     std::vector<double> get_nsga_props()
     {
         return nsga_props;
@@ -126,6 +131,7 @@ private:
     bool run_evaluate_decompositions_testing_flag = false;
     bool run_MIP_Duals_testing_flag = false;
     bool run_LR_testing_flag = false;
+    bool run_statistic_testing_flag = false;
 
     bool getBoolVal(const char* input);
 

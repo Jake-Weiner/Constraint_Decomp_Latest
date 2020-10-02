@@ -21,7 +21,7 @@ using namespace boost;
 using namespace std;
 
 ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions,
-    const vector<bool>& con_vec, const bool printing, const double sp_solve_time_limit)
+    const vector<bool>& con_vec, const bool printing, const double sp_solve_time_limit, Subproblem_Statistics* subproblem_statistics_ptr)
 {
     this->OP = original_problem;
     this->debug_printing = printing;
@@ -29,6 +29,7 @@ ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_probl
     initOriginalCosts();
     populateDualIdxToOrigIdxMap(con_vec);
     initSubproblems(partitions);
+    this->subproblem_statistics_ptr = subproblem_statistics_ptr;
 }
 
 void ConDecomp_LaPSO_Connector::initOriginalCosts()
