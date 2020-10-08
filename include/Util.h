@@ -182,41 +182,56 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
     // runtime statistics:
 
     // for each subproblem, store the time required to solve the subproblem
-    vector<pair<int,double>> mip_times;
-    vector<pair<int,double>> mip_obj_solutions;
+    vector<double> mip_times;
+    vector<double> mip_obj_solutions;
     double average_mip_time;
     double max_mip_time;
     double min_mip_time;
     double stddev_mip_time;
+
+    double average_mip_obj_soln;
+    double max_mip_obj_soln;
+    double min_mip_obj_soln;
+    double stddev_mip_obj_soln;
     
-    vector<pair<int,double>> lp_times;
-    vector<pair<int,double>> lp_obj_solutions;
-    // vector<double> lp_times;
-    // double average_lp_time;
-    // double max_lp_time;
-    // double min_lp_time; 
+    vector<double> lp_times;
+    vector<double> lp_obj_solutions;
+
+    double average_lp_time;
+    double max_lp_time;
+    double min_lp_time;
+    double stddev_lp_time;
+
+    double average_lp_obj_soln;
+    double max_lp_obj_soln;
+    double min_lp_obj_soln;
+    double stddev_lp_obj_soln;
+
     
     // variable statistics
     // proportion of problem variables in the subproblem
-    vector<pair<int,double>> block_variable_props;
+    vector<double> block_variable_props;
     double average_block_variable_prop;
     double stddev_block_variable_prop;
     double max_block_variable_prop;
-    vector<pair<int,double>> bin_props;
+
+    vector<double> bin_props;
     double average_bin_prop;
     double stddev_bin_prop;
-    vector<pair<int,double>> int_props;
+
+    vector<double> int_props;
     double average_int_prop;
     double stddev_int_prop;
-    vector<pair<int,double>> cont_props;
+
+    vector<double> cont_props;
     double average_cont_prop;
     double stddev_cont_prop;
 
     // constraint statistics
-    
-    vector<pair<int,double>> total_constr_props; // proportion of total constraints in subproblem
-    vector<pair<int,double>> equality_props;
-    vector<pair<int,double>> inequality_props;
+
+    vector<double> total_constr_props; // proportion of total constraints in subproblem
+    vector<double> equality_props;
+    vector<double> inequality_props;
     double average_equality_prop;
     double stddev_equality_prop;
     double average_inequality_prop;
@@ -227,26 +242,24 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
     // average of objective coefficients in each of the blocks - This will 
 
     // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
-    vector<pair<int,double>> average_block_obj_values;
-    vector<pair<int,double>> stddev_block_obj_values;
+    vector<double> average_block_obj_values;
+    vector<double> stddev_block_obj_values;
 
     // average abs(RHS) value of each block
-    vector<pair<int,double>> average_block_RHS_values;
+    vector<double> average_block_RHS_values;
 
-    vector<pair<int,double>> average_block_Largest_RHSLHS_ratio;
+    vector<double> average_block_Largest_RHSLHS_ratio;
 
     //average block shapes, where shape is no.of variables / number of constraints
-    vector<pair<int,double>> average_block_shape;
+    vector<double> average_block_shape;
 
     // Max RHS - Min RHS for each block
-    vector<pair<int,double>> block_RHS_range;
+    vector<double> block_RHS_range;
 
     // Block densities = Non_zeroes / (num constraints * num variables)
-    vector<pair<int,double>> block_densities;
+    vector<double> block_densities;
 
-    
-    // double LSP_prop;
-    // double constraints_relaxed_prop;
+   
 };
 
 struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
@@ -310,7 +323,7 @@ struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
 // calculates the statistics for a given vector of data (min, max, average stddev)
 // stddev is sqrt(1/n sum(x_i - x_mean)^2)
 template <class T1>
-std::tuple<T1,T1,double,double> getStatistics(std::vector<T1> input_vec){
+std::tuple<T1,T1,double,double> getStatistics(const std::vector<T1>& input_vec){
 
     T1 sum;
     T1 min;

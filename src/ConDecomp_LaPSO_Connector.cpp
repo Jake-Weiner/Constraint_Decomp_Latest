@@ -247,10 +247,10 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
         int lp_soln_time = 0;
 
         // capture the solution statistics
-        subproblem_statistics_ptr->mip_times.push_back({subproblem_idx, 0});
-        subproblem_statistics_ptr->lp_times.push_back({subproblem_idx, 0});
-        subproblem_statistics_ptr->mip_obj_solutions.push_back({subproblem_idx, coeff * x[original_var_idx]});
-        subproblem_statistics_ptr->lp_obj_solutions.push_back({subproblem_idx, coeff * x[original_var_idx]});
+        subproblem_statistics_ptr->mip_times.push_back(0);
+        subproblem_statistics_ptr->lp_times.push_back(0);
+        subproblem_statistics_ptr->mip_obj_solutions.push_back(coeff * x[original_var_idx]);
+        subproblem_statistics_ptr->lp_obj_solutions.push_back(coeff * x[original_var_idx]);
         return 0;
     }
 
@@ -281,9 +281,9 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     }
 
      //capture the mip runtime in cpu seconds
-    subproblem_statistics_ptr->mip_times.push_back({sp.getSubproblemIdx(), cplex.getTime()});
+    subproblem_statistics_ptr->mip_times.push_back(cplex.getTime());
     // capture the mip solution quality
-    subproblem_statistics_ptr->mip_obj_solutions.push_back({sp.getSubproblemIdx(), cplex.getObjValue()});
+    subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getObjValue());
     
     // solve the subproblem as a LP and get the statistics
     IloModel relax(*sp.envPtr);
@@ -302,9 +302,9 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     }
 
      //capture the lp runtime in cpu seconds
-    subproblem_statistics_ptr->lp_times.push_back({sp.getSubproblemIdx(), cplex_relaxed.getTime()});
+    subproblem_statistics_ptr->lp_times.push_back(cplex_relaxed.getTime());
     // capture the milp solution quality
-    subproblem_statistics_ptr->lp_obj_solutions.push_back({sp.getSubproblemIdx(), cplex_relaxed.getObjValue()});
+    subproblem_statistics_ptr->lp_obj_solutions.push_back( cplex_relaxed.getObjValue());
     // end the LP relaxed environment to free up memory
     cplex_relaxed.end();
     
