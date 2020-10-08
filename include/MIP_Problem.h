@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <tuple> 
 
 using std::cout;
 using std::endl;
@@ -99,23 +100,20 @@ class MIP_Problem{
             objective_fn.push_back(term);
         }
 
-        
-       
         int getNumBin();
         int getNumInt();
         int getNumCont();
         int getnumNonZero();
-        Constraint getConstraint(const int& constraint_idx, bool& success_flag);
+        Constraint getConstraint(const int& constraint_idx);
         double getConstraintSumObj(const int& constraint_idx);
         double getAverageConstraintDensity();
         double getStddevConstraintDensity();
         double getEqualityConstraintProp();
         double getInequalityConstraintProp();
 
+        int getEqualityConstraintCount(const std::vector<int>& edge_indexes);
 
         bool testMIPProblem(const int num_con, const int num_var, const int bin, const int cont, const int integer, const int non_zero);
-
-
 
         int number_variables;
         vector<Constraint> constraints;
@@ -140,6 +138,16 @@ class MIP_Problem{
         void setEqualityConstraintCount();
         void countVarTypes();
         void countNonZeros();
+        bool variableIndexValidity(int index){
+            if (index < variables.size() && index >= 0){
+                return true;
+            }
+        }
+        bool constraintIndexValidity(int index){
+            if (index < constraints.size() && index >= 0){
+                return true;
+            }
+        }
 };  
 
 #endif

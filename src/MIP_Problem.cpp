@@ -197,11 +197,14 @@ void MIP_Problem::setEqualityConstraintCount()
 
 
 
-Constraint MIP_Problem::getConstraint(const int& constraint_idx, bool& success_flag){
+Constraint MIP_Problem::getConstraint(const int& constraint_idx){
     Constraint ret_val;
     if (constraint_idx < getNumConstraints()){
-        success_flag = true;
         ret_val = constraints[constraint_idx];
+    }
+    else {
+        cout << "Error, Attempted to Access Constraint Index from MIP_Problem which is invalid" << endl;
+        exit(EXIT_FAILURE);
     }
     return ret_val;
 }
@@ -222,4 +225,23 @@ double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
         }
     }
     return sum_obj_ceoff;   
+}
+
+
+
+int MIP_Problem::getEqualityConstraintCount(const std::vector<int>& edge_indexes){
+
+    int equality_const_count = 0;
+    for (const auto& edge_idx : edge_indexes){
+        if(constraintIndexValidity(edge_idx)){
+            if (constraints[edge_idx].getBoundType() == Equal){
+                ++equality_const_count;
+            }
+        }   
+        else{
+            cout << "Invalid Constraint Index in getEqualityConstraintCount(). Index requested is: " << edge_idx << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    return equality_const_count;
 }

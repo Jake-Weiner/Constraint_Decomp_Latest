@@ -1,6 +1,143 @@
 #include "MIPProblemProbe.h"
 #include <math.h>
 
+MIPProblemProbe::MIPProblemProbe(MIP_Problem* MP_ptr)
+    : MP_ptr(MP_ptr)
+{
+}
+
+std::tuple<int, int, int> MIPProblemProbe::getVariableCounts(const std::vector<int>& variable_indexes)
+{
+    int bin_count = 0;
+    int int_count = 0;
+    int cont_count = 0;
+    for (const auto& variable_idx : variable_indexes) {
+        Variable v = MP_ptr->getVariable(variable_idx);
+        if (v.getVarType == Bin) {
+            ++bin_count;
+        } else if (v.getVarType == Int) {
+            ++int_count;
+        } else {
+            ++cont_count;
+        }
+    }
+    return std::make_tuple(bin_count, int_count, cont_count);
+}
+
+std::vector<double> MIPProblemProbe::getLargestRHSLHSRatios(const std::vector<int>& constraint_idxs)
+{
+    std::vector<double> ret_vec;
+    for (const auto& constraint_idx : constraint_idxs) {
+        Constraint con = MP_ptr->getConstraint(constraint_idx);
+        ret_vec.push_back(con.getLargestRHSLHSRatio());
+    }
+    return ret_vec;
+}
+
+std::vector<double> MIPProblemProbe::getSumRHSLHSRatios(const std::vector<int>& constraint_idxs)
+{
+
+    std::vector<double> ret_vec;
+    for (const auto& constraint_idx : constraint_idxs) {
+        Constraint con = MP_ptr->getConstraint(constraint_idx);
+        ret_vec.push_back(con.getSumRHSLHSRatio());
+    }
+    return ret_vec;
+}
+
+std::vector<double> MIPProblemProbe::getConstraintSumObjs(const std::vector<int>& constraint_idxs)
+{
+
+    std::vector<double> ret_vec;
+    for (const auto& constraint_idx : constraint_idxs) {
+        ret_vec.push_back(MP_ptr->getConstraintSumObj(constraint_idx));
+    }
+    return ret_vec;
+}
+
+// returns the average sum obj coeffs for the group of constraint indexes supplied
+double MIPProblemProbe::getConstraintAverageSumObjs(const std::vector<int>& constraint_idxs)
+{
+
+    double sum = 0;
+
+    for (const auto& constraint_idx : constraint_idxs) {
+        sum += MP_ptr->getConstraintSumObj(constraint_idx);
+    }
+
+    double average = double(sum) / double(constraint_idxs.size());
+    return average;
+}
+
+// returns the stddev of the sums of obj coeffs for the group of constraint indexes supplied
+double MIPProblemProbe::getConstraintStddevSumObjs(const std::vector<int>& constraint_idxs, const double average_sum_obj,
+    bool average_supplied = false)
+{
+
+    double variance = 0.0;
+    if (average_supplied) {
+        for (const auto& constraint_idx : constraint_idxs) {
+            variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - average_sum_obj, 2);
+        }
+    } else {
+        double new_average_sum_obj = getConstraintAverageSumObjs(constraint_idxs);
+        for (const auto& constraint_idx : constraint_idxs) {
+            variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - new_average_sum_obj, 2);
+        }
+    }
+
+    double stddev = sqrt(variance / constraint_idxs.size());
+    return stddev;
+}
+
+// returns the average of the blocks abs(RHS) for the constraints the block contains
+double MIPProblemProbe::getAverageBlockRHS(const std::vector<int>& constraint_idxs)
+{
+
+    double sum = 0;
+    for (const auto& constraint_idx : constraint_idxs) {
+        sum += abs(MP_ptr->getConstraint(constraint_idx).getRHS());
+    }
+    return (sum / constraint_idxs.size());
+}
+
+// returns the average of the blocks abs(Largest RHS/LHS) for the constraints the block contains
+double MIPProblemProbe::getAverageBlockLargestRHSLHSRatio(const std::vector<int>& constraint_idxs)
+{
+
+    double sum = 0;
+    for (const auto& constraint_idx : constraint_idxs) {
+        sum += abs(MP_ptr->getConstraint(constraint_idx).getLargestRHSLHSRatio());
+    }
+    return (sum / constraint_idxs.size());
+}
+
+double MIPProblemProbe::getBlockLargestRHSRange(const std::vector<int>& constraint_idxs)
+{
+
+    double max_rhs = std::numeric_limits<double>::min();
+    double min_rhs = std::numeric_limits<double>::max();
+    for (const auto& constraint_idx : constraint_idxs) {
+        if (MP_ptr->getConstraint(constraint_idx).getRHS() > max_rhs) {
+            max_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
+        }
+        if (MP_ptr->getConstraint(constraint_idx).getRHS() < min_rhs) {
+            min_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
+        }
+    }
+    return (max_rhs - min_rhs);
+}
+
+// get the non_zero count for the constraint indices provided
+int MIPProblemProbe::getBlockNonZeroes(const std::vector<int>& constraint_idxs)
+{
+    int non_zero_count = 0;
+    for (const auto& constraint_idx : constraint_idxs) {
+        non_zero_count += MP_ptr->getConstraint(constraint_idx).getNumVar();
+    }
+    return non_zero_count;
+}
+
 void MIPProblemProbe::populateInstanceStatistics(instance_statistics& is, MIP_Problem& MP)
 {
     is.bin_prop = double(MP.getNumBin()) / double(MP.getNumVariables());
@@ -12,34 +149,32 @@ void MIPProblemProbe::populateInstanceStatistics(instance_statistics& is, MIP_Pr
     is.inequality_constraints_prop = MP.getInequalityConstraintProp();
 
     for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
-        bool get_constraint_success_flag = false;
-        Constraint con = MP.getConstraint(con_idx, get_constraint_success_flag);
-        if (get_constraint_success_flag) {        
-            double currrent_constraint_largest_ratio = con.getLargestRHSLHSRatio();
-            if (currrent_constraint_largest_ratio > is.max_largest_ratio){
-                is.max_largest_ratio = currrent_constraint_largest_ratio;
-            }
-            if (currrent_constraint_largest_ratio < is.min_largest_ratio){
-                is.min_largest_ratio = currrent_constraint_largest_ratio;
-            }
 
-            double current_constraint_sum_RHS_ratio = con.getSumRHSLHSRatio();
-        
-            if (current_constraint_sum_RHS_ratio > is.max_sum_ratio){
-                is.max_sum_ratio = current_constraint_sum_RHS_ratio;
-            }
-            if (current_constraint_sum_RHS_ratio < is.min_sum_ratio){
-                is.min_sum_ratio = current_constraint_sum_RHS_ratio;
-            }
+        Constraint con = MP.getConstraint(con_idx);
+        double currrent_constraint_largest_ratio = con.getLargestRHSLHSRatio();
+        if (currrent_constraint_largest_ratio > is.max_largest_ratio) {
+            is.max_largest_ratio = currrent_constraint_largest_ratio;
+        }
+        if (currrent_constraint_largest_ratio < is.min_largest_ratio) {
+            is.min_largest_ratio = currrent_constraint_largest_ratio;
+        }
 
-            double current_constraint_sum_obj_coeff = MP.getConstraintSumObj(con_idx);
-            
-            if (current_constraint_sum_RHS_ratio > is.max_sum_ratio){
-                is.max_sum_ratio = current_constraint_sum_RHS_ratio;
-            }
-            if (current_constraint_sum_RHS_ratio < is.min_sum_ratio){
-                is.min_sum_ratio = current_constraint_sum_RHS_ratio;
-            }
+        double current_constraint_sum_RHS_ratio = con.getSumRHSLHSRatio();
+
+        if (current_constraint_sum_RHS_ratio > is.max_sum_ratio) {
+            is.max_sum_ratio = current_constraint_sum_RHS_ratio;
+        }
+        if (current_constraint_sum_RHS_ratio < is.min_sum_ratio) {
+            is.min_sum_ratio = current_constraint_sum_RHS_ratio;
+        }
+
+        double current_constraint_sum_obj_coeff = MP.getConstraintSumObj(con_idx);
+
+        if (current_constraint_sum_RHS_ratio > is.max_sum_ratio) {
+            is.max_sum_ratio = current_constraint_sum_RHS_ratio;
+        }
+        if (current_constraint_sum_RHS_ratio < is.min_sum_ratio) {
+            is.min_sum_ratio = current_constraint_sum_RHS_ratio;
         }
     }
 }
@@ -187,68 +322,65 @@ void MIPProblemProbe::populateNonRuntimeAverages(const individual_information_st
         // account for potential rounding errors
         if (int(decomp.con_vec[con_idx] + 0.1) == 1) {
             bool get_constraint_success_flag = false;
-            Constraint con = MP.getConstraint(con_idx, get_constraint_success_flag);
-            if (get_constraint_success_flag) {        
-                int non_zeroes =  con.getNumVar();
-                total_nonzero_count_in_relaxed_constraints += non_zeroes;
-                
-                // constraint type
-                bound_type bound = con.getBoundType();
-                if (bound == Equal) {
-                    ++equality_constraint_count;
-                }
+            Constraint con = MP.getConstraint(con_idx);
 
-                // proportion of variable types in the relaxed constraints
-                for (const auto& variable_idx : con.getVarIndxs()){
-                    Variable var = MP.getVariable(variable_idx);
-                    if (var.getVarType() == Bin){
-                        ++num_bin;
-                    }
-                    else if(var.getVarType() == Int){
-                        ++num_int;
-                    }
-                    else if(var.getVarType() == Cont){
-                        ++num_cont;
-                    }
-                }
+            int non_zeroes = con.getNumVar();
+            total_nonzero_count_in_relaxed_constraints += non_zeroes;
 
-                double currrent_constraint_largest_ratio = con.getLargestRHSLHSRatio();
-                largest_ratio_sum += currrent_constraint_largest_ratio;
-                if (currrent_constraint_largest_ratio > nrcs.max_largest_ratio){
-                    nrcs.max_largest_ratio = currrent_constraint_largest_ratio;
-                }
-                if (currrent_constraint_largest_ratio < nrcs.min_largest_ratio){
-                    nrcs.min_largest_ratio = currrent_constraint_largest_ratio;
-                }
-                
-                double current_constraint_sum_RHS_ratio = con.getSumRHSLHSRatio();
-                sum_RHS_ratio_sum += current_constraint_sum_RHS_ratio;
-            
-                if (current_constraint_sum_RHS_ratio > nrcs.max_sum_ratio){
-                    nrcs.max_sum_ratio = current_constraint_sum_RHS_ratio;
-                }
-                if (current_constraint_sum_RHS_ratio < nrcs.min_sum_ratio){
-                    nrcs.min_sum_ratio = current_constraint_sum_RHS_ratio;
-                }
-            
-                double current_constraint_sum_obj_coeff = MP.getConstraintSumObj(con_idx);
-                sum_obj_coeff_sum += current_constraint_sum_obj_coeff;
+            // constraint type
+            bound_type bound = con.getBoundType();
+            if (bound == Equal) {
+                ++equality_constraint_count;
+            }
 
-                if (current_constraint_sum_obj_coeff > nrcs.max_sum_obj){
-                    nrcs.max_sum_obj = current_constraint_sum_obj_coeff;
+            // proportion of variable types in the relaxed constraints
+            for (const auto& variable_idx : con.getVarIndxs()) {
+                Variable var = MP.getVariable(variable_idx);
+                if (var.getVarType() == Bin) {
+                    ++num_bin;
+                } else if (var.getVarType() == Int) {
+                    ++num_int;
+                } else if (var.getVarType() == Cont) {
+                    ++num_cont;
                 }
-                if (current_constraint_sum_obj_coeff < nrcs.min_sum_obj){
-                    nrcs.min_sum_obj = current_constraint_sum_obj_coeff;
-                }
+            }
+
+            double currrent_constraint_largest_ratio = con.getLargestRHSLHSRatio();
+            largest_ratio_sum += currrent_constraint_largest_ratio;
+            if (currrent_constraint_largest_ratio > nrcs.max_largest_ratio) {
+                nrcs.max_largest_ratio = currrent_constraint_largest_ratio;
+            }
+            if (currrent_constraint_largest_ratio < nrcs.min_largest_ratio) {
+                nrcs.min_largest_ratio = currrent_constraint_largest_ratio;
+            }
+
+            double current_constraint_sum_RHS_ratio = con.getSumRHSLHSRatio();
+            sum_RHS_ratio_sum += current_constraint_sum_RHS_ratio;
+
+            if (current_constraint_sum_RHS_ratio > nrcs.max_sum_ratio) {
+                nrcs.max_sum_ratio = current_constraint_sum_RHS_ratio;
+            }
+            if (current_constraint_sum_RHS_ratio < nrcs.min_sum_ratio) {
+                nrcs.min_sum_ratio = current_constraint_sum_RHS_ratio;
+            }
+
+            double current_constraint_sum_obj_coeff = MP.getConstraintSumObj(con_idx);
+            sum_obj_coeff_sum += current_constraint_sum_obj_coeff;
+
+            if (current_constraint_sum_obj_coeff > nrcs.max_sum_obj) {
+                nrcs.max_sum_obj = current_constraint_sum_obj_coeff;
+            }
+            if (current_constraint_sum_obj_coeff < nrcs.min_sum_obj) {
+                nrcs.min_sum_obj = current_constraint_sum_obj_coeff;
             }
         }
     }
 
     nrcs.average_nonzero_prop = (total_nonzero_count_in_relaxed_constraints / decomp.number_constraints_relaxed) / (MP.getNumVariables());
-    
+
     nrcs.equality_constaints_relaxed_prop = double(equality_constraint_count) / double(decomp.number_constraints_relaxed);
     nrcs.inequality_constaints_relaxed_prop = 1.0 - nrcs.equality_constaints_relaxed_prop;
-    
+
     nrcs.average_largest_ratio = largest_ratio_sum / decomp.number_constraints_relaxed;
     nrcs.average_sum_ratio = sum_RHS_ratio_sum / decomp.number_constraints_relaxed;
     nrcs.average_sum_obj = sum_obj_coeff_sum / decomp.number_constraints_relaxed;
@@ -256,5 +388,4 @@ void MIPProblemProbe::populateNonRuntimeAverages(const individual_information_st
     nrcs.bin_prop = num_bin / total_nonzero_count_in_relaxed_constraints;
     nrcs.int_prop = num_int / total_nonzero_count_in_relaxed_constraints;
     nrcs.cont_prop = num_cont / total_nonzero_count_in_relaxed_constraints;
-
 }

@@ -78,13 +78,23 @@ public:
 
     // }
     int num_subproblem_vars;
+    
     unordered_map<int, int> subproblemVarIdx_to_originalVarIdx;
     unordered_map<int, int> originalVarIdx_to_subproblemVarIdx;
     IloEnv* envPtr;
     IloModel model;
     IloNumVarArray variables;
 
+    int getSubproblemIdx(){
+        return subproblem_idx;
+    }
+
+    void setSubproblemIdx(int index){
+        subproblem_idx = index;
+    }
+
 private:
+    int subproblem_idx;
 };
 
 class ConDecomp_LaPSO_Connector_Solution : public LaPSO::Solution {

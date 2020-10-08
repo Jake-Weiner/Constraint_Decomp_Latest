@@ -64,14 +64,18 @@ void ConDecomp_LaPSO_Connector::populateDualIdxToOrigIdxMap(const vector<bool>& 
 // Initialise the various subproblems based on the partitions created via relaxing constraints
 void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& partitions)
 {
+
+
     int subproblem_idx = 0;
     for (auto& partition : partitions) {
         if (subproblem_idx % 10000 == 0) {
             cout << "setting up subproblem " << subproblem_idx << endl;
         }
-        ++subproblem_idx;
 
         CPLEX_MIP_Subproblem sp;
+
+        sp.setSubproblemIdx(subproblem_idx);
+        
         // creatre a new IloEnv object which is used for memory management of Ilo objects
         sp.envPtr = new IloEnv;
         // IloEnv *(sp.envPtr);
@@ -170,6 +174,8 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
         sp.variables = subproblem_vars_cplex;
         sp.num_subproblem_vars = subproblem_var_idx;
         MS.push_back(sp);
+
+        ++subproblem_idx;
     }
     cout << "finished initialising subproblems " << endl;
     return;
@@ -183,8 +189,6 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
         s.rc[i] = original_costs[i];
     }
 
-
-    
     // // for each dualised constraint, update the red cost by dual[i] * coeff in constraint
     // for (auto& constraint : OP.constraints) {
     //     int constraint_idx = constraint.getConIdx();
@@ -253,6 +257,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     IloCplex cplex(sp.model);
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     cplex.setParam(IloCplex::TiLim, sp_solve_time_limit);
+   
+    //subproblem_statistics_ptr
     cplex.setOut((*(sp.envPtr)).getNullStream());
     if (!cplex.solve()) {
         // cout << "objective solved is " << obj_exp << endl;
@@ -268,6 +274,9 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
         return -1;
     }
 
+     //returns the time in cpu
+    subproblem_statistics_ptr->mip_times.push_back({sp.getSubproblemIdx(), cplex.getTime()});
+
     // cout << "Solution status = " << cplex.getStatus() << endl;
     // cout << "Solution value  = " << cplex.getObjValue() << endl;
 
@@ -278,18 +287,19 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
             Variable_Type vt = OP.variables[orig_idx].getVarType();
             
             if (vt == Int || vt == Bin) {
-                int x_val = int(val);
+                // in case of rounding errors, add in slight perturbation and then conver to int to round down
+                int x_val = int(val + 0.1);
                 x[orig_idx] = x_val;
             } else if (vt == Cont) {
                 x[orig_idx] = val;
             }
+        // } catch (IloException& e) {
+        //     int x_val = 0;
+        //     x[orig_idx] = x_val;
+        //     // cout << e << endl;
+        //     // cout << "number of variables is " << sp.variables.getSize() << endl;
         } catch (IloException& e) {
-            int x_val = 0;
-            x[orig_idx] = x_val;
-            // cout << e << endl;
-            // cout << "number of variables is " << sp.variables.getSize() << endl;
-        } catch (...) {
-            cout << "Unknown exception caught in ConDecomp_LaPSO_Connector::solveSubproblemCplex()" << endl;
+            cout << "Exception caught in ConDecomp_LaPSO_Connector::solveSubproblemCplex()" << endl;
         }
     }
     sp.model.remove(obj_fn);

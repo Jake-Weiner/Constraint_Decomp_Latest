@@ -36,18 +36,22 @@ struct Common_Statistical_Measures{
     double stddev_nonzero_prop;
 
     // ratio of abs(RHS/largest coeff in constraint)
+
+    vector<pair<int,double>> RHS_largest_coeff_ratios;
     double average_largest_ratio;
     double stddev_largest_ratio;
     double max_largest_ratio;
     double min_largest_ratio;
 
     // sum of all abs(RHS/LHS) values
+    vector<pair<int,double>> sum_RHS_LHS_ratios;
     double average_sum_ratio;
     double stddev_sum_ratio;
     double max_sum_ratio;
     double min_sum_ratio;
 
     // sum of all abs(obj) values
+    vector<pair<int,double>> sum_obj_values;
     double average_sum_obj;
     double stddev_sum_obj;
     double max_sum_obj;
@@ -177,44 +181,158 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
     
     // runtime statistics:
 
-    vector<double> mip_times;
+    // for each subproblem, store the time required to solve the subproblem
+    vector<pair<int,double>> mip_times;
     double average_mip_time;
     double max_mip_time;
     double min_mip_time;
     double stddev_mip_time;
     
-    vector<double> lp_times;
-    double average_lp_time;
-    double max_lp_time;
-    double min_lp_time; 
+    // vector<double> lp_times;
+    // double average_lp_time;
+    // double max_lp_time;
+    // double min_lp_time; 
     
     // variable statistics
-    vector<double> variable_props;
-    double average_variable_prop;
-    double stddev_variable_prop;
-    vector<double> bin_props;
+    // proportion of problem variables in the subproblem
+    vector<pair<int,double>> block_variable_props;
+    double average_block_variable_prop;
+    double stddev_block_variable_prop;
+    double max_block_variable_prop;
+    vector<pair<int,double>> bin_props;
     double average_bin_prop;
     double stddev_bin_prop;
-    vector<double> int_props;
+    vector<pair<int,double>> int_props;
     double average_int_prop;
     double stddev_int_prop;
-    vector<double> cont_props;
+    vector<pair<int,double>> cont_props;
     double average_cont_prop;
     double stddev_cont_prop;
 
     // constraint statistics
-    vector<double> equality_prop;
+    
+    vector<pair<int,double>> total_constr_props; // proportion of total constraints in subproblem
+    vector<pair<int,double>> equality_props;
+    vector<pair<int,double>> inequality_props;
     double average_equality_prop;
     double stddev_equality_prop;
     double average_inequality_prop;
     double stddev_inequality_prop;
     double average_total_constraint_prop;
     double stddev_total_constraint_prop;
+
+    // average of objective coefficients in each of the blocks - This will 
+
+    // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
+    vector<pair<int,double>> average_block_obj_values;
+    vector<pair<int,double>> stddev_block_obj_values;
+
+    // average abs(RHS) value of each block
+    vector<pair<int,double>> average_block_RHS_values;
+
+    vector<pair<int,double>> average_block_Largest_RHSLHS_ratio;
+
+    //average block shapes, where shape is no.of variables / number of constraints
+    vector<pair<int,double>> average_block_shape;
+
+    // Max RHS - Min RHS for each block
+    vector<pair<int,double>> block_RHS_range;
+
+    // Block densities = Non_zeroes / (num constraints * num variables)
+    vector<pair<int,double>> block_densities;
+
     
     // double LSP_prop;
     // double constraints_relaxed_prop;
 };
 
+struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
+    int decomposition_idx;
+    vector<double>* con_vec_ptr;
+    
+   
+    
+    // variable statistics
+    // proportion of problem variables in the subproblem
+    vector<pair<int,double>> variable_props;
+    double average_variable_prop;
+    double stddev_variable_prop;
+    vector<pair<int,double>> bin_props;
+    double average_bin_prop;
+    double stddev_bin_prop;
+    vector<pair<int,double>> int_props;
+    double average_int_prop;
+    double stddev_int_prop;
+    vector<pair<int,double>> cont_props;
+    double average_cont_prop;
+    double stddev_cont_prop;
+
+    // constraint statistics
+    
+    double relaxed_constraint_prop; // proportion of relaxed constraints/total constraints
+    double equality_constraint_prop; // proportion of relaxed constraints which are equality constraints
+    double inequality_constraint_prop; // proportion of relaxed constraints which are inequality constraints
+    double average_equality_prop;
+    double stddev_equality_prop;
+    double average_inequality_prop;
+    double stddev_inequality_prop;
+    double average_total_constraint_prop;
+    double stddev_total_constraint_prop;
+
+    // average of objective coefficients in each of the blocks - This will 
+
+    // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
+    vector<pair<int,double>> average_block_obj_values;
+    vector<pair<int,double>> stddev_block_obj_values;
+
+    // average abs(RHS) value of each block
+    vector<pair<int,double>> average_block_RHS_values;
+
+    vector<pair<int,double>> average_block_Largest_RHSLHS_ratio;
+
+    //average block shapes, where shape is no.of variables / number of constraints
+    vector<pair<int,double>> average_block_shape;
+
+    // Max RHS - Min RHS for each block
+    vector<pair<int,double>> block_RHS_range;
+
+    // Block densities = Non_zeroes / (num constraints * num variables)
+    vector<pair<int,double>> block_densities;
+
+    
+    // double LSP_prop;
+    // double constraints_relaxed_prop;
+};
+
+// calculates the statistics for a given vector of data (min, max, average stddev)
+// stddev is sqrt(1/n sum(x_i - x_mean)^2)
+template <class T1>
+std::tuple<T1,T1,double,double> getStatistics(std::vector<T1> input_vec){
+
+    T1 sum;
+    T1 min;
+    T1 max;
+    for (const auto& element : input_vec){
+        if (element > max){
+            max = element;
+        }
+        if (element < min){
+            min = element;
+        }
+        sum += element;
+    }
+    
+    double average = double(sum) / double(input_vec.size());
+    double variance = 0.0;
+
+    for (const auto& element : input_vec){
+        variance += pow(double(element) - average, 2);
+    }
+
+    double stddev = sqrt(variance / input_vec.size());
+
+    return std::make_tuple(min,max,average,stddev);
+}
 
 // pair_hash used for hashmaps with pair type as the key. Creates a hash of the pair key.
 struct pair_hash
@@ -225,6 +343,7 @@ struct pair_hash
 		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
 	}
 };
+
 
 
 

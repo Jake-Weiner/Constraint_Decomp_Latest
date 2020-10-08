@@ -33,6 +33,10 @@ struct Partition_Struct{
     int getNumNodes(){
         return node_idxs.size();
     }
+
+    int getNumEdges(){
+        return edge_idxs.size();
+    }
     
 };
 
