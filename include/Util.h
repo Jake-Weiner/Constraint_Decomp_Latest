@@ -183,11 +183,14 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
 
     // for each subproblem, store the time required to solve the subproblem
     vector<pair<int,double>> mip_times;
+    vector<pair<int,double>> mip_obj_solutions;
     double average_mip_time;
     double max_mip_time;
     double min_mip_time;
     double stddev_mip_time;
     
+    vector<pair<int,double>> lp_times;
+    vector<pair<int,double>> lp_obj_solutions;
     // vector<double> lp_times;
     // double average_lp_time;
     // double max_lp_time;

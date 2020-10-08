@@ -113,9 +113,9 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     rcs.relaxed_constraint_prop = double(num_con_relaxed) / MP.getNumConstraints();
     
     // subproblem_statistics structure is used
-    Subproblem_Statistics ss = {};
+    Subproblem_Statistics* ss_ptr = new Subproblem_Statistics({});
     // assign decomposition index
-    ss.decomposition_idx = decomposition_idx;
+    ss->decomposition_idx = decomposition_idx;
 
 
     // test partition if required
@@ -143,46 +143,50 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         int number_of_variables_in_subproblem = ps[partition_idx].getNumNodes();
         int number_of_constraints_in_subproblem = ps[partition_idx].getNumEdges();
 
-        ss.block_variable_props.push_back({partition_idx, double(number_of_variables_in_subproblem) / double(HG.getNumNodes())});
+        // subproblem sizes as a proportion of original problem
+        ss->block_variable_props.push_back({partition_idx, double(number_of_variables_in_subproblem) / double(HG.getNumNodes())});
         
         // proportion of variables in each partition which are bin, int and cont
         tuple<int,int,int> variable_counts = MPP.getVariableCounts(ps[partition_idx].node_idxs);
-        ss.bin_props.push_back({partition_idx, double(get<0>(variable_counts)) / double(number_of_variables_in_subproblem)});
-        ss.int_props.push_back({partition_idx, double(get<1>(variable_counts)) / double(number_of_variables_in_subproblem)});
-        ss.cont_props.push_back({partition_idx, double(get<2>(variable_counts)) / double(number_of_variables_in_subproblem)});
+        ss->bin_props.push_back({partition_idx, double(get<0>(variable_counts)) / double(number_of_variables_in_subproblem)});
+        ss->int_props.push_back({partition_idx, double(get<1>(variable_counts)) / double(number_of_variables_in_subproblem)});
+        ss->cont_props.push_back({partition_idx, double(get<2>(variable_counts)) / double(number_of_variables_in_subproblem)});
         
-
         //constraint statistics
-        ss.total_constr_props.push_back({partition_idx,double(number_of_constraints_in_subproblem) / double(HG.getNumEdges())});
+        ss->total_constr_props.push_back({partition_idx,double(number_of_constraints_in_subproblem) / double(HG.getNumEdges())});
         
-        // recheck this ti see if it should be using MP or MPP
+        // recheck this to see if it should be using MP or MPP
         int equality_const_count = MP.getEqualityConstraintCount(ps[partition_idx].edge_idxs);
-        ss.equality_props.push_back({partition_idx, double(equality_const_count) / double(number_of_constraints_in_subproblem)});
-        ss.inequality_props.push_back({partition_idx, 1.00 - (double(equality_const_count) / number_of_constraints_in_subproblem)});
+        ss->equality_props.push_back({partition_idx, double(equality_const_count) / double(number_of_constraints_in_subproblem)});
+        ss->inequality_props.push_back({partition_idx, 1.00 - (double(equality_const_count) / number_of_constraints_in_subproblem)});
 
         // obj coefficients in each block statistics
         double average_block_obj_val_sum = MPP.getConstraintAverageSumObjs(ps[partition_idx].edge_idxs);
-        ss.average_block_obj_values.push_back({partition_idx, average_block_obj_val_sum});
+        ss->average_block_obj_values.push_back({partition_idx, average_block_obj_val_sum});
         bool supply_average = true;
-        ss.stddev_block_obj_values.push_back({partition_idx, MPP.getConstraintStddevSumObjs(ps[partition_idx].edge_idxs,average_block_obj_val_sum, supply_average)});
+        ss->stddev_block_obj_values.push_back({partition_idx, MPP.getConstraintStddevSumObjs(ps[partition_idx].edge_idxs,average_block_obj_val_sum, supply_average)});
         
         // averages of abs(rhs) coefficients in each block
-        ss.average_block_RHS_values.push_back({partition_idx, MPP.getAverageBlockRHS(ps[partition_idx].edge_idxs)});
+        ss->average_block_RHS_values.push_back({partition_idx, MPP.getAverageBlockRHS(ps[partition_idx].edge_idxs)});
         
         // averages of abs(Largest RHS/LHS ratio) coefficients in each block
-        ss.average_block_Largest_RHSLHS_ratio.push_back({partition_idx, MPP.getAverageBlockLargestRHSLHSRatio(ps[partition_idx].edge_idxs)});
+        ss->average_block_Largest_RHSLHS_ratio.push_back({partition_idx, MPP.getAverageBlockLargestRHSLHSRatio(ps[partition_idx].edge_idxs)});
         
         // averages of block shapes
         if (number_of_constraints_in_subproblem != 0){
-            ss.average_block_shape.push_back({partition_idx, double(number_of_variables_in_subproblem) / double(number_of_constraints_in_subproblem)});
+            ss->average_block_shape.push_back({partition_idx, double(number_of_variables_in_subproblem) / double(number_of_constraints_in_subproblem)});
         }
         
-        ss.block_RHS_range.push_back({partition_idx, MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs)});
+        ss->block_RHS_range.push_back({partition_idx, MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs)});
 
-        ss.block_densities.push_back({partition_idx, 
+        ss->block_densities.push_back({partition_idx, 
             double(MPP.getBlockNonZeroes(ps[partition_idx].edge_idxs)) / double(number_of_variables_in_subproblem * number_of_constraints_in_subproblem)});
     }
     
+    // output subproblem statistics
+
+
+
     // get the indices of the different constraint types
     LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
 
