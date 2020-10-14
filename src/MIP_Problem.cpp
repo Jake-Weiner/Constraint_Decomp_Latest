@@ -227,7 +227,18 @@ double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
     return sum_obj_ceoff;   
 }
 
+double MIP_Problem::getVarObjCoeff(const int var_idx, bool& success){
 
+    double obj_coeff = 0.0;
+    for (const auto& obj_pair : objective_fn){
+        if (obj_pair.first == var_idx){
+            obj_coeff = obj_pair.second;
+            success = true;
+            break;
+        }
+    }
+    return obj_coeff;
+}
 
 int MIP_Problem::getEqualityConstraintCount(const std::vector<int>& edge_indexes){
 

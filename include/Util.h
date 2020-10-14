@@ -98,6 +98,7 @@ struct LaPSOOutputFilenames{
     string output_best_lb_filename;
     string output_average_lb_filename;
     string final_lb_filename;
+    string subproblem_statistics_filename;
 };
 
 struct solveLapsoStruct{
@@ -148,7 +149,7 @@ struct instance_statistics{
 struct NSGA_ii_relaxed_constraint_statistics{
 
     int decomposition_idx;
-    vector<double>* con_vec_ptr;
+    
     double LSP_prop;
     double num_constraints_relaxed_prop;
     // proportion of relaxed constraints which are equality
@@ -165,7 +166,7 @@ struct NSGA_ii_relaxed_constraint_statistics{
 
 struct Nonruntime_Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
     int decomposition_idx;
-    vector<double>* con_vec_ptr;
+    
     double LSP_prop;
     double constraints_relaxed_prop;
    
@@ -175,9 +176,11 @@ struct Nonruntime_Relaxed_Constraint_Statistics : public Common_Statistical_Meas
 };
 
 
-struct Subproblem_Statistics : public Common_Statistical_Measures{
+struct Subproblem_Statistics{
+
+    ~Subproblem_Statistics(){};
+
     int decomposition_idx;
-    vector<double>* con_vec_ptr;
     
     // runtime statistics:
 
@@ -195,13 +198,12 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
     double stddev_mip_obj_soln;
     
     vector<double> lp_times;
-    vector<double> lp_obj_solutions;
-
     double average_lp_time;
     double max_lp_time;
     double min_lp_time;
     double stddev_lp_time;
 
+    vector<double> lp_obj_solutions;
     double average_lp_obj_soln;
     double max_lp_obj_soln;
     double min_lp_obj_soln;
@@ -230,36 +232,54 @@ struct Subproblem_Statistics : public Common_Statistical_Measures{
     // constraint statistics
 
     vector<double> total_constr_props; // proportion of total constraints in subproblem
-    vector<double> equality_props;
-    vector<double> inequality_props;
-    double average_equality_prop;
-    double stddev_equality_prop;
-    double average_inequality_prop;
-    double stddev_inequality_prop;
     double average_total_constraint_prop;
     double stddev_total_constraint_prop;
 
+    vector<double> equality_props;
+    double average_equality_prop;
+    double stddev_equality_prop;
+    
+    vector<double> inequality_props;
+    double average_inequality_prop;
+    double stddev_inequality_prop;
+   
     // average of objective coefficients in each of the blocks - This will 
 
     // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
-    vector<double> average_block_obj_values;
-    vector<double> stddev_block_obj_values;
+    vector<double> sum_block_obj_values;
+    double average_of_sum_block_obj_values;
+    double stddev_of_sum_block_obj_values;
+
+    // stddev of abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
+    // vector<double> stddev_block_obj_values;
+    // double average_of_stddev_block_obj_values;
+    // double stddev_of_stddev_block_obj_values;
 
     // average abs(RHS) value of each block
     vector<double> average_block_RHS_values;
+    double average_of_average_block_RHS_values;
+    double stddev_of_average_block_RHS_values;
 
+    //average of block largest RHS/LHS ratios
     vector<double> average_block_Largest_RHSLHS_ratio;
+    double average_of_average_block_Largest_RHSLHS_ratio;
+    double stddev_of_average_block_Largest_RHSLHS_ratio;
 
     //average block shapes, where shape is no.of variables / number of constraints
     vector<double> average_block_shape;
+    double average_of_average_block_shapes;
+    double stddev_of_average_block_shapes;
 
     // Max RHS - Min RHS for each block
     vector<double> block_RHS_range;
+    double average_block_RHS_range;
+    double stddev_block_RHS_range;
 
     // Block densities = Non_zeroes / (num constraints * num variables)
     vector<double> block_densities;
+    double average_block_density;
+    double stddev_block_density;
 
-   
 };
 
 struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
@@ -373,9 +393,10 @@ struct pair_hash
     //average, stddev largest ratio (RHS/LHS)
     //average, stddev sum/coefficients (RHS/LHS)
 
-
 bool fileExists (const std::string& name);
 vector<bool> readInConVecFromFile(const std::string& name);
+vector<double> readInDualsFromFile(const std::string& filename);
+
 
 
 #endif

@@ -155,8 +155,12 @@ void Problem::initProblem(const LaPSORequirements& LR)
     _wallTime = omp_get_wtime();
 
     // create the best_solution and current_solution Solution objects
-    current_solution = new Solution(psize, dsize);
-    best_solution = new Solution(psize, dsize);
+
+    current_solution = std::make_shared<Solution>(psize, dsize);
+
+    // // current_solution = new Solution(psize, dsize);
+    best_solution = std::make_shared<Solution>(psize, dsize);
+    
 
     best_solution->isFeasible = false;
     best_solution->dual.resize(LR.nConstr, 0.0);
@@ -172,36 +176,22 @@ void Problem::initProblem(const LaPSORequirements& LR)
     best_solution->lb = -INF;
 
     // set the dual bounds based on constraint types
-    setDualBoundsEqual(LR.cti->equality_idxs);
-    setDualBoundsLesser(LR.cti->less_than_idxs);
-    setDualBoundsGreater(LR.cti->greater_than_idxs);
+    setDualBoundsEqual(LR.cti.equality_idxs);
+    setDualBoundsLesser(LR.cti.less_than_idxs);
+    setDualBoundsGreater(LR.cti.greater_than_idxs);
 
     if (LR.set_initial_dual_values){
-        for (const auto& dual_pair : (*LR.intial_dual_value_pairs)){
+        for (const auto& dual_pair : LR.intial_dual_value_pairs){
             current_solution->dual[dual_pair.first] = dual_pair.second;
         }
     }
-
-    // figure out what range of duals makes sense
-    // initialise duals = 0?
-    // if (best_solution->dual.size() < (size_t)dsize)
-    //     best_solution->dual.resize(dsize, 0.0);
-    // if (best_solution->rc.size() < (size_t)psize)
-    //     best_solution->rc.resize(psize, 0.0);
-    // hooks.reducedCost(*best_solution);
-
-    // find biggest absolute value reduced cost
-    // const double maxCost = std::max(
-    //     *std::max_element(best_solution->rc.begin(), best_solution->rc.end()),
-    //     -*std::min_element(best_solution->rc.begin(), best_solution->rc.end()));
-
-    // Uniform rand;
-    // rand.seed(1);
 }
 
 void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 {
+
     for (auto& idx : idxs) {
+        printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
         dualUB[idx] = INF;
     }
@@ -209,14 +199,18 @@ void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 
 void Problem::setDualBoundsLesser(const std::vector<int>& idxs)
 {
+    
     for (auto& idx : idxs) {
+        printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
         dualUB[idx] = 0;
     }
 }
 void Problem::setDualBoundsGreater(const std::vector<int>& idxs)
 {
+   
     for (auto& idx : idxs) {
+        printf("constraint idx is %d", idx);
         dualLB[idx] = 0;
         dualUB[idx] = INF;
     }
@@ -240,7 +234,7 @@ void Problem::solve(UserHooks& hooks)
     //     printf("initial dual max is %f:\n", initial_dual_max);
     // }
     double bestLB;
-
+    printf("rc size is %f", current_solution->rc.size());
     Uniform rand; //
 
     if (param.randomSeed != 0)
@@ -465,7 +459,6 @@ void Problem::initialise(UserHooks& hooks)
 // upper bound and primal solution, however it may not return true if the lower bound has not been improved
 bool Problem::updateBest(UserHooks& hooks, int nIter)
 {
-
     bool improved = false;
     if (current_solution->lb > best_solution->lb) {
         //update best_solution's lower bound

@@ -53,6 +53,11 @@ struct Param {
     const char* run_MIP_Duals_testing = "false";
     const char* run_LR_testing = "false";
     const char* run_statistic_testing_flag = "false";
+
+
+    const char* con_vec_filename = "";
+    const char* subproblem_statistics_filename = "";
+
     const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;
     const char* subproblem_var_prop = "";

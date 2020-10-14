@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <memory>
 
 #include <type_traits>
 #include <typeinfo>
@@ -21,7 +22,8 @@ using namespace boost;
 using namespace std;
 
 ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions,
-    const vector<bool>& con_vec, const bool printing, const double sp_solve_time_limit, Subproblem_Statistics* subproblem_statistics_ptr)
+    const vector<bool>& con_vec, const bool printing, const double sp_solve_time_limit, 
+    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr)
 {
     this->OP = original_problem;
     this->debug_printing = printing;
@@ -49,13 +51,63 @@ void ConDecomp_LaPSO_Connector::initOriginalCosts()
     }
 }
 
+// converts the indicies of the equality,less,greater than indexes from the original indices to the dual indices
+LaPSO::constraint_type_indicies ConDecomp_LaPSO_Connector::convertOriginalConstraintTypeIndicies(const LaPSO::constraint_type_indicies& cti){
+
+    std::vector<int> dual_equality_idxs;
+    std::vector<int> dual_less_than_idxs;
+    std::vector<int> dual_greater_than_idxs;
+
+    // convert equality constraint indicies
+    for (auto& idx : cti.equality_idxs){
+        if (orig_constraint_idx_to_dual_idx_map.find(idx) != orig_constraint_idx_to_dual_idx_map.end()){
+            dual_equality_idxs.push_back(orig_constraint_idx_to_dual_idx_map[idx]);
+        }
+    }
+
+    // convert equality constraint indicies
+    for (auto& idx : cti.less_than_idxs){
+        if (orig_constraint_idx_to_dual_idx_map.find(idx) != orig_constraint_idx_to_dual_idx_map.end()){
+            dual_less_than_idxs.push_back(orig_constraint_idx_to_dual_idx_map[idx]);
+        }
+    }
+
+    // convert equality constraint indicies
+    for (auto& idx : cti.greater_than_idxs){
+        if (orig_constraint_idx_to_dual_idx_map.find(idx) != orig_constraint_idx_to_dual_idx_map.end()){
+            dual_greater_than_idxs.push_back(orig_constraint_idx_to_dual_idx_map[idx]);
+        }
+    }
+
+    LaPSO::constraint_type_indicies dual_indicies{dual_equality_idxs, dual_less_than_idxs, dual_greater_than_idxs};
+    return dual_indicies;
+
+}
+
+// convert the original constraint indicies with dual values to the dual indicies
+vector<initial_dual_value_pair> ConDecomp_LaPSO_Connector::convertOriginalConstraintInitialDualIndicies(const std::vector<initial_dual_value_pair>& original_initial_dual_pairs){
+    vector<initial_dual_value_pair> dual_index_pair_values;
+    for (const auto& dual_constraint_pair : original_initial_dual_pairs){
+        int orig_constraint_idx = dual_constraint_pair.first;
+        // check if the original constraint maps to a dual constraint (i.e is one of the relaxed constraints)
+        if (orig_constraint_idx_to_dual_idx_map.find(orig_constraint_idx) != orig_constraint_idx_to_dual_idx_map.end()){
+            int dual_idx = orig_constraint_idx_to_dual_idx_map[orig_constraint_idx];
+            dual_index_pair_values.push_back({dual_idx, dual_constraint_pair.second});
+        }
+    }
+    return dual_index_pair_values;
+}
+
+
 // create a mapping between the dual variable indexes and the original constraint indexes
 void ConDecomp_LaPSO_Connector::populateDualIdxToOrigIdxMap(const vector<bool>& con_relax_vector){
 
+    //dual idx is assigned as the count index
     int con_relaxation_count = 0;
     for (int orig_con_idx=0; orig_con_idx<con_relax_vector.size(); ++orig_con_idx){
         if (con_relax_vector[orig_con_idx] == true){
             dual_idx_to_orig_constraint_idx_map[con_relaxation_count] = orig_con_idx;
+            orig_constraint_idx_to_dual_idx_map[orig_con_idx] = con_relaxation_count;
             ++con_relaxation_count;
         }
     }
@@ -182,6 +234,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
 
 Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 {
+
 
     //reset the reduced costs to the original costs
     for (int i = 0; i < s.rc.size(); i++) {

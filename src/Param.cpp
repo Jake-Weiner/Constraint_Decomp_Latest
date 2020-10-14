@@ -46,6 +46,9 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_statistic_testing_flag");
  
 
+    // output files
+    parser.setOption("subproblem_statistics_filename");
+
 
 
     parser.setOption("run_evaluate_decompositions_testing_flag");
@@ -61,6 +64,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_lapso");
     parser.setOption("nsga_decomp_output_file");
     parser.setOption("random_lb_output");
+    parser.setOption("con_vec_filename");
 
     if (argc == -1) // abuse of function
         parser.processFile(*argv);
@@ -118,7 +122,15 @@ void Param::parse(int argc, const char** argv)
         random_lb_output = parser.getValue("random_lb_output");
     if (parser.getValue("nsga_decomp_output_file"))
         nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");
+    if (parser.getValue("con_vec_filename"))
+        con_vec_filename = parser.getValue("con_vec_filename");
+        
 
+    // output files
+    if (parser.getValue("subproblem_statistics_filename"))
+        subproblem_statistics_filename = parser.getValue("subproblem_statistics_filename");
+        
+    
     // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");

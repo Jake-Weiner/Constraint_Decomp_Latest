@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "Util.h"
+#include <memory>
 
 class Writer{
 
@@ -53,7 +54,7 @@ class Writer{
         void writeRelaxedConstraintStatistics(){};
         void writeCPLEXResults(const std::string& output_filename, const std::string& instnace_name, const CPLEX_Return_struct& CRS);
         void writeMIPParsingResults(const std::string& output_filename, const MIP_Parsing_Test_struct& MPTS);
-        void writeSubproblemStatistics(const std::string& output_filename, Subproblem_Statistics* ss_ptr);
+        void writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblem_Statistics> ss_ptr);
     private:
 
 };

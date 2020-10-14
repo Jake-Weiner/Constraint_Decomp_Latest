@@ -22,9 +22,10 @@
 #include <string>
 #include <utility> // for std::pair<>
 #include <vector>
+#include <memory>
 
 
-typedef std::pair<int,double> initial_daul_value_pair;
+typedef std::pair<int,double> initial_dual_value_pair;
 
 namespace LaPSO {
 
@@ -112,15 +113,14 @@ namespace LaPSO {
     };
 
     struct LaPSORequirements{
-        constraint_type_indicies* cti;
+        constraint_type_indicies cti;
         int nVar = 0;
         int nConstr = 0;
         double best_ub = 0.0;
         bool benchmark_ub_flag = false;
         double best_lb = -INF;
-        std::vector<initial_daul_value_pair>* intial_dual_value_pairs;
+        std::vector<initial_dual_value_pair> intial_dual_value_pairs;
         bool set_initial_dual_values = false;
-
     };
 
     /** integer vector with  some extra convenience methods */
@@ -247,7 +247,9 @@ namespace LaPSO {
         Solution(const Solution& other);
         // void swap(Solution& rhs);
         // Solution& operator=(const Solution& other);
-        virtual ~Solution() {}
+        virtual ~Solution() {
+            std::cout << "Deleting Solution" << std::endl;
+        }
         /// resize particle to problem size
         void resize(size_t numVar, size_t numConstr);
         DblVec dual; ///< lagrange multiplier for each relaxed constraint
@@ -331,11 +333,10 @@ namespace LaPSO {
         /// Constructor with size (number of variables and constraints)
         Problem(int nVar, int nConstr);
         ~Problem()
-        { // clear out particles
-            delete current_solution;
-            delete best_solution;
+        { 
         }
 
+        
         void initProblem(const LaPSORequirements& LR);
         /// Problem definition:
         int psize; ///< primal size, number of variables
@@ -359,13 +360,15 @@ namespace LaPSO {
         /// If the swarm is initialised by the user it should have each
         /// particle of the correct size and with dual vectors forming a
         /// suitably diverse initial distribution of starting points.
-        Solution* current_solution;
-        Solution* best_solution; ///< best solution found so far
+        // Solution* current_solution;
+      
 
+        std::shared_ptr<Solution> current_solution;
+        std::shared_ptr<Solution> best_solution;   ///< best solution found so far
 
-        std::vector<Solution*> swarm_primal_time;
-        std::vector<Solution*> best_particles; // this vector stores best lower bound solutions if only 1 particle is used. Replacement for swarm
-        std::vector<Solution*> best_particles_primal_time;
+        // std::vector<Solution*> swarm_primal_time;
+        // std::vector<Solution*> best_particles; // this vector stores best lower bound solutions if only 1 particle is used. Replacement for swarm
+        // std::vector<Solution*> best_particles_primal_time;
         std::vector<double> average_lb_tracking;
         std::vector<double> average_ub_tracking;
         std::vector<double> average_viol_tracking;

@@ -10,15 +10,8 @@ LaPSOHandler::LaPSOHandler(int& argc, const char** argv, LaPSO::LaPSORequirement
 
 void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequirements& lr){
 
-    // fill in requirements for initialising LaPSO
-   
-    // lr.cti = &cti;
-    // lr.nVar = num_var;
-    // lr.nConstr = num_con;
-    // lr.best_ub = best_ub_sol;
-    // lr.benchmark_ub_flag = true;
-    // lr.best_lb = -INF;
-    // initialise the solver 
+
+    //initialise the solver 
     solver.initProblem(lr); // 
     
     // override default parameter values with command line arguments

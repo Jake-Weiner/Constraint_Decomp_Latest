@@ -92,7 +92,7 @@ vector<double> getCplexConVector(string cplex_filename)
 
 void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
     const double& best_ub_sol, const LaPSOOutputFilenames& LOF, int decomposition_idx,
-    const double sp_solver_time_limit, const int LR_iter_limit, std::vector<initial_daul_value_pair>* intial_dual_value_pairs, bool set_initial_dual_values = false, 
+    const double sp_solver_time_limit, const int LR_iter_limit, std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false, 
     bool debug_printing = false)
 {
 
@@ -113,10 +113,9 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     rcs.relaxed_constraint_prop = double(num_con_relaxed) / MP.getNumConstraints();
     
     // subproblem_statistics structure is used
-    Subproblem_Statistics* ss_ptr = new Subproblem_Statistics({});
+    std::shared_ptr<Subproblem_Statistics> ss_ptr = std::make_shared<Subproblem_Statistics>();
     // assign decomposition index
     ss_ptr->decomposition_idx = decomposition_idx;
-
 
     // test partition if required
     bool test_hypergraph_partitioning = false;
@@ -126,7 +125,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
     
     // the LaPSO method
-    bool debug_printing = true;
+    debug_printing = true;
     ConDecomp_LaPSO_Connector CLC(MP, ps,con_relax_vector, debug_printing, sp_solver_time_limit, ss_ptr);
 
     // based on the partitioned structures, calculate variable/constraint information.
@@ -155,38 +154,128 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         //constraint statistics
         ss_ptr->total_constr_props.push_back(double(number_of_constraints_in_subproblem) / double(HG.getNumEdges()));
         
-        // recheck this to see if it should be using MP or MPP
-        int equality_const_count = MP.getEqualityConstraintCount(ps[partition_idx].edge_idxs);
-        ss_ptr->equality_props.push_back(double(equality_const_count) / double(number_of_constraints_in_subproblem));
-        ss_ptr->inequality_props.push_back(1.00 - (double(equality_const_count) / number_of_constraints_in_subproblem));
+        // get block equality/inequality constraint props
+        double equality_const_prop = MPP.getBlockEqualityConstraintProp(ps[partition_idx].edge_idxs);
+        ss_ptr->equality_props.push_back(equality_const_prop);
+        ss_ptr->inequality_props.push_back(1.00 - equality_const_prop);
 
-        // obj coefficients in each block statistics
-        double average_block_obj_val_sum = MPP.getConstraintAverageSumObjs(ps[partition_idx].edge_idxs);
-        ss_ptr->average_block_obj_values.push_back(average_block_obj_val_sum);
-        bool supply_average = true;
-        ss_ptr->stddev_block_obj_values.push_back(MPP.getConstraintStddevSumObjs(ps[partition_idx].edge_idxs,average_block_obj_val_sum, supply_average));
+        // sum of obj coefficients of variables in each block
+       
+        double sum_block_obj_val = MPP.getBlockSumObjs(ps[partition_idx].node_idxs);
+        ss_ptr->sum_block_obj_values.push_back(sum_block_obj_val);
         
         // averages of abs(rhs) coefficients in each block
-        ss_ptr->average_block_RHS_values.push_back(MPP.getAverageBlockRHS(ps[partition_idx].edge_idxs));
-        
+        if (number_of_constraints_in_subproblem != 0){
+            ss_ptr->average_block_RHS_values.push_back(MPP.getAverageBlockRHS(ps[partition_idx].edge_idxs));
+        }
         // averages of abs(Largest RHS/LHS ratio) coefficients in each block
-        ss_ptr->average_block_Largest_RHSLHS_ratio.push_back(MPP.getAverageBlockLargestRHSLHSRatio(ps[partition_idx].edge_idxs));
-        
+        if (number_of_constraints_in_subproblem != 0){
+            ss_ptr->average_block_Largest_RHSLHS_ratio.push_back(MPP.getAverageBlockLargestRHSLHSRatio(ps[partition_idx].edge_idxs));
+        }
         // averages of block shapes
         if (number_of_constraints_in_subproblem != 0){
             ss_ptr->average_block_shape.push_back(double(number_of_variables_in_subproblem) / double(number_of_constraints_in_subproblem));
         }
-        
-        ss_ptr->block_RHS_range.push_back(MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs));
-
-        ss_ptr->block_densities.push_back(
+        if (number_of_constraints_in_subproblem != 0){
+            ss_ptr->block_RHS_range.push_back(MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs));
+        }
+        if (number_of_constraints_in_subproblem != 0){
+            ss_ptr->block_densities.push_back(
             double(MPP.getBlockNonZeroes(ps[partition_idx].edge_idxs)) / double(number_of_variables_in_subproblem * number_of_constraints_in_subproblem));
+        }
     }
     
     // calculate required statistical measures from data collected
     // min,max,average,stddev
 
-    // mip times
+
+    // subproblem sizes
+    tuple<double,double,double,double> subproblem_sizes_statistics = getStatistics(ss_ptr->block_variable_props);
+    ss_ptr->max_block_variable_prop = get<1>(subproblem_sizes_statistics);
+    ss_ptr->average_block_variable_prop = get<2>(subproblem_sizes_statistics);
+    ss_ptr->stddev_block_variable_prop = get<3>(subproblem_sizes_statistics);
+
+    // binary variable props
+    tuple<double,double,double,double> binary_prop_statistics = getStatistics(ss_ptr->bin_props);
+    ss_ptr->average_bin_prop = get<2>(binary_prop_statistics);
+    ss_ptr->stddev_bin_prop = get<3>(binary_prop_statistics);
+
+    // int variable props
+    tuple<double,double,double,double> int_prop_statistics = getStatistics(ss_ptr->int_props);
+    ss_ptr->average_int_prop = get<2>(int_prop_statistics);
+    ss_ptr->stddev_int_prop = get<3>(int_prop_statistics);
+
+    // cont variable props
+    tuple<double,double,double,double> cont_prop_statistics = getStatistics(ss_ptr->cont_props);
+    ss_ptr->average_cont_prop = get<2>(cont_prop_statistics);
+    ss_ptr->stddev_cont_prop = get<3>(cont_prop_statistics);
+
+    // total constraint props
+    tuple<double,double,double,double> total_constr_prop_statistics = getStatistics(ss_ptr->total_constr_props);
+    ss_ptr->average_total_constraint_prop = get<2>(total_constr_prop_statistics);
+    ss_ptr->stddev_total_constraint_prop = get<3>(total_constr_prop_statistics);
+
+    // equality constraints props
+    tuple<double,double,double,double> equality_prop_statistics = getStatistics(ss_ptr->equality_props);
+    ss_ptr->average_equality_prop = get<2>(equality_prop_statistics);
+    ss_ptr->stddev_equality_prop = get<3>(equality_prop_statistics);
+
+    //  block objective values
+    tuple<double,double,double,double> block_sum_objective_values_statistics = getStatistics(ss_ptr->sum_block_obj_values);
+    ss_ptr->average_of_sum_block_obj_values = get<2>(block_sum_objective_values_statistics);
+    ss_ptr->stddev_of_sum_block_obj_values = get<3>(block_sum_objective_values_statistics);
+
+    // block RHS values
+    tuple<double,double,double,double> block_RHS_statistics = getStatistics(ss_ptr->average_block_RHS_values);
+    ss_ptr->average_of_average_block_RHS_values = get<2>(block_RHS_statistics);
+    ss_ptr->stddev_of_average_block_RHS_values = get<3>(block_RHS_statistics);
+
+    // block largest RHS/LHS statistics
+    tuple<double,double,double,double> block_RHSLHS_statistics = getStatistics(ss_ptr->average_block_Largest_RHSLHS_ratio);
+    ss_ptr->average_of_average_block_Largest_RHSLHS_ratio = get<2>(block_RHSLHS_statistics);
+    ss_ptr->stddev_of_average_block_Largest_RHSLHS_ratio = get<3>(block_RHSLHS_statistics);
+
+    // block largest RHS/LHS statistics
+    tuple<double,double,double,double> average_block_shape_statistics = getStatistics(ss_ptr->average_block_shape);
+    ss_ptr->average_of_average_block_shapes = get<2>(average_block_shape_statistics);
+    ss_ptr->stddev_of_average_block_shapes = get<3>(average_block_shape_statistics);
+
+    // block RHS ranges
+    tuple<double,double,double,double> block_RHS_range_statistics = getStatistics(ss_ptr->block_RHS_range);
+    ss_ptr->average_block_RHS_range = get<2>(block_RHS_range_statistics);
+    ss_ptr->stddev_block_RHS_range = get<3>(block_RHS_range_statistics);
+
+    // block densities
+    tuple<double,double,double,double> block_density_statistics = getStatistics(ss_ptr->block_densities);
+    ss_ptr->average_block_RHS_range = get<2>(block_density_statistics);
+    ss_ptr->stddev_block_RHS_range = get<3>(block_density_statistics);
+
+    
+    // get the indices of the different constraint types
+    LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
+
+ 
+
+    // set up the initial requirements for LaPSO initialisation
+    LaPSO::LaPSORequirements LR = {};
+    LR.cti = CLC.convertOriginalConstraintTypeIndicies(original_constraint_indices);
+    LR.nVar = HG.getNumNodes();
+    LR.nConstr = num_con_relaxed;
+    LR.best_ub = best_ub_sol;
+    LR.benchmark_ub_flag = true;
+    LR.intial_dual_value_pairs = CLC.convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
+    LR.set_initial_dual_values = set_initial_dual_values;
+    
+
+    // Create the LaPSO Handler object which controls LaPSO process
+    cout << "Setting up LaPSO Handler" << endl;
+    LaPSOHandler LH(argc, argv, LR);
+
+    // solve Lagrangian Relaxation
+    cout << "solving Lagrangian Relaxation" << endl;
+    LH.solve(CLC);
+
+    //  // mip times
     tuple<double,double,double,double> mip_time_statistics = getStatistics(ss_ptr->mip_times);
     ss_ptr->max_mip_time = get<1>(mip_time_statistics);
     ss_ptr->average_mip_time = get<2>(mip_time_statistics);
@@ -210,39 +299,10 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_lp_obj_soln = get<2>(lp_obj_soln_statistics);
     ss_ptr->stddev_lp_obj_soln = get<3>(lp_obj_soln_statistics);
 
-    // subproblem sizes
-    tuple<double,double,double,double> subproblem_sizes_statistics = getStatistics(ss_ptr->block_variable_props);
-    ss_ptr->max_block_variable_prop = get<1>(subproblem_sizes_statistics);
-    ss_ptr->average_block_variable_prop = get<2>(subproblem_sizes_statistics);
-    ss_ptr->stddev_block_variable_prop = get<3>(subproblem_sizes_statistics);
-
-    
-
-
     // output subproblem statistics
+    Writer w;
+    w.writeSubproblemStatistics(LOF.subproblem_statistics_filename,ss_ptr);
 
-
-
-    // get the indices of the different constraint types
-    LaPSO::constraint_type_indicies cti = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
-
-    // set up the initial requirements for LaPSO initialisation
-    LaPSO::LaPSORequirements LR = {};
-    LR.cti = &cti;
-    LR.nVar = HG.getNumNodes();
-    LR.nConstr = num_con_relaxed;
-    LR.best_ub = best_ub_sol;
-    LR.benchmark_ub_flag = true;
-    LR.intial_dual_value_pairs = intial_dual_value_pairs;
-    LR.set_initial_dual_values = set_initial_dual_values;
-    
-    // Create the LaPSO Handler object which controls LaPSO process
-    LaPSOHandler LH(argc, argv, LR);
-    // solve Lagrangian Relaxation
-    LH.solve(CLC);
-
-    
-    // int largest_sp = HG.getLargestPartition();
 
     // Writer w;
     // w.writeAverageLBPlot(largest_sp, num_con_relaxed, LH.getSolverAverageLBTracking(), LH.getSolverTimingTracking(), output_average_lb_filename);
@@ -317,6 +377,7 @@ int main(int argc,const char** argv)
     // Parse in parameters
     mainParam::Param para;
     para.parse(argc, argv);
+
     // Manipulate/transform parameters from char to required values through Adapter
     ParamAdapter PA(para);
     Writer w;
@@ -572,23 +633,25 @@ int main(int argc,const char** argv)
         std::cout << std::endl;
         //void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
     //const double& best_ub_sol, const LaPSOOutputFilenames& LOF, const double sp_solver_time_limit)
-        solveLapso(argc, argv, MP, HG, test_convec1, para.set_ub, LOF, 100, 100, {}, false);
+       std::vector<initial_dual_value_pair> idvp;
+       int decomposition_idx = 0;
+        solveLapso(argc, argv, MP, HG, test_convec1, para.set_ub, LOF, decomposition_idx, 100, 100, idvp, false);
 
         vector<bool> test_convec2 = { false, true, true };
         std::cout << "original constraint relaxed vector is " << std::endl;
         for (const auto& con_val : test_convec2) {
             std::cout << con_val << " ";
         }
-
-        std::vector<initial_daul_value_pair> idvp_2;
+        ++decomposition_idx;
+        std::vector<initial_dual_value_pair> idvp_2;
         idvp_2.push_back({0,-11});
         idvp_2.push_back({1,0});
-        int decomposition_idx = 1;
+        
         bool set_inital_dual_values = true;
 
         //  solveLapso(argc, argv, MP, HG, test_decomposition, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim, 
         // LR_iter_limit, &dual_values_from_LP, set_initial_dual_values);
-        solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx, 100,100, &idvp_2, set_inital_dual_values);
+        solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx, 100,100, idvp_2, set_inital_dual_values);
         std::cout << std::endl;
         exit(0);
 
@@ -598,33 +661,53 @@ int main(int argc,const char** argv)
         
 
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested. 
-
-
         // get in the dual values for all constraints
+        // vector<initial_daul_value_pair> dual_values_from_LP;
+        // MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
+        // bool solve_as_LP = true;
+    
+        // CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), true);
+        // cout << "LP bound is" << MIP_results.bound << endl;
+        // for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
+        //     dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
+        //     cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
+        // }
 
-        vector<initial_daul_value_pair> dual_values_from_LP;
-        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-
-        bool solve_as_LP = true;
-        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), true);
-        cout << "LP bound is" << MIP_results.bound << endl;
-        for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
-            dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
-            cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
-        }
+     
         
         // assign a decomposition index
         int decomposition_idx = 0;
-        vector<bool> test_decomposition = {true, false, false};
-
-        LaPSOOutputFilenames LOF = {};
+        // for test_mip 1...
+        // get the constraint vector from external file.
+        cout << "here" << endl;
+        vector<bool> con_vec_readin = readInConVecFromFile(string(para.con_vec_filename));
+        vector<initial_dual_value_pair> test_dual_values;
+        for (int i=0; i<con_vec_readin.size(); ++i){
+            test_dual_values.push_back({i,0});
+        }
+        cout << "con vec size is " << con_vec_readin.size() << endl;
+        for (int i=0; i<test_dual_values.size(); ++i){
+            cout << test_dual_values[i].first << test_dual_values[i].second << " ";
+        }
+        cout  << endl;
         bool set_initial_dual_values = true;
-        int LR_iter_limit = 1;
+        LaPSOOutputFilenames LOF = {};
+        LOF.subproblem_statistics_filename = string(para.subproblem_statistics_filename);
+        cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_filename) << endl;
+        int LR_iter_limit = 2;
         int subproblem_solver_time_lim = 100;
-        solveLapso(argc, argv, MP, HG, test_decomposition, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim, 
-        LR_iter_limit, &dual_values_from_LP, set_initial_dual_values);
-        
-        //generate 
+        solveLapso(argc, argv, MP, HG, con_vec_readin, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim, 
+        LR_iter_limit, test_dual_values, set_initial_dual_values);
+
+        exit(0);
+        // for test_mip 2...
+        //vector<bool> test_convec2 = {true, true, true, false, false, false, false, false};
+       
+
+        // solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim, 
+        // LR_iter_limit
+        // , &dual_values_from_LP, set_initial_dual_values);
+  
 
 
     }

@@ -100,6 +100,18 @@ class MIP_Problem{
             objective_fn.push_back(term);
         }
 
+        bool constraintIndexValidity(int index){
+            if (index < constraints.size() && index >= 0){
+                return true;
+            }
+        }
+
+        bool variableIndexValidity(int index){
+            if (index < variables.size() && index >= 0){
+                return true;
+            }
+        }
+
         int getNumBin();
         int getNumInt();
         int getNumCont();
@@ -110,6 +122,7 @@ class MIP_Problem{
         double getStddevConstraintDensity();
         double getEqualityConstraintProp();
         double getInequalityConstraintProp();
+        double getVarObjCoeff(const int var_idx, bool& success);
 
         int getEqualityConstraintCount(const std::vector<int>& edge_indexes);
 
@@ -118,10 +131,13 @@ class MIP_Problem{
         int number_variables;
         vector<Constraint> constraints;
         vector<Variable> variables;
+        // variable index and coefficient in the objective function
         vector<pair<int,double>> objective_fn; 
         vector<int> variables_obj_fn;
         vector<double> coeff_obj_fn;
         Optimisation_Type OT;
+
+
     
     private:
         bool variable_types_counted = false;
@@ -138,16 +154,8 @@ class MIP_Problem{
         void setEqualityConstraintCount();
         void countVarTypes();
         void countNonZeros();
-        bool variableIndexValidity(int index){
-            if (index < variables.size() && index >= 0){
-                return true;
-            }
-        }
-        bool constraintIndexValidity(int index){
-            if (index < constraints.size() && index >= 0){
-                return true;
-            }
-        }
+        
+
 };  
 
 #endif

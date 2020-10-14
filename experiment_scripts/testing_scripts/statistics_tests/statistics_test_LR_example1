@@ -1,8 +1,8 @@
 #!/bin/bash
 
-INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/LR"
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics"
 executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
-instance_name="LR_test1.mps"
+instance_name="test1.mps"
 
 if test -f $INPUT_FILE; then
     echo "$INPUT_FILE exists."
@@ -12,12 +12,14 @@ else
 fi
 
 $executable_path/main_test --input_root_folder=$INPUT_DIR \
---subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9 --nsga_pop_size=8 --printLevel=3 \
 --output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
---nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps \
---solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP \
---set_ub=20 --run_nsga_decomp=false --nsga_gen=5 --input_instance_name=$instance_name --decomp_type=NSGA --maxCPU=1000 \
---run_statistic_testing_flag=true \
+--input_instance_name=$instance_name --maxCPU=1000 \
+--run_statistic_testing_flag=true --con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/test_case1_con_vec.csv \
+--subproblem_statistics_filename=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test1.csv
 
 
-
+valgrind --verbose ./main_test --input_root_folder=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics \
+--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
+--input_instance_name=test1.mps --maxCPU=1000 \
+--run_statistic_testing_flag=true --con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/test_case1_con_vec.csv \
+--subproblem_statistics_filename=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test1.csv

@@ -112,7 +112,7 @@ class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 
 public:
     ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<bool>& con_vec,const bool printing, const double sp_solve_time_limit, 
-    Subproblem_Statistics* subproblem_statistics_ptr);
+    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr);
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
@@ -129,6 +129,8 @@ public:
     void setPrinting(bool p) { debug_printing = p; }
     void endCplexEnvs();
     int getOriginalConIdx(int dual_idx);
+    LaPSO::constraint_type_indicies convertOriginalConstraintTypeIndicies(const LaPSO::constraint_type_indicies& cti);
+    vector<initial_dual_value_pair> convertOriginalConstraintInitialDualIndicies(const std::vector<initial_dual_value_pair>& original_initial_dual_pairs);
 
 private:
     void updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s);
@@ -143,7 +145,8 @@ private:
     DblVec original_costs;
     double sp_solve_time_limit;
     unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
-    Subproblem_Statistics* subproblem_statistics_ptr;
+    unordered_map<int, int> orig_constraint_idx_to_dual_idx_map;
+    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr;
 };
 
 #endif

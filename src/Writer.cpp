@@ -137,3 +137,62 @@ void Writer::writeMIPParsingResults(const std::string& output_filename, const MI
     outfile.close();
 }
 
+
+//
+void Writer::writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblem_Statistics> ss_ptr){
+
+    // If file doesn't exist populate the column names for features
+    if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile) {
+            outfile << "Decomposition Index" << "," << "Average MIP Time (s)"<< "," << "Stddev MIP Time" 
+            << "," << "Max MIP Time (s)" << "," << "Average MIP Bound" << "," << "Stddev MIP Bound" 
+            << "," << "Average LP Time (s)" << "," << "Stddev LP Time" << "," << "Max LP Time (s)"
+            << "," << "Average LP Bound" << "," << "Stddev LP Bound" << "," << "Average Subproblem Size (Prop of Variables)" 
+            << "," << "Stddev Subproblem Size" << "," << "Max Subproblem Size" << "," << "Average Block Bin Prop"
+            << "," << "Stddev Block Bin Prop" << "," << "Average Block Int Prop" << "," << "Stddev Block Int Prop"
+            << "," << "Average Block Cont Prop" << "," << "Stddev Block Cont Prop" << "," << "Average Block Constraint Prop"
+            << "," << "Stddev Block Constraint Prop" << "," << "Average Block Equality Prop" <<  "," << "Stddev Block Equality Prop"
+            << "," << "Average of Sum Block Objectives" << "," << "Stddev of Sum Block Objectives" 
+            << "," << "Average of Average Block RHS" << "," << "Stddev of Average Block RHS"
+            << "," << "Average of Average Block Largest RHS/LHS Ratio" << "," << "Stddev of Average Block Largest RHS/LHS Ratio"
+            << "," << "Average of Average Block Shape" << "," << "Stddev of Average Block Shape"
+            << "," << "Average Block RHS Range" << "," << "Stddev Block RHS Range"
+            << "," << "Average Block Density" << "," << "Stddev Block Density"
+            << endl;
+        }
+        else{
+            cout << "unable to open Subproblem Statistics File: " << output_filename << endl;
+        }
+        outfile.close();
+    }
+    // Then populate file with statistics
+    
+    std::ofstream outfile;
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << ss_ptr->decomposition_idx << "," << ss_ptr->average_mip_time << "," << ss_ptr->stddev_mip_time
+        << "," << ss_ptr->max_mip_time << "," << ss_ptr->average_mip_obj_soln << "," << ss_ptr->stddev_mip_obj_soln
+        << "," << ss_ptr->average_lp_time << "," << ss_ptr->stddev_lp_time << "," << ss_ptr->max_lp_time
+        << "," << ss_ptr->average_lp_obj_soln << "," << ss_ptr->stddev_lp_obj_soln << "," << ss_ptr->average_block_variable_prop
+        << "," << ss_ptr->stddev_block_variable_prop << "," << ss_ptr->max_block_variable_prop << "," << ss_ptr->average_bin_prop
+        << "," << ss_ptr->stddev_bin_prop << "," << ss_ptr->average_int_prop << "," << ss_ptr->stddev_int_prop
+        << "," << ss_ptr->average_cont_prop << "," << ss_ptr->stddev_cont_prop << "," << ss_ptr->average_total_constraint_prop
+        << "," << ss_ptr->stddev_total_constraint_prop << "," << ss_ptr->average_equality_prop <<  "," << ss_ptr->stddev_equality_prop
+        << "," << ss_ptr->average_of_sum_block_obj_values << "," << ss_ptr->stddev_of_sum_block_obj_values
+        << "," << ss_ptr->average_of_average_block_RHS_values << "," << ss_ptr->stddev_of_average_block_RHS_values
+        << "," << ss_ptr->average_of_average_block_Largest_RHSLHS_ratio << "," << ss_ptr->stddev_of_average_block_Largest_RHSLHS_ratio
+        << "," << ss_ptr->average_of_average_block_shapes << "," << ss_ptr->stddev_of_average_block_shapes
+        << "," << ss_ptr->average_block_RHS_range << "," << ss_ptr->stddev_block_RHS_range
+        << "," << ss_ptr->average_block_density << "," << ss_ptr->stddev_block_density
+        << endl;
+    }
+    else{
+        cout << "unable to open Subproblem Statistics File: " << output_filename << endl;
+    }
+    outfile.close();
+    
+    cout << "finished writing Subproblem Statistics" << endl;
+    
+}

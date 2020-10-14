@@ -1,8 +1,7 @@
 #include "MIPProblemProbe.h"
 #include <math.h>
 
-MIPProblemProbe::MIPProblemProbe(MIP_Problem* MP_ptr)
-    : MP_ptr(MP_ptr)
+MIPProblemProbe::MIPProblemProbe(MIP_Problem* MP_ptr) : MP_ptr(MP_ptr)
 {
 }
 
@@ -13,9 +12,9 @@ std::tuple<int, int, int> MIPProblemProbe::getVariableCounts(const std::vector<i
     int cont_count = 0;
     for (const auto& variable_idx : variable_indexes) {
         Variable v = MP_ptr->getVariable(variable_idx);
-        if (v.getVarType == Bin) {
+        if (v.getVarType() == Bin) {
             ++bin_count;
-        } else if (v.getVarType == Int) {
+        } else if (v.getVarType() == Int) {
             ++int_count;
         } else {
             ++cont_count;
@@ -56,39 +55,39 @@ std::vector<double> MIPProblemProbe::getConstraintSumObjs(const std::vector<int>
 }
 
 // returns the average sum obj coeffs for the group of constraint indexes supplied
-double MIPProblemProbe::getConstraintAverageSumObjs(const std::vector<int>& constraint_idxs)
-{
+// double MIPProblemProbe::getConstraintAverageSumObjs(const std::vector<int>& constraint_idxs)
+// {
 
-    double sum = 0;
+//     double sum = 0;
 
-    for (const auto& constraint_idx : constraint_idxs) {
-        sum += MP_ptr->getConstraintSumObj(constraint_idx);
-    }
+//     for (const auto& constraint_idx : constraint_idxs) {
+//         sum += MP_ptr->getConstraintSumObj(constraint_idx);
+//     }
 
-    double average = double(sum) / double(constraint_idxs.size());
-    return average;
-}
+//     double average = double(sum) / double(constraint_idxs.size());
+//     return average;
+// }
 
-// returns the stddev of the sums of obj coeffs for the group of constraint indexes supplied
-double MIPProblemProbe::getConstraintStddevSumObjs(const std::vector<int>& constraint_idxs, const double average_sum_obj,
-    bool average_supplied = false)
-{
+// // returns the stddev of the sums of obj coeffs for the group of constraint indexes supplied
+// double MIPProblemProbe::getConstraintStddevSumObjs(const std::vector<int>& constraint_idxs, const double average_sum_obj,
+//     bool average_supplied = false)
+// {
 
-    double variance = 0.0;
-    if (average_supplied) {
-        for (const auto& constraint_idx : constraint_idxs) {
-            variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - average_sum_obj, 2);
-        }
-    } else {
-        double new_average_sum_obj = getConstraintAverageSumObjs(constraint_idxs);
-        for (const auto& constraint_idx : constraint_idxs) {
-            variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - new_average_sum_obj, 2);
-        }
-    }
+//     double variance = 0.0;
+//     if (average_supplied) {
+//         for (const auto& constraint_idx : constraint_idxs) {
+//             variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - average_sum_obj, 2);
+//         }
+//     } else {
+//         double new_average_sum_obj = getConstraintAverageSumObjs(constraint_idxs);
+//         for (const auto& constraint_idx : constraint_idxs) {
+//             variance += pow(double(MP_ptr->getConstraintSumObj(constraint_idx)) - new_average_sum_obj, 2);
+//         }
+//     }
 
-    double stddev = sqrt(variance / constraint_idxs.size());
-    return stddev;
-}
+//     double stddev = sqrt(variance / constraint_idxs.size());
+//     return stddev;
+// }
 
 // returns the average of the blocks abs(RHS) for the constraints the block contains
 double MIPProblemProbe::getAverageBlockRHS(const std::vector<int>& constraint_idxs)
@@ -136,6 +135,40 @@ int MIPProblemProbe::getBlockNonZeroes(const std::vector<int>& constraint_idxs)
         non_zero_count += MP_ptr->getConstraint(constraint_idx).getNumVar();
     }
     return non_zero_count;
+}
+
+// get the proportion of constraints in the block which are equality
+double MIPProblemProbe::getBlockEqualityConstraintProp(const std::vector<int>& constraint_idxs){
+    
+    int equality_const_count = 0;
+    for (const auto& constraint_idx : constraint_idxs){
+        if(MP_ptr->constraintIndexValidity(constraint_idx)){
+            if (MP_ptr->constraints[constraint_idx].getBoundType() == Equal){
+                ++equality_const_count;
+            }
+        }   
+        else{
+            cout << "Invalid Constraint Index in getBlockEqualityConstraintProp(). Index requested is: " << constraint_idx << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    return ((double)equality_const_count / (double)constraint_idxs.size());
+}
+
+
+ double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs){
+
+    double sum_obj = 0;
+    for (const auto& var_idx : variable_idxs){
+        if(MP_ptr->variableIndexValidity(var_idx)){
+            bool var_has_obj_coeff = false;
+            double obj_coeff = MP_ptr->getVarObjCoeff(var_idx,var_has_obj_coeff);
+            if (var_has_obj_coeff){
+                sum_obj += obj_coeff;
+            }
+        }   
+    }
+    return sum_obj;
 }
 
 void MIPProblemProbe::populateInstanceStatistics(instance_statistics& is, MIP_Problem& MP)

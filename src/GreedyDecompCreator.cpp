@@ -26,12 +26,17 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
     constraint_probabilities.resize(total_num_constraints,0.0);
     double probability_accumulative_count = 0.0;
     for (int con_idx = 0; con_idx < total_num_constraints; ++con_idx) {
-        bool con_idx_check = false;
-        Constraint con = MP.getConstraint(con_idx,con_idx_check);
-        int num_non_zeroes_in_constraint = 0;
-        if (con_idx_check){
-            num_non_zeroes_in_constraint = con.getNumVar();
+        // if (MP.ch)
+        Constraint con;
+        if (MP.constraintIndexValidity(con_idx)){
+            con = MP.getConstraint(con_idx);
+        }else{
+            cout << "Invalid constraint idx supplied in GreedyDecompCreator.cpp " << endl;
+            exit(EXIT_FAILURE);
         }
+        
+        int num_non_zeroes_in_constraint = con.getNumVar();
+     
    
         // probability accumulative count
         double constraint_probability = (double(num_non_zeroes_in_constraint) / double(total_nonzeroes));
