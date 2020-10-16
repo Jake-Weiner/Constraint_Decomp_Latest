@@ -373,6 +373,7 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
             pair<int, double> con_term = { var_idx, var_coeff };
             MP.constraints[edge_constraint_idx].addConTerm(con_term);
             MP.constraints[edge_constraint_idx].addVarIdx(var_idx);
+            MP.constraints[edge_constraint_idx].addVarCoeff(var_coeff);
         }
 
         // if (line_split[i].compare("OBJ") ==0 ){

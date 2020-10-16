@@ -99,7 +99,9 @@ public:
     {
         double largest_ratio = 0.00;
         for (auto& var_coeff : variable_coeffs) {
+           
             if (std::abs(RHS / var_coeff) > largest_ratio) {
+            
                 largest_ratio = std::abs(RHS / var_coeff);
             }
         }
@@ -117,7 +119,7 @@ public:
 
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };
-    double RHS = 0.00;
+    double RHS;
     int constraint_idx;
     bound_type bt;
     vector<pair<int, double>> constraint_terms;

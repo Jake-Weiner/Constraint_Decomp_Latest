@@ -248,7 +248,6 @@ namespace LaPSO {
         // void swap(Solution& rhs);
         // Solution& operator=(const Solution& other);
         virtual ~Solution() {
-            std::cout << "Deleting Solution" << std::endl;
         }
         /// resize particle to problem size
         void resize(size_t numVar, size_t numConstr);

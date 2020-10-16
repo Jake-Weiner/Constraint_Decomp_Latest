@@ -31,6 +31,9 @@ struct Param {
     int MIP_num_int = -1;
     int MIP_num_non_zeroes = -1;
 
+    int maxIter = 1;
+    
+
     double set_ub = std::numeric_limits<double>::max();
     double subproblem_solver_runtime_lim = 100;
   

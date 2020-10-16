@@ -54,7 +54,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
         double RHS = constraint.getRHS();
 
         if (constraint.getBoundType() == Greater) {
-            IloRange r1(env, RHS, constraint_exp, 99999999999999);
+            IloRange r1(env, RHS, constraint_exp, std::numeric_limits<double>::max());
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
         } else if (constraint.getBoundType() == Equal) {
@@ -62,7 +62,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
         } else if (constraint.getBoundType() == Less) {
-            IloRange r1(env, -999999999999,constraint_exp, RHS);
+            IloRange r1(env, std::numeric_limits<double>::min(),constraint_exp, RHS);
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
         }

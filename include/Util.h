@@ -345,9 +345,9 @@ struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
 template <class T1>
 std::tuple<T1,T1,double,double> getStatistics(const std::vector<T1>& input_vec){
 
-    T1 sum;
-    T1 min;
-    T1 max;
+    T1 sum = 0;
+    T1 min = std::numeric_limits<T1>::max();
+    T1 max = std::numeric_limits<T1>::min();
     for (const auto& element : input_vec){
         if (element > max){
             max = element;
@@ -357,12 +357,12 @@ std::tuple<T1,T1,double,double> getStatistics(const std::vector<T1>& input_vec){
         }
         sum += element;
     }
-    
-    double average = double(sum) / double(input_vec.size());
+
+    double average = static_cast<double>(sum) / static_cast<double>(input_vec.size());
     double variance = 0.0;
 
     for (const auto& element : input_vec){
-        variance += pow(double(element) - average, 2);
+        variance += pow(static_cast<double>(element) - average, 2);
     }
 
     double stddev = sqrt(variance / input_vec.size());

@@ -125,7 +125,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
     
     // the LaPSO method
-    debug_printing = true;
+    debug_printing = false;
     ConDecomp_LaPSO_Connector CLC(MP, ps,con_relax_vector, debug_printing, sp_solver_time_limit, ss_ptr);
 
     // based on the partitioned structures, calculate variable/constraint information.
@@ -176,9 +176,15 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         if (number_of_constraints_in_subproblem != 0){
             ss_ptr->average_block_shape.push_back(double(number_of_variables_in_subproblem) / double(number_of_constraints_in_subproblem));
         }
+
+        // Block RHS ranges
         if (number_of_constraints_in_subproblem != 0){
             ss_ptr->block_RHS_range.push_back(MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs));
         }
+
+        cout << "Block RHS Range is " << MPP.getBlockLargestRHSRange(ps[partition_idx].edge_idxs) << endl;
+
+        // Block densities (no. non_zeroes / (no. cons * no. var) 
         if (number_of_constraints_in_subproblem != 0){
             ss_ptr->block_densities.push_back(
             double(MPP.getBlockNonZeroes(ps[partition_idx].edge_idxs)) / double(number_of_variables_in_subproblem * number_of_constraints_in_subproblem));
@@ -235,7 +241,8 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_of_average_block_Largest_RHSLHS_ratio = get<2>(block_RHSLHS_statistics);
     ss_ptr->stddev_of_average_block_Largest_RHSLHS_ratio = get<3>(block_RHSLHS_statistics);
 
-    // block largest RHS/LHS statistics
+
+    // block shape statistics
     tuple<double,double,double,double> average_block_shape_statistics = getStatistics(ss_ptr->average_block_shape);
     ss_ptr->average_of_average_block_shapes = get<2>(average_block_shape_statistics);
     ss_ptr->stddev_of_average_block_shapes = get<3>(average_block_shape_statistics);
@@ -245,10 +252,11 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_block_RHS_range = get<2>(block_RHS_range_statistics);
     ss_ptr->stddev_block_RHS_range = get<3>(block_RHS_range_statistics);
 
+
     // block densities
     tuple<double,double,double,double> block_density_statistics = getStatistics(ss_ptr->block_densities);
-    ss_ptr->average_block_RHS_range = get<2>(block_density_statistics);
-    ss_ptr->stddev_block_RHS_range = get<3>(block_density_statistics);
+    ss_ptr->average_block_density = get<2>(block_density_statistics);
+    ss_ptr->stddev_block_density = get<3>(block_density_statistics);
 
     
     // get the indices of the different constraint types
@@ -293,20 +301,17 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_lp_time = get<2>(lp_time_statistics);
     ss_ptr->stddev_lp_time = get<3>(lp_time_statistics);
 
-    // lp soln qualities
+    // lp bounds
     tuple<double,double,double,double> lp_obj_soln_statistics = getStatistics(ss_ptr->lp_obj_solutions);
     ss_ptr->max_lp_obj_soln = get<1>(lp_obj_soln_statistics);
     ss_ptr->average_lp_obj_soln = get<2>(lp_obj_soln_statistics);
     ss_ptr->stddev_lp_obj_soln = get<3>(lp_obj_soln_statistics);
 
     // output subproblem statistics
+
     Writer w;
     w.writeSubproblemStatistics(LOF.subproblem_statistics_filename,ss_ptr);
 
-
-    // Writer w;
-    // w.writeAverageLBPlot(largest_sp, num_con_relaxed, LH.getSolverAverageLBTracking(), LH.getSolverTimingTracking(), output_average_lb_filename);
-    // w.writeBestLBPlot(largest_sp, num_con_relaxed, LH.getSolverBestLBTracking(), LH.getSolverTimingTracking(), output_best_lb_filename);
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -679,22 +684,17 @@ int main(int argc,const char** argv)
         int decomposition_idx = 0;
         // for test_mip 1...
         // get the constraint vector from external file.
-        cout << "here" << endl;
+        
         vector<bool> con_vec_readin = readInConVecFromFile(string(para.con_vec_filename));
         vector<initial_dual_value_pair> test_dual_values;
         for (int i=0; i<con_vec_readin.size(); ++i){
             test_dual_values.push_back({i,0});
         }
-        cout << "con vec size is " << con_vec_readin.size() << endl;
-        for (int i=0; i<test_dual_values.size(); ++i){
-            cout << test_dual_values[i].first << test_dual_values[i].second << " ";
-        }
-        cout  << endl;
         bool set_initial_dual_values = true;
         LaPSOOutputFilenames LOF = {};
         LOF.subproblem_statistics_filename = string(para.subproblem_statistics_filename);
         cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_filename) << endl;
-        int LR_iter_limit = 2;
+        int LR_iter_limit = para.maxIter;
         int subproblem_solver_time_lim = 100;
         solveLapso(argc, argv, MP, HG, con_vec_readin, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim, 
         LR_iter_limit, test_dual_values, set_initial_dual_values);

@@ -45,7 +45,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_LR_testing");
     parser.setOption("run_statistic_testing_flag");
  
-
+   
     // output files
     parser.setOption("subproblem_statistics_filename");
 
@@ -56,6 +56,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("test_greedy_decomp"); 
     parser.setOption("test_random_decomp");
 
+    //LR Parameters
+    parser.setOption("maxIter");
 
     
     
@@ -163,6 +165,11 @@ void Param::parse(int argc, const char** argv)
     if (parser.getValue("MIP_Parse_Test_Exception"))
         MIP_Parse_Test_Exception = (parser.getValue("MIP_Parse_Test_Exception"));
     
-        
+    // LR parameters
+    
+    if (parser.getValue("maxIter")){
+        maxIter = atoi(parser.getValue("maxIter"));
+    }
+
 }
 };

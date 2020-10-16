@@ -188,6 +188,7 @@ void Writer::writeSubproblemStatistics(const std::string& output_filename, std::
         << "," << ss_ptr->average_block_density << "," << ss_ptr->stddev_block_density
         << endl;
     }
+  
     else{
         cout << "unable to open Subproblem Statistics File: " << output_filename << endl;
     }

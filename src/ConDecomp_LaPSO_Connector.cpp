@@ -277,7 +277,6 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 // returns 0 for success, -1 for failure
 int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, DblVec& rc, DblVec& x)
 {
-
     //if subproblem size is 1 solve without cplex
     if (sp.subproblemVarIdx_to_originalVarIdx.size() == 1) {
         int original_var_idx = sp.subproblemVarIdx_to_originalVarIdx[0];
