@@ -1,0 +1,21 @@
+#!/bin/bash
+
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics"
+executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
+instance_name="test2.mps"
+
+if test -f $INPUT_FILE; then
+    echo "$INPUT_FILE exists."
+else
+    echo "$INPUT_FILE does not exist" 
+    exit 99
+fi
+
+$executable_path/main_test --input_root_folder=$INPUT_DIR \
+--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
+--input_instance_name=$instance_name --maxCPU=1000 \
+--maxIter=1 \
+--run_statistic_testing_flag=true --con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/test_case2_con_vec.csv \
+--subproblem_statistics_filename=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test2.csv
+
+

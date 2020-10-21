@@ -209,7 +209,7 @@ Constraint MIP_Problem::getConstraint(const int& constraint_idx){
     return ret_val;
 }
 
-
+// returns the sum(obj coeff) for the supplied constraint
 double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
     double sum_obj_ceoff = 0.00;
     // get the variables in the constraint
@@ -226,6 +226,27 @@ double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
     }
     return sum_obj_ceoff;   
 }
+
+// returns the sum (abs(obj coeff) for the supplied constraint
+double MIP_Problem::getConstraintAbsSumObj(const int& constraint_idx){
+    double sum_obj_ceoff = 0.00;
+    // get the variables in the constraint
+    if (constraint_idx < getNumConstraints()){
+        for (const auto& variable_index : constraints[constraint_idx].getVarIndxs()){
+            //search through the objective function for the variable 
+            for (const auto& obj_pair : objective_fn){
+                if (obj_pair.first == variable_index){
+                    sum_obj_ceoff += abs(obj_pair.second);
+                    break;
+                }
+            }
+        }
+    }
+    return sum_obj_ceoff;   
+}
+
+
+// returns the objective coefficient of the variable if the variable is contained within the objective function
 
 double MIP_Problem::getVarObjCoeff(const int var_idx, bool& success){
 

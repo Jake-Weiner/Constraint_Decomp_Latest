@@ -107,20 +107,65 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
+    // test partition if required
+    bool test_hypergraph_partitioning = false;
+
+    // MIPProblem probe object used to get statistics from MIP problem
+    MIPProblemProbe MPP(&MP);
+
     //generate relaxed constraint statistics
     Relaxed_Constraint_Statistics rcs = {};
-    rcs.decomposition_idx = decomposition_idx;
-    rcs.relaxed_constraint_prop = double(num_con_relaxed) / MP.getNumConstraints();
+    std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr = std::make_shared<Relaxed_Constraint_Statistics>();
+    rcs_ptr->decomposition_idx = decomposition_idx;
+
+    // proportion of constaints which are relaxed
+    rcs_ptr->relaxed_constraint_prop = static_cast<double>(num_con_relaxed) / MP.getNumConstraints();
     
+    // get block equality/inequality constraint props
+    double relaxed_const_equality_const_prop = MPP.getEqualityConstraintProp(relaxed_constraint_indices);
+    rcs_ptr->equality_props.push_back(relaxed_const_equality_const_prop);
+    rcs_ptr->inequality_props.push_back(1.00 - relaxed_const_equality_const_prop);
+    
+    // var props in the relaxed constraints
+    tuple<double,double,double> relaxed_const_var_props = MPP.getVariableProps(relaxed_constraint_indices);
+    rcs_ptr->bin_prop = get<0>(relaxed_const_var_props);
+    rcs_ptr->int_prop = get<1>(relaxed_const_var_props);
+    rcs_ptr->cont_prop = get<2>(relaxed_const_var_props);
+
+    // non zero props of relaxed constraints
+    rcs_ptr->non_zero_props = MPP.getConstraintNonZeroProps(relaxed_constraint_indices);
+    tuple<double,double,double,double> relaxed_const_nonzero_stats = getStatistics(rcs_ptr->non_zero_props);
+    rcs_ptr->average_non_zero_prop = get<2>(relaxed_const_nonzero_stats);
+    rcs_ptr->stddev_non_zero_prop = get<3>(relaxed_const_nonzero_stats);
+    
+    // Largest RHS/LHS ratio
+    rcs_ptr->largest_RHSLHS_ratios = MPP.getLargestRHSLHSRatios(relaxed_constraint_indices);
+    tuple<double,double,double,double> relaxed_const_LargestRHSLHS_stats = getStatistics(rcs_ptr->largest_RHSLHS_ratios);
+    rcs_ptr->average_RHSLHS_ratio = get<2>(relaxed_const_LargestRHSLHS_stats);
+    rcs_ptr->stddev_RHSLHS_ratio = get<3>(relaxed_const_LargestRHSLHS_stats);
+
+    // sum obj coefficients
+    rcs_ptr->sum_obj_coeffs_of_constraints = MPP.getConstraintSumObjs(relaxed_constraint_indices);
+    tuple<double,double,double,double> relaxed_const_SumObj_stats = getStatistics(rcs_ptr->sum_obj_coeffs_of_constraints);
+    rcs_ptr->average_sum_obj_coeffs = get<2>(relaxed_const_SumObj_stats);
+
+    // sum abs(obj) coefficients
+    rcs_ptr->sum_abs_obj_coeffs_of_constraints = MPP.getConstraintSumAbsObjs(relaxed_constraint_indices);
+    tuple<double,double,double,double> relaxed_const_SumAbsObj_stats = getStatistics(rcs_ptr->sum_abs_obj_coeffs_of_constraints);
+    rcs_ptr->average_abs_sum_obj_coeffs = get<2>(relaxed_const_SumAbsObj_stats);
+    rcs_ptr->stddev_abs_sum_obj_coeffs = get<3>(relaxed_const_SumAbsObj_stats);
+
+    // RHS values
+    rcs_ptr->RHS_values = MPP.getConstraintRHSVals(relaxed_constraint_indices);
+    tuple<double,double,double,double> relaxed_const_RHS_stats = getStatistics(rcs_ptr->RHS_values);
+    rcs_ptr->average_RHS = get<2>(relaxed_const_RHS_stats);
+
     // subproblem_statistics structure is used
     std::shared_ptr<Subproblem_Statistics> ss_ptr = std::make_shared<Subproblem_Statistics>();
     // assign decomposition index
     ss_ptr->decomposition_idx = decomposition_idx;
 
-    // test partition if required
-    bool test_hypergraph_partitioning = false;
-
-    MIPProblemProbe MPP(&MP);
+    
     // generate the different subproblem structures from relaxing the constaints. Structures are node and edge idx's in each subproblem
     std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
     
@@ -155,7 +200,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         ss_ptr->total_constr_props.push_back(double(number_of_constraints_in_subproblem) / double(HG.getNumEdges()));
         
         // get block equality/inequality constraint props
-        double equality_const_prop = MPP.getBlockEqualityConstraintProp(ps[partition_idx].edge_idxs);
+        double equality_const_prop = MPP.getEqualityConstraintProp(ps[partition_idx].edge_idxs);
         ss_ptr->equality_props.push_back(equality_const_prop);
         ss_ptr->inequality_props.push_back(1.00 - equality_const_prop);
 
@@ -678,7 +723,9 @@ int main(int argc,const char** argv)
         //     cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         // }
 
-     
+        MP.printConstraints();
+        MP.printObjectiveFn();
+        MP.printVariables();
         
         // assign a decomposition index
         int decomposition_idx = 0;

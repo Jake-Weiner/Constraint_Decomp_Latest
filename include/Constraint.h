@@ -117,6 +117,10 @@ public:
         return sum_RHS_ratio;
     }
 
+    vector<int> getVarIndxs(){
+        return variable_indxs;
+    }
+
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };
     double RHS;

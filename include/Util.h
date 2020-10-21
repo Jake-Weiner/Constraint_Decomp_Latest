@@ -282,62 +282,54 @@ struct Subproblem_Statistics{
 
 };
 
-struct Relaxed_Constraint_Statistics : public Common_Statistical_Measures{
-    int decomposition_idx;
-    vector<double>* con_vec_ptr;
-    
-   
-    
-    // variable statistics
-    // proportion of problem variables in the subproblem
-    vector<pair<int,double>> variable_props;
-    double average_variable_prop;
-    double stddev_variable_prop;
-    vector<pair<int,double>> bin_props;
-    double average_bin_prop;
-    double stddev_bin_prop;
-    vector<pair<int,double>> int_props;
-    double average_int_prop;
-    double stddev_int_prop;
-    vector<pair<int,double>> cont_props;
-    double average_cont_prop;
-    double stddev_cont_prop;
+struct Relaxed_Constraint_Statistics {
 
-    // constraint statistics
+     ~Relaxed_Constraint_Statistics(){};
+
+    int decomposition_idx;
     
-    double relaxed_constraint_prop; // proportion of relaxed constraints/total constraints
-    double equality_constraint_prop; // proportion of relaxed constraints which are equality constraints
-    double inequality_constraint_prop; // proportion of relaxed constraints which are inequality constraints
+    // constraint statistics
+    vector<double> equality_props;
     double average_equality_prop;
     double stddev_equality_prop;
+    
+    vector<double> inequality_props;
     double average_inequality_prop;
     double stddev_inequality_prop;
-    double average_total_constraint_prop;
-    double stddev_total_constraint_prop;
-
-    // average of objective coefficients in each of the blocks - This will 
-
-    // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
-    vector<pair<int,double>> average_block_obj_values;
-    vector<pair<int,double>> stddev_block_obj_values;
-
-    // average abs(RHS) value of each block
-    vector<pair<int,double>> average_block_RHS_values;
-
-    vector<pair<int,double>> average_block_Largest_RHSLHS_ratio;
-
-    //average block shapes, where shape is no.of variables / number of constraints
-    vector<pair<int,double>> average_block_shape;
-
-    // Max RHS - Min RHS for each block
-    vector<pair<int,double>> block_RHS_range;
-
-    // Block densities = Non_zeroes / (num constraints * num variables)
-    vector<pair<int,double>> block_densities;
-
     
-    // double LSP_prop;
-    // double constraints_relaxed_prop;
+    // proportion of relaxed constraints compared to all constraints in the original problem
+    double relaxed_constraint_prop;
+    // variable statistics
+    // proportion of problem variables in the subproblem
+    double bin_prop;
+    double int_prop;
+    double cont_prop;
+    
+    // non zero counts of all relaxed constraints
+    vector<double> non_zero_props;
+    double average_non_zero_prop;
+    double stddev_non_zero_prop;
+    
+    vector<double> largest_RHSLHS_ratios;
+    double average_RHSLHS_ratio;
+    double stddev_RHSLHS_ratio;
+
+    vector<double> sum_obj_coeffs_of_constraints;
+    double average_sum_obj_coeffs;
+    double stddev_sum_obj_coeffs;
+
+    vector<double> sum_abs_obj_coeffs_of_constraints;
+    double average_abs_sum_obj_coeffs;
+    double stddev_abs_sum_obj_coeffs;
+
+    vector<double> RHS_values;
+    double average_RHS;
+    double stddev_RHS;
+
+    vector<double> sum_LHS_values;
+    double average_sum_LHS;
+    double stddev_sum_LHS;
+   
 };
 
 // calculates the statistics for a given vector of data (min, max, average stddev)

@@ -1,7 +1,9 @@
 #include "MIPProblemProbe.h"
 #include <math.h>
+#include <unordered_map>
 
-MIPProblemProbe::MIPProblemProbe(MIP_Problem* MP_ptr) : MP_ptr(MP_ptr)
+MIPProblemProbe::MIPProblemProbe(MIP_Problem* MP_ptr)
+    : MP_ptr(MP_ptr)
 {
 }
 
@@ -35,7 +37,6 @@ std::vector<double> MIPProblemProbe::getLargestRHSLHSRatios(const std::vector<in
 
 std::vector<double> MIPProblemProbe::getSumRHSLHSRatios(const std::vector<int>& constraint_idxs)
 {
-
     std::vector<double> ret_vec;
     for (const auto& constraint_idx : constraint_idxs) {
         Constraint con = MP_ptr->getConstraint(constraint_idx);
@@ -46,10 +47,28 @@ std::vector<double> MIPProblemProbe::getSumRHSLHSRatios(const std::vector<int>& 
 
 std::vector<double> MIPProblemProbe::getConstraintSumObjs(const std::vector<int>& constraint_idxs)
 {
-
     std::vector<double> ret_vec;
     for (const auto& constraint_idx : constraint_idxs) {
         ret_vec.push_back(MP_ptr->getConstraintSumObj(constraint_idx));
+    }
+    return ret_vec;
+}
+
+// return a vector containing the RHS values of the constraint indexes supplied
+std::vector<double> MIPProblemProbe::getConstraintRHSVals(const std::vector<int>& constraint_idxs){
+
+    std::vector<double> ret_vec;
+    for (const auto& constraint_idx : constraint_idxs) {
+        ret_vec.push_back(MP_ptr->getConstraint(constraint_idx).getRHS());
+    }
+    return ret_vec;
+}
+
+std::vector<double> MIPProblemProbe::getConstraintSumAbsObjs(const std::vector<int>& constraint_idxs)
+{
+    std::vector<double> ret_vec;
+    for (const auto& constraint_idx : constraint_idxs) {
+        ret_vec.push_back(MP_ptr->getConstraintAbsSumObj(constraint_idx));
     }
     return ret_vec;
 }
@@ -138,36 +157,107 @@ int MIPProblemProbe::getBlockNonZeroes(const std::vector<int>& constraint_idxs)
     return non_zero_count;
 }
 
-// get the proportion of constraints in the block which are equality
-double MIPProblemProbe::getBlockEqualityConstraintProp(const std::vector<int>& constraint_idxs){
-    
+// get the proportion of constraints provided which are equality
+double MIPProblemProbe::getEqualityConstraintProp(const std::vector<int>& constraint_idxs)
+{
+
     int equality_const_count = 0;
-    for (const auto& constraint_idx : constraint_idxs){
-        if(MP_ptr->constraintIndexValidity(constraint_idx)){
-            if (MP_ptr->constraints[constraint_idx].getBoundType() == Equal){
+    for (const auto& constraint_idx : constraint_idxs) {
+        if (MP_ptr->constraintIndexValidity(constraint_idx)) {
+            if (MP_ptr->constraints[constraint_idx].getBoundType() == Equal) {
                 ++equality_const_count;
             }
-        }   
-        else{
+        } else {
             cout << "Invalid Constraint Index in getBlockEqualityConstraintProp(). Index requested is: " << constraint_idx << endl;
             exit(EXIT_FAILURE);
         }
     }
-    return ((double)equality_const_count / (double)constraint_idxs.size());
+    return (static_cast<double>(equality_const_count) / static_cast<double>(constraint_idxs.size()));
 }
 
+// returns bin,int and cont props of supplied constraints
+std::tuple<double, double, double> MIPProblemProbe::getVariableProps(const std::vector<int>& constraint_idxs)
+{
 
- double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs){
+    //total variable count in the constraint idx's provided
+    int var_count = getVarCount(constraint_idxs);
+
+    int bin_count = 0;
+    int int_count = 0;
+    int cont_count = 0;
+
+    // need to keep count of bin, int and cont vars as well as total number of variables seen so far
+    for (const auto& con_idx : constraint_idxs) {
+        if (MP_ptr->constraintIndexValidity(con_idx)) {
+            vector<int> variable_idxs = MP_ptr->getConstraint(con_idx).getVarIndxs();
+            for (const auto& var_idx : variable_idxs) {
+                Variable v = MP_ptr->getVariable(var_idx);
+                if (v.getVarType() == Bin) {
+                    ++bin_count;
+                } else if (v.getVarType() == Int) {
+                    ++int_count;
+                } else {
+                    ++cont_count;
+                }
+            }
+        }
+    }
+    
+    return std::make_tuple(static_cast<double>(bin_count)/ static_cast<double>(var_count)
+    , static_cast<double>(int_count)/ static_cast<double>(var_count)
+    , static_cast<double>(cont_count)/ static_cast<double>(var_count));
+   
+}
+
+// for the input constraint indices, create a hashmap for
+int MIPProblemProbe::getVarCount(const std::vector<int>& constraint_idxs)
+{
+
+    int var_count = 0;
+    std::unordered_map<int, bool> variable_index_hashmap;
+    // for every new variable, add to the hashmap to see if it's been seen previously or not
+    for (const auto& con_idx : constraint_idxs) {
+        if (MP_ptr->constraintIndexValidity(con_idx)) {
+            vector<int> variable_idxs = MP_ptr->getConstraint(con_idx).getVarIndxs();
+            for (const auto& var_idx : variable_idxs) {
+                if (variable_index_hashmap.find(var_idx) == variable_index_hashmap.end()) {
+                    variable_index_hashmap[var_idx] = true;
+                    ++var_count;
+                }
+            }
+        }
+    }
+    return var_count;
+}
+
+// returns the vector of non zero props contained withint the constriants supplied
+std::vector<double> MIPProblemProbe::getConstraintNonZeroProps(const std::vector<int>& constraint_idxs){
+    vector<double> constraint_non_zeroes_props;
+    int non_zero_total = MP_ptr->getnumNonZero();
+    int number_of_vars_in_mip = MP_ptr->getNumVariables();
+    for (const auto& con_idx : constraint_idxs){
+        if (MP_ptr->constraintIndexValidity(con_idx)) {
+            int const_num_of_non_zeroes = MP_ptr->getConstraint(con_idx).getNumVar();
+
+            constraint_non_zeroes_props.push_back(static_cast<double>(const_num_of_non_zeroes)
+            / static_cast<double>(non_zero_total));
+        }
+    }
+    return constraint_non_zeroes_props;
+}
+
+double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs)
+{
 
     double sum_obj = 0;
-    for (const auto& var_idx : variable_idxs){
-        if(MP_ptr->variableIndexValidity(var_idx)){
+    for (const auto& var_idx : variable_idxs) {
+        if (MP_ptr->variableIndexValidity(var_idx)) {
             bool var_has_obj_coeff = false;
-            double obj_coeff = MP_ptr->getVarObjCoeff(var_idx,var_has_obj_coeff);
-            if (var_has_obj_coeff){
+            double obj_coeff = MP_ptr->getVarObjCoeff(var_idx, var_has_obj_coeff);
+            if (var_has_obj_coeff) {
                 sum_obj += obj_coeff;
             }
-        }   
+        }
     }
     return sum_obj;
 }

@@ -326,7 +326,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     cplex.setParam(IloCplex::TiLim, sp_solve_time_limit);
     cplex.setOut((*(sp.envPtr)).getNullStream());
     if (!cplex.solve()) {
-        cout << "Failed to find feasible/optimal subproblem solution" << endl;
+        cout << "Failed to find feasible/optimal subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
         sp.model.remove(obj_fn);
         cplex.end();
         exit(EXIT_FAILURE);

@@ -15,16 +15,21 @@ class MIPProblemProbe{
         std::vector<double> getLargestRHSLHSRatios(const std::vector<int>& constraint_idxs);
         std::vector<double> getSumRHSLHSRatios(const std::vector<int>& constraint_idxs);
         std::vector<double> getConstraintSumObjs(const std::vector<int>& constraint_idxs);
+        std::vector<double> getConstraintSumAbsObjs(const std::vector<int>& constraint_idxs);
+        std::vector<double> getConstraintRHSVals(const std::vector<int>& constraint_idxs);
+        
+        std::vector<double> getConstraintNonZeroProps(const std::vector<int>& constraint_idxs);
         double getBlockSumObjs(const std::vector<int>& variable_idxs);
-        // double getConstraintAverageSumObjs(const std::vector<int>& constraint_idxs);
-        // double getConstraintStddevSumObjs(const std::vector<int>& constraint_idxs, const double average_sum_obj, 
-        // bool average_supplied = false);
+        // get prop of var types from constraint indices provided
+        std::tuple<double, double, double> getVariableProps(const std::vector<int>& constraint_idxs);
+        // given a vector of constraints, count the total number of variables
+        int getVarCount(const std::vector<int>& constraint_idxs);
         double getAverageBlockRHS(const std::vector<int>& constraint_idxs);
         double getAverageBlockLargestRHSLHSRatio(const std::vector<int>& constraint_idxs);
         double getBlockLargestRHSRange(const std::vector<int>& constraint_idxs);
         int getBlockNonZeroes(const std::vector<int>& constraint_idxs);
         std::tuple<int, int, int> getVariableCounts(const std::vector<int>& variable_indexes);
-        double getBlockEqualityConstraintProp(const std::vector<int>& constraint_idxs);
+        double getEqualityConstraintProp(const std::vector<int>& constraint_idxs);
     private:
 
         int getNumberEqualityConstraintsRelaxed(const vector<double>& con_vec, MIP_Problem& MP);

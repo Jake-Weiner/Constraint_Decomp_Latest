@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum Variable_Type{Bin,Cont, Int};
+enum Variable_Type{Bin, Cont, Int};
 
 class Variable{
 
@@ -53,9 +53,11 @@ class Variable{
         double getLB(){
             return lower_bound;
         }
-
+        
+        // for type, bin = 0, cont = 1, int = 2
         void printInfo(){
-            cout << "index = " << variable_idx << " : upper bound = " << upper_bound << " : lower bound = " << lower_bound << endl; 
+            cout << "index = " << variable_idx << " : upper bound = " << upper_bound << " : lower bound = " << lower_bound
+            << " bound type = " << vt << endl; 
         }
 
         inline bool operator< ( const Variable& rhs ) const { 
