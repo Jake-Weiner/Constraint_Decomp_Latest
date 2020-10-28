@@ -19,6 +19,28 @@ struct individual_information_struct{
     unsigned int largest_sp;
 };
 
+struct SubproblemRawData{
+    // MIP Times
+    string MIP_times_filename;
+    // MIP Bounds
+    string MIP_bounds_filename;
+    // LP Bounds
+    string LP_bounds_filename;
+    // LP Times
+    string LP_time_filename;
+    // Block SUM obj vals
+    string sum_obj_filename;
+    // Block SUM abs(obj) vals
+    string sum_absobj_filename;
+    // block RHS vals
+    string rhs_filename;
+    // Block largest RHSLHS ratios
+    string largestRHSLHS_filename;
+    // Block RHS range
+    string RHS_range_filename;
+};
+
+
 struct CPLEX_Return_struct{
     double bound;
     double obj_val;
@@ -99,7 +121,10 @@ struct LaPSOOutputFilenames{
     string output_average_lb_filename;
     string final_lb_filename;
     string subproblem_statistics_filename;
+    SubproblemRawData raw_data_filenames;
+
 };
+
 
 struct solveLapsoStruct{
     int argc;
@@ -250,10 +275,10 @@ struct Subproblem_Statistics{
     double average_of_sum_block_obj_values;
     double stddev_of_sum_block_obj_values;
 
-    // stddev of abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
-    // vector<double> stddev_block_obj_values;
-    // double average_of_stddev_block_obj_values;
-    // double stddev_of_stddev_block_obj_values;
+    // abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
+    vector<double> sum_abs_block_obj_values;
+    double average_of_sum_abs_block_obj_values;
+    double stddev_of_sum_abs_block_obj_values;
 
     // average abs(RHS) value of each block
     vector<double> average_block_RHS_values;
@@ -349,16 +374,14 @@ std::tuple<T1,T1,double,double> getStatistics(const std::vector<T1>& input_vec){
         }
         sum += element;
     }
-
+ 
     double average = static_cast<double>(sum) / static_cast<double>(input_vec.size());
     double variance = 0.0;
 
     for (const auto& element : input_vec){
         variance += pow(static_cast<double>(element) - average, 2);
     }
-
     double stddev = sqrt(variance / input_vec.size());
-
     return std::make_tuple(min,max,average,stddev);
 }
 

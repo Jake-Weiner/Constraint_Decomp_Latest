@@ -22,8 +22,10 @@ struct Param {
     /// maxIter) and set the corresponding parameter to the value
     void parse(int argc, const char** argv);
 
+
     int nsga_gen = 1;
     int nsga_pop_size = 1;
+    int greedy_decomp_size = 1000;
     int MIP_num_var = -1;
     int MIP_num_cons = -1;
     int MIP_num_bin = -1;
@@ -36,17 +38,19 @@ struct Param {
 
     double set_ub = std::numeric_limits<double>::max();
     double subproblem_solver_runtime_lim = 100;
+    double set_generic_MIP_time = 100;
   
     // generic MIP parameters
     const char* run_generic_MIP_solver = "false";
     const char* solve_generic_MIP_output_filename = "";
     const char* generic_mip_random_seed = "true";
-    double set_generic_MIP_time = 100;
+   
 
 
     const char* parsed_mip_random_seed = "true";
     double set_parsed_MIP_time = 100;
 
+    // testing flags
     const char* run_MIP_Parse_testing = "false";
     const char* run_Hypergraph_Partitioning_testing = "false";
     const char* run_NSGA_testing = "false";
@@ -57,6 +61,13 @@ struct Param {
     const char* run_LR_testing = "false";
     const char* run_statistic_testing_flag = "false";
 
+    // decomposition flags
+    const char* run_greedy_decomp = "false";
+    const char* run_NSGA_decomp = "false";
+    
+    // decomposition output files
+    const char* nsga_decomp_output_file = "";
+    const char* greedy_decomp_output_file = "";
 
     const char* con_vec_filename = "";
     const char* subproblem_statistics_filename = "";
@@ -73,7 +84,7 @@ struct Param {
     
     const char* solve_parsed_MIP_output_filename = "";   
     const char* run_nsga_decomp = "";
-    const char* nsga_decomp_output_file = "";
+
 
     const char* run_lapso = "false";
     const char* test_greedy_decomp = "";

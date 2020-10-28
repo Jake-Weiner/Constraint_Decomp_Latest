@@ -7,7 +7,6 @@
 
 vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const double& desired_prop)
 {
-
     int total_nonzeroes = MP.getnumNonZero();
     int total_num_constraints = MP.getNumConstraints();
 
@@ -20,8 +19,8 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
     std::uniform_real_distribution<> dis(0.0, 1.0);
     int individual_idx = 0;
     int desired_number_relaxed_constraints = desired_prop * total_num_constraints;
-    cout << "running greedy decomposition in function" << endl;
-     
+    // cout << "running greedy decomposition in function" << endl;
+    
     vector<double> constraint_probabilities;
     constraint_probabilities.resize(total_num_constraints,0.0);
     double probability_accumulative_count = 0.0;
@@ -37,9 +36,8 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
         
         int num_non_zeroes_in_constraint = con.getNumVar();
      
-   
         // probability accumulative count
-        double constraint_probability = (double(num_non_zeroes_in_constraint) / double(total_nonzeroes));
+        double constraint_probability = (static_cast<double>(num_non_zeroes_in_constraint) / static_cast<double>(total_nonzeroes));
         probability_accumulative_count += constraint_probability;
         constraint_probabilities[con_idx] = probability_accumulative_count;
         // in case of rounding errors, assign the final accumulative probability 1
@@ -48,10 +46,10 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
         }
     }
 
-    for (int con_idx = 0; con_idx < total_num_constraints; ++con_idx) {
-        cout << "constraint probabilities index: " << con_idx << endl;
-        cout << constraint_probabilities[con_idx] << endl;
-    }
+    // for (int con_idx = 0; con_idx < total_num_constraints; ++con_idx) {
+    //     cout << "constraint probabilities index: " << con_idx << endl;
+    //     cout << constraint_probabilities[con_idx] << endl;
+    // }
     // keep relaxing constraints one at a time until the desired number of constraints are relaxed
     while (number_relaxed_constraints < (desired_prop * total_num_constraints)) {
 
@@ -69,39 +67,6 @@ vector<bool> GreedyDecompCreator::createGreedyDecomp(MIP_Problem& MP, const doub
             ++number_relaxed_constraints;
         }
     }
-        
-    //             double random_num = dis(gen);
-    //             if (random_num < probability) {
-    //                 greedy_decomp[con_idx] = true;
-    //                 ++number_relaxed_constraints;
-    //             }
-    //             // if the number of relaxed constraints are found, exit the loop early
-    //             if (number_relaxed_constraints == desired_number_relaxed_constraints) {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    // //populate constraint probabilities
 
-    // while (number_relaxed_constraints < (desired_prop * total_num_constraints)) {
-    //     // loop through the constraints
-    //     for (int con_idx = 0; con_idx < total_num_constraints; ++con_idx) {
-    //         if (greedy_decomp[con_idx] == false) {
-    //             bool con_idx_check = false;
-    //             int num_non_zeroes_in_constraint = MP.getConstraintNumNonZeroes(con_idx, con_idx_check);
-    //             double probability = (double(num_non_zeroes_in_constraint) / double(total_nonzeroes)) * (desired_prop) * (total_num_constraints);
-    //             double random_num = dis(gen);
-    //             if (random_num < probability) {
-    //                 greedy_decomp[con_idx] = true;
-    //                 ++number_relaxed_constraints;
-    //             }
-    //             // if the number of relaxed constraints are found, exit the loop early
-    //             if (number_relaxed_constraints == desired_number_relaxed_constraints) {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
     return greedy_decomp;
 }

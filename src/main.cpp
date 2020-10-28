@@ -107,6 +107,8 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         }
     }
 
+    // writer object to write necessary information to files
+    Writer w;
     // test partition if required
     bool test_hypergraph_partitioning = false;
 
@@ -159,7 +161,9 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     rcs_ptr->RHS_values = MPP.getConstraintRHSVals(relaxed_constraint_indices);
     tuple<double,double,double,double> relaxed_const_RHS_stats = getStatistics(rcs_ptr->RHS_values);
     rcs_ptr->average_RHS = get<2>(relaxed_const_RHS_stats);
-
+    rcs_ptr->stddev_RHS = get<3>(relaxed_const_RHS_stats);
+    
+    w.writeRawRelaxedConstraintStatistics(LOF,rcs_ptr);
     // subproblem_statistics structure is used
     std::shared_ptr<Subproblem_Statistics> ss_ptr = std::make_shared<Subproblem_Statistics>();
     // assign decomposition index
@@ -205,8 +209,11 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
         ss_ptr->inequality_props.push_back(1.00 - equality_const_prop);
 
         // sum of obj coefficients of variables in each block
-       
-        double sum_block_obj_val = MPP.getBlockSumObjs(ps[partition_idx].node_idxs);
+        double sum_block_obj_val = MPP.getBlockSumObjs(ps[partition_idx].node_idxs, false);
+        ss_ptr->sum_block_obj_values.push_back(sum_block_obj_val);
+
+        // sum of abs(obj) coefficients of variables in each block
+        double sum_abs_block_obj_val = MPP.getBlockSumObjs(ps[partition_idx].node_idxs, true);
         ss_ptr->sum_block_obj_values.push_back(sum_block_obj_val);
         
         // averages of abs(rhs) coefficients in each block
@@ -276,6 +283,11 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_of_sum_block_obj_values = get<2>(block_sum_objective_values_statistics);
     ss_ptr->stddev_of_sum_block_obj_values = get<3>(block_sum_objective_values_statistics);
 
+    //  abs(block objective values)
+    tuple<double,double,double,double> block_abs_sum_objective_values_statistics = getStatistics(ss_ptr->sum_abs_block_obj_values);
+    ss_ptr->average_of_sum_abs_block_obj_values = get<2>(block_abs_sum_objective_values_statistics);
+    ss_ptr->stddev_of_sum_abs_block_obj_values = get<3>(block_abs_sum_objective_values_statistics);
+
     // block RHS values
     tuple<double,double,double,double> block_RHS_statistics = getStatistics(ss_ptr->average_block_RHS_values);
     ss_ptr->average_of_average_block_RHS_values = get<2>(block_RHS_statistics);
@@ -285,7 +297,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     tuple<double,double,double,double> block_RHSLHS_statistics = getStatistics(ss_ptr->average_block_Largest_RHSLHS_ratio);
     ss_ptr->average_of_average_block_Largest_RHSLHS_ratio = get<2>(block_RHSLHS_statistics);
     ss_ptr->stddev_of_average_block_Largest_RHSLHS_ratio = get<3>(block_RHSLHS_statistics);
-
 
     // block shape statistics
     tuple<double,double,double,double> average_block_shape_statistics = getStatistics(ss_ptr->average_block_shape);
@@ -297,17 +308,13 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     ss_ptr->average_block_RHS_range = get<2>(block_RHS_range_statistics);
     ss_ptr->stddev_block_RHS_range = get<3>(block_RHS_range_statistics);
 
-
     // block densities
     tuple<double,double,double,double> block_density_statistics = getStatistics(ss_ptr->block_densities);
     ss_ptr->average_block_density = get<2>(block_density_statistics);
     ss_ptr->stddev_block_density = get<3>(block_density_statistics);
 
-    
     // get the indices of the different constraint types
     LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds()};
-
- 
 
     // set up the initial requirements for LaPSO initialisation
     LaPSO::LaPSORequirements LR = {};
@@ -354,7 +361,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
 
     // output subproblem statistics
 
-    Writer w;
+    
     w.writeSubproblemStatistics(LOF.subproblem_statistics_filename,ss_ptr);
 
 }
@@ -515,6 +522,7 @@ int main(int argc,const char** argv)
 
     //convert parsed MIP to Hypergraph
     MIP_to_Hypergraph MTH;
+    cout << "Converting MIP read to Hypergraph " << endl;
     MTH.convertToHypergraph(MP);
     Hypergraph HG(MTH.getHGEdges(), MTH.getHGNodes());
 
@@ -538,6 +546,7 @@ int main(int argc,const char** argv)
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
         exit(0);
     }
+    
 
     //test constraint redundancy for decompositions
     if (PA.get_run_constraint_redundancy_testing_flag()) {
@@ -568,7 +577,7 @@ int main(int argc,const char** argv)
         outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.1.csv");
         if (outfile) {
             // creating 1000 decompositions
-            for (int i = 0; i < 10000; ++i) {
+            for (int i = 0; i < para.greedy_decomp_size; ++i) {
                 //std::cout << "creating Decomp number: " << i << std::endl;
                 vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.1);
                 for (const auto& con_val : greedy_decomp) {
@@ -583,7 +592,7 @@ int main(int argc,const char** argv)
         outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.2.csv");
         if (outfile) {
             // creating 1000 decompositions
-            for (int i = 0; i < 10000; ++i) {
+            for (int i = 0; i < para.greedy_decomp_size; ++i) {
                 //std::cout << "creating Decomp number: " << i << std::endl;
                 vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.2);
                 for (const auto& con_val : greedy_decomp) {
@@ -598,7 +607,7 @@ int main(int argc,const char** argv)
         outfile.open("/home/jake/PhD/Decomposition/Output/testing/Greedy_Decomp_Tests/decomps_0.5.csv");
         if (outfile) {
             // creating 1000 decompositions
-            for (int i = 0; i < 10000; ++i) {
+            for (int i = 0; i < para.greedy_decomp_size; ++i) {
                 //std::cout << "creating Decomp number: " << i << std::endl;
                 vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, 0.5);
                 for (const auto& con_val : greedy_decomp) {
@@ -627,11 +636,7 @@ int main(int argc,const char** argv)
 
     // run NSGA if desired
     if (PA.get_run_nsga_decomp_flag() == true) {
-        // start, stop, interval
-        vector<double> desired_subproblem_props = PA.get_nsga_props();
-        string NSGA_decomp_plot_filename = PA.get_NSGA_decomp_plot_filename();
-
-        // creates all decompositions found in first front. Also returns all decompositions which satisfy the desired proportion
+      
         Problem_Adapter ProblemAdapter;
         // write out to a file the different decompositions found
         ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
@@ -709,7 +714,6 @@ int main(int argc,const char** argv)
 
     if (PA.get_run_statistic_testing_flag() == true) {
         
-
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested. 
         // get in the dual values for all constraints
         // vector<initial_daul_value_pair> dual_values_from_LP;
@@ -754,9 +758,32 @@ int main(int argc,const char** argv)
         // solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim, 
         // LR_iter_limit
         // , &dual_values_from_LP, set_initial_dual_values);
-  
 
-
+    }
+//  run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
+//     run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);
+    if (PA.get_run_greedy_decomp_flag()){
+        cout << "running greedy decomposition testing" << endl;
+        GreedyDecompCreator GDC;
+        vector<double> rc_props = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+        std::ofstream outfile;
+        outfile.open(para.greedy_decomp_output_file, std::ofstream::app);
+        int desired_decomp_num_per_rcprop = para.greedy_decomp_size / rc_props.size();
+        if (outfile) {
+            // write out greedy decomposition as relaxed constraints to specified file
+            for (const auto& rc_prop : rc_props){
+                for (int decomp_num = 0; decomp_num < desired_decomp_num_per_rcprop; ++decomp_num) {
+                    vector<bool> greedy_decomp = GDC.createGreedyDecomp(MP, rc_prop);
+                    for (int i =0; i<greedy_decomp.size(); ++i) {
+                        if (greedy_decomp[i] == true){
+                            outfile << i << ",";
+                        }
+                    }
+                    outfile << endl;
+                }
+            }
+            outfile.close();
+        }
     }
 
     // flow pattern of the whole process
@@ -769,27 +796,6 @@ int main(int argc,const char** argv)
 
 
 
-            //     std::vector<std::string> result;
-            //     std::string line;
-            
-            //     std::stringstream lineStream(line);
-            //     std::string cell;
-
-            //     while (std::getline(lineStream, cell, ',')) {
-            //         result.push_back(cell);
-            //     }
-            //     // used for breaking words
-            //     stringstream s(line);
-            //     // read every column data of a row and
-            //     // store it in a string variable, 'word'
-            //     while (getline(s, word, ',')) {
-
-            //         // add all the column data
-            //         // of a row to a vector
-            //         row.push_back(word);
-            //     }
-            // }
-           
 
             // read in constraint_vector from file
             // vector<bool> con_vec = getNSGAConVec(filename);
@@ -800,208 +806,112 @@ int main(int argc,const char** argv)
             // cout << "running Lapso: " << prop_string << endl;
             // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
 
-            //non-runtime decompositions statistics
-
-            //         Largest Subproblem as a proportion of total variables
-            // proportion of total constraints relaxed
-            // proportion of constraints relaxed which are equality constraints
-            // proportion of constraints relaxed which are inequality constraints
-            // proportion of binary variables in relaxed constraints
-            // proportion of integer variables in relaxed constraints
-            // proportion of continuous variables in relaxed constraints
-            // average, min, max, stddev nonzeros percentage in relaxed constraints
-            // average, min, max, stddev of the largest ratio of each constraint (abs(RHS/LHS)) (e.g for constraint x1 + 2x2 = 3, Largest ratio is 3/1,  2x1 + x3 = 4,  Largest ratio is 4)
-            //read in decompositions from file
-            //for each decomposition, run LR once with LP duals forming the LR values
-            // get the statistics of the constraints
+          
         
 
-        // writes out NSGA Decomps to show pareto fronts NSGA_decomp_plot_filename  std::ofstream outfile;
-        // outfile.open(output_filename);
-        // vector<pop_size_t> front1 = non_dominated_front_2d(f_vals);
-        // for (auto& idx : front1) {
-        //     outfile << f_vals[idx][1] << "," << f_vals[idx][0] << endl;
-        // }
+     
 
-        //instance statistics (based of MIP Parser)
-        //Binary Var prop
-        //Cont Var prop
-        //Int Var prop
-        //Constraint Types
-        //Number of non zerores
-        // average density of constraints, stddev of constraints
-
-        // MIPProblemProbe MPP;
-        // NSGA_ii_instance_statistics nis;
-
-        // // fill out the required instance statistics
-        // MPP.populateInstanceStatistics(nis, MP);
-
-        // // loop through decompositions, assigning a decomposition number
-
-        // int decomp_idx = 0;
-        // for (auto& decomp: nsga_con_relax_info_struct){
-        //     NSGA_ii_relaxed_constraint_statistics nrcs;
-        //     MPP.populateRelaxedConstraintsStatistics(decomp_idx,decomp, nrcs, MP);
-        //     ++decomp_idx;
-        // }
-
-        // vector<double> con_vec;
-        // double LSP_prop;
-        // double num_constraints_relaxed_prop;
-        // // proportion of relaxed constraints which are equality
-        // double equality_constaints_relaxed_prop;
-        // // proportion of relaxed constraints which are inequality = 1-equality_constaints_relaxed_prop
-        // double inequality_constaints_relaxed_prop;
-        // // non_zero prop in constraints relaxed
-        // double average_nonzero_prop;
-        // double stddev_nonzero_prop;
-        // // ratio of RHS to largest coeff in constraint
-        // double average_largest_ratio;
-        // double stddev_largest_ratio;
-
-        // instance_statistics_masterfile.csv
-        // <instance_name>, Binary Var Prop, Cont Var Prop, Int Var Prop, Constraint types(?), Number Non-zeroes, Average density(nonzero/no. constraints), stddev nonzeroes
-
-        //con_relax vec
-        //based off NSGA_results
-        //LSP
-        // constraints statistics
-        //num constraints_relaxed
-        //prop equality constraints/non equality constraints
-        //average perc/non_zeroes stddev nonzeros (in constraints relaxed)
-        //average, stddev largest ratio (RHS/LHS)
-        //average, stddev sum/coefficients (RHS/LHS)
-
-        // output file is <instance_name>_constraint_statistics.csv
-        // Decomp No.,[xxxx], LSP, No. Constraints Relaxed, prop equality constraints, prop inequality constraints, ave prop non zeroes, stddev non zeroes,
-        // average largest ratio RHS/LHS, stddev largest ration (RHS/LHS), average sum (not sure if we need this feature)
-
-        //output file is <instance_name>_solver_statistics
-        //solver statistics
-        // Decomp No., Max MIP Time, average MIP time, stdev mip time,
-        // Max LP Time, average LP time, stdev LP time,
-
-        //subproblem statistics
-        // Subproblem Number
-        //MIP Time
-        //LP Time
-        //Problem Reduction (%)
-        // average Bin, cont, int.
-        // stdev bin, cont, int
-        //average no. constraint, stddev no. constraint
-        //First iteration solve time
-
-        // write out decompositions of desired proportions
-        // for (auto& con_relax_info : nsga_con_relax_info_struct) {
-        //     string con_vec_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_vec.csv";
-        //     string decomp_info_filename = string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name) + "/" + to_string(con_relax_info.largest_sp) + "_info.txt";
-
-        //     // w.writeConVecToFile(con_relax_info.first, con_vec_filename);
-        //     // writeConVecToFile(con_relax_info.first, con_vec_filename);
-        //     // writeDecompInfoToFile(HG, con_relax_info.first, decomp_info_filename);
-        // }
-
+       
         // run normal LR
-        if (PA.get_run_lapso_flag() == true) {
-            cout << "solving LaPSO with NSGA Decomposition" << endl;
-            boost::filesystem::path p(string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name));
-            try {
-                if (exists(p)) {
-                    if (is_directory(p)) {
-                        cout << p << " is a directory containing:\n";
+        // if (PA.get_run_lapso_flag() == true) {
+        //     cout << "solving LaPSO with NSGA Decomposition" << endl;
+        //     boost::filesystem::path p(string(para.nsga_vector_root_folder) + "/" + string(para.input_instance_name));
+        //     try {
+        //         if (exists(p)) {
+        //             if (is_directory(p)) {
+        //                 cout << p << " is a directory containing:\n";
 
-                        for (boost::filesystem::directory_entry& x : boost::filesystem::directory_iterator(p)) {
-                            string filename = x.path().string();
-                            if (filename.find("_vec") == string::npos) {
-                                continue;
-                            }
-                            string prop_string = "";
-                            int pos = filename.find_last_of("/");
-                            for (int i = pos + 1; i < filename.size(); i++) {
-                                if (isdigit(filename[i]) || filename[i] == '.') {
-                                    prop_string += filename[i];
-                                }
-                            }
-                            //read in file
-                            vector<bool> con_vec = getNSGAConVec(filename);
-                            cout << "con vec size is " << con_vec.size() << endl;
-                            string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "NSGA_" + prop_string + "txt";
-                            string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_best_" + prop_string + "csv";
-                            string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_average_" + prop_string + "csv";
-                            cout << "running Lapso: " << prop_string << endl;
-                            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
-                        }
-                    } else
-                        cout << p << " exists, but is not a regular file or directory\n";
-                } else
-                    cout << p << " does not exist\n";
-            } catch (const boost::filesystem::filesystem_error& ex) {
-                cout << ex.what() << '\n';
-            }
-        }
+        //                 for (boost::filesystem::directory_entry& x : boost::filesystem::directory_iterator(p)) {
+        //                     string filename = x.path().string();
+        //                     if (filename.find("_vec") == string::npos) {
+        //                         continue;
+        //                     }
+        //                     string prop_string = "";
+        //                     int pos = filename.find_last_of("/");
+        //                     for (int i = pos + 1; i < filename.size(); i++) {
+        //                         if (isdigit(filename[i]) || filename[i] == '.') {
+        //                             prop_string += filename[i];
+        //                         }
+        //                     }
+        //                     //read in file
+        //                     vector<bool> con_vec = getNSGAConVec(filename);
+        //                     cout << "con vec size is " << con_vec.size() << endl;
+        //                     string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "NSGA_" + prop_string + "txt";
+        //                     string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_best_" + prop_string + "csv";
+        //                     string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "NSGA_average_" + prop_string + "csv";
+        //                     cout << "running Lapso: " << prop_string << endl;
+        //                     // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stod(prop_string), para.subproblem_solver_runtime_lim, "");
+        //                 }
+        //             } else
+        //                 cout << p << " exists, but is not a regular file or directory\n";
+        //         } else
+        //             cout << p << " does not exist\n";
+        //     } catch (const boost::filesystem::filesystem_error& ex) {
+        //         cout << ex.what() << '\n';
+        //     }
+        // }
 
-        // run LR with greedily produced decompositions
-        if (PA.get_test_greedy_decomp_flag() == true) {
-            cout << "solving greedy decomp" << endl;
-            string con_count_string(para.test_greedy_decomp);
+        // // run LR with greedily produced decompositions
+        // if (PA.get_test_greedy_decomp_flag() == true) {
+        //     cout << "solving greedy decomp" << endl;
+        //     string con_count_string(para.test_greedy_decomp);
 
-            string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Greedy_" + con_count_string + ".txt";
-            string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_best_" + con_count_string + ".csv";
-            string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_average_" + con_count_string + ".csv";
-            //create decomp vec
+        //     string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Greedy_" + con_count_string + ".txt";
+        //     string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_best_" + con_count_string + ".csv";
+        //     string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Greedy_average_" + con_count_string + ".csv";
+        //     //create decomp vec
 
-            std::vector<HG_Edge> edges_copy;
+        //     std::vector<HG_Edge> edges_copy;
 
-            for (auto& edge : HG.getHGEdges()) {
-                edges_copy.push_back(HG_Edge{ edge.getEdgeIdx(), edge.getNodeIdxs() });
-            }
-            vector<bool> con_vec;
-            con_vec.resize(edges_copy.size(), false);
+        //     for (auto& edge : HG.getHGEdges()) {
+        //         edges_copy.push_back(HG_Edge{ edge.getEdgeIdx(), edge.getNodeIdxs() });
+        //     }
+        //     vector<bool> con_vec;
+        //     con_vec.resize(edges_copy.size(), false);
 
-            //sort by descending order on constraint size
-            std::sort(edges_copy.begin(), edges_copy.end(), greater<HG_Edge>());
-            int count = 0;
-            for (int i = 0; i < edges_copy.size(); i++) {
-                if (count < (stoi(con_count_string))) {
-                    con_vec[edges_copy[i].getEdgeIdx()] = 1;
-                    count++;
-                } else {
-                    break;
-                }
-            }
-            cout << "solving LaPSO" << endl;
-            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, "");
-        }
+        //     //sort by descending order on constraint size
+        //     std::sort(edges_copy.begin(), edges_copy.end(), greater<HG_Edge>());
+        //     int count = 0;
+        //     for (int i = 0; i < edges_copy.size(); i++) {
+        //         if (count < (stoi(con_count_string))) {
+        //             con_vec[edges_copy[i].getEdgeIdx()] = 1;
+        //             count++;
+        //         } else {
+        //             break;
+        //         }
+        //     }
+        //     cout << "solving LaPSO" << endl;
+        //     // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, "");
+        // }
 
-        // run LR with random decompositions
-        if (PA.get_test_random_decomp_flag() == true) {
-            cout << "solving random decomp" << endl;
-            string con_count_string(para.test_random_decomp);
-            string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Random_" + con_count_string + ".txt";
-            string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Random_best_" + con_count_string + ".csv";
-            string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Random_average_" + con_count_string + ".csv";
-            //create decompveco
+        // // run LR with random decompositions
+        // if (PA.get_test_random_decomp_flag() == true) {
+        //     cout << "solving random decomp" << endl;
+        //     string con_count_string(para.test_random_decomp);
+        //     string stats_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/stat_results/" + "Random_" + con_count_string + ".txt";
+        //     string best_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Random_best_" + con_count_string + ".csv";
+        //     string average_lb_output_filename = string(para.output_root_folder) + "/" + string(para.input_instance_name) + "/lb_results/" + "Random_average_" + con_count_string + ".csv";
+        //     //create decompveco
 
-            vector<bool> con_vec;
-            con_vec.resize(HG.getNumEdges(), false);
-            //set seed to current time in seconds
+        //     vector<bool> con_vec;
+        //     con_vec.resize(HG.getNumEdges(), false);
+        //     //set seed to current time in seconds
 
-            int count = 0;
-            int idx = 0;
-            while (count < (stoi(con_count_string))) {
-                con_vec[idx] = 1;
-                count++;
-                idx++;
-            }
+        //     int count = 0;
+        //     int idx = 0;
+        //     while (count < (stoi(con_count_string))) {
+        //         con_vec[idx] = 1;
+        //         count++;
+        //         idx++;
+        //     }
 
-            std::random_device rd;
-            std::mt19937 g(rd());
-            std::shuffle(con_vec.begin(), con_vec.end(), g);
+        //     std::random_device rd;
+        //     std::mt19937 g(rd());
+        //     std::shuffle(con_vec.begin(), con_vec.end(), g);
 
-            cout << "solving LaPSO" << endl;
-            // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, string(para.random_lb_output));
-        }
+        //     cout << "solving LaPSO" << endl;
+        //     // solveLapso(argc, argv, MP, HG, con_vec, para.set_ub, stats_output_filename, best_lb_output_filename, average_lb_output_filename, stoi(con_count_string), para.subproblem_solver_runtime_lim, string(para.random_lb_output));
+        // }
 
         return 0;
     }

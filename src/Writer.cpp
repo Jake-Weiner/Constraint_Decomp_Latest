@@ -193,7 +193,53 @@ void Writer::writeSubproblemStatistics(const std::string& output_filename, std::
         cout << "unable to open Subproblem Statistics File: " << output_filename << endl;
     }
     outfile.close();
-    
     cout << "finished writing Subproblem Statistics" << endl;
-    
 }
+
+
+// write out raw data for subproblem statistics which might require scaling/normalisation
+void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblem_Statistics> ss_ptr){
+    // MIP Times
+    genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_times_filename, ss_ptr->decomposition_idx, ss_ptr->mip_times);
+    // MIP Bounds
+    genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_bounds_filename, ss_ptr->decomposition_idx, ss_ptr->mip_obj_solutions);
+    // LP Bounds
+    genericRawSubproblemOutput(LOF.raw_data_filenames.LP_bounds_filename, ss_ptr->decomposition_idx, ss_ptr->lp_obj_solutions);
+    // LP Times
+    genericRawSubproblemOutput(LOF.raw_data_filenames.LP_time_filename, ss_ptr->decomposition_idx, ss_ptr->lp_times);
+    // Block SUM obj vals
+    genericRawSubproblemOutput(LOF.raw_data_filenames.sum_obj_filename, ss_ptr->decomposition_idx, ss_ptr->sum_block_obj_values);
+    // Block SUM abs(obj) vals
+    genericRawSubproblemOutput(LOF.raw_data_filenames.sum_absobj_filename, ss_ptr->decomposition_idx, ss_ptr->sum_abs_block_obj_values);
+    // block RHS vals
+    genericRawSubproblemOutput(LOF.raw_data_filenames.rhs_filename, ss_ptr->decomposition_idx, ss_ptr->average_block_RHS_values);
+    // Block largest RHSLHS ratios
+    genericRawSubproblemOutput(LOF.raw_data_filenames.largestRHSLHS_filename, ss_ptr->decomposition_idx, ss_ptr->average_block_Largest_RHSLHS_ratio);
+    // Block RHS range
+    genericRawSubproblemOutput(LOF.raw_data_filenames.RHS_range_filename, ss_ptr->decomposition_idx, ss_ptr->block_RHS_range);
+}
+
+// write out raw data for subproblem statistics which might require scaling/normalisation
+void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr){
+    // MIP Times
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_times_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // MIP Bounds
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_bounds_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // LP Bounds
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.LP_bounds_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // LP Times
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.LP_time_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // Block SUM obj vals
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.sum_obj_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // Block SUM abs(obj) vals
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.sum_absobj_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // block RHS vals
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.rhs_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // Block largest RHSLHS ratios
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.largestRHSLHS_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+    // // Block RHS range
+    // genericRawSubproblemOutput(LOF.raw_data_filenames.RHS_range_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+}
+
+
+

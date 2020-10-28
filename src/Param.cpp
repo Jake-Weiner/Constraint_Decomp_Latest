@@ -9,8 +9,6 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("input_root_folder");
     parser.setOption("subproblem_var_prop");
     parser.setOption("output_root_folder");
-    parser.setOption("nsga_gen"); 
-    parser.setOption("nsga_pop_size"); 
     parser.setOption("input_instance_name"); 
     parser.setOption("decomp_type"); 
     parser.setOption("nsga_vector_root_folder");
@@ -25,7 +23,12 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("set_generic_MIP_time");
     parser.setOption("set_parsed_MIP_time");  
     parser.setOption("run_generic_MIP_solver");
-    
+
+    // Decomp parameters
+    parser.setOption("nsga_gen"); 
+    parser.setOption("nsga_pop_size"); 
+    parser.setOption("greedy_decomp_size"); 
+
     // MPS File Statistics
     parser.setOption("MIP_num_var"); 
     parser.setOption("MIP_num_cons");
@@ -59,12 +62,16 @@ void Param::parse(int argc, const char** argv)
     //LR Parameters
     parser.setOption("maxIter");
 
-    
+    // decomp output files
+    parser.setOption("nsga_decomp_output_file");
+    parser.setOption("greedy_decomp_output_file");
     
     // running flags/parameters
     parser.setOption("run_parsed_MIP_solver");
     parser.setOption("run_lapso");
-    parser.setOption("nsga_decomp_output_file");
+    parser.setOption("run_greedy_decomp");
+    
+   
     parser.setOption("random_lb_output");
     parser.setOption("con_vec_filename");
 
@@ -122,16 +129,31 @@ void Param::parse(int argc, const char** argv)
         test_random_decomp = parser.getValue("test_random_decomp");
     if (parser.getValue("random_lb_output"))
         random_lb_output = parser.getValue("random_lb_output");
-    if (parser.getValue("nsga_decomp_output_file"))
-        nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");
+    
     if (parser.getValue("con_vec_filename"))
         con_vec_filename = parser.getValue("con_vec_filename");
-        
 
+    // running flags
+    
+    if (parser.getValue("run_greedy_decomp"))
+        run_greedy_decomp = parser.getValue("run_greedy_decomp");
+
+    // decomp parameters
+    if (parser.getValue("greedy_decomp_size"))
+        greedy_decomp_size = atoi(parser.getValue("greedy_decomp_size"));
+    
+
+    // decomp output files
+    if (parser.getValue("nsga_decomp_output_file"))
+        nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");  
+    if (parser.getValue("greedy_decomp_output_file"))
+        greedy_decomp_output_file = parser.getValue("greedy_decomp_output_file");  
+    
+    
     // output files
     if (parser.getValue("subproblem_statistics_filename"))
         subproblem_statistics_filename = parser.getValue("subproblem_statistics_filename");
-        
+    
     
     // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))

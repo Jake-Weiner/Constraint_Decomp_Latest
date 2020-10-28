@@ -246,21 +246,25 @@ std::vector<double> MIPProblemProbe::getConstraintNonZeroProps(const std::vector
     return constraint_non_zeroes_props;
 }
 
-double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs)
+double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs, const bool& abs_flag)
 {
-
     double sum_obj = 0;
     for (const auto& var_idx : variable_idxs) {
         if (MP_ptr->variableIndexValidity(var_idx)) {
             bool var_has_obj_coeff = false;
             double obj_coeff = MP_ptr->getVarObjCoeff(var_idx, var_has_obj_coeff);
             if (var_has_obj_coeff) {
-                sum_obj += obj_coeff;
+                if (abs_flag){
+                    sum_obj += abs(obj_coeff);
+                }else{
+                    sum_obj += obj_coeff;
+                }
             }
         }
     }
     return sum_obj;
 }
+
 
 void MIPProblemProbe::populateInstanceStatistics(instance_statistics& is, MIP_Problem& MP)
 {

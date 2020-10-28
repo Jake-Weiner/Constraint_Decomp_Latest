@@ -55,8 +55,37 @@ class Writer{
         void writeCPLEXResults(const std::string& output_filename, const std::string& instnace_name, const CPLEX_Return_struct& CRS);
         void writeMIPParsingResults(const std::string& output_filename, const MIP_Parsing_Test_struct& MPTS);
         void writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblem_Statistics> ss_ptr);
+        void writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblem_Statistics> ss_ptr);    
+        void writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr);
     private:
 
+        // generic raw subproblem statistics output
+
+        // required filename, decomposition idx, vector of data
+        template<class T1>
+        void genericRawSubproblemOutput(const string& output_filename, int decomposition_idx, vector<T1> raw_data){      
+            std::cout << "writing Raw Subproblem Statistics to " << output_filename << endl; 
+            // file doesn't exist
+            if (!fileExists(output_filename)){
+                std::ofstream outfile;
+                outfile.open(output_filename);
+                if (outfile){
+                    outfile << "Decompsitions Index" << "," << "Raw Data" << std::endl;
+                }
+                outfile.close();
+            }
+
+            // Then populate file with statistics
+            std::ofstream outfile;
+            outfile.open(output_filename, std::ofstream::app);
+            if (outfile) {
+                outfile << decomposition_idx;
+                for (const auto& val : raw_data){
+                    outfile << "," << val;
+                }
+                outfile << endl;
+            }
+        }
 };
 
 

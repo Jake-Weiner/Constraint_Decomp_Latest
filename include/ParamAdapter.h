@@ -83,6 +83,7 @@ public:
     {
         return run_MIP_Duals_testing_flag;
     }
+
     bool get_run_LR_testing_flag()
     {
         return run_LR_testing_flag;
@@ -92,6 +93,24 @@ public:
     {
         return run_statistic_testing_flag;
     }
+
+    // decomp flags
+
+    //    bool run_greedy_decomp = false;
+    // bool run_NSGA_decomp = false;
+
+
+     bool get_run_greedy_decomp_flag()
+    {
+        return run_greedy_decomp_flag;
+    }
+
+    bool get_run_NSGA_decomp_flag()
+    {
+        return run_NSGA_decomp_flag;
+    }
+
+
 
     std::vector<double> get_nsga_props()
     {
@@ -115,6 +134,7 @@ private:
     void create_NSGA_decomp_plot_filename(const mainParam::Param& p);
     string NSGA_decomp_plot_filename;
     vector<double> nsga_props;
+
     bool generic_MIP_Solver_Flag = false;
     bool run_nsga_decomp_flag = false;
     bool run_lapso_flag = false;
@@ -132,6 +152,10 @@ private:
     bool run_MIP_Duals_testing_flag = false;
     bool run_LR_testing_flag = false;
     bool run_statistic_testing_flag = false;
+
+    // decomposition flags
+    bool run_greedy_decomp_flag = false;
+    bool run_NSGA_decomp_flag = false;
 
     bool getBoolVal(const char* input);
 

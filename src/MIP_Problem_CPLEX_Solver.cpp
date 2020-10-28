@@ -23,9 +23,9 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
 
     //ensure that variables are ordered before adding to model
     vector<Variable> variables = MP.variables;
-    sort(variables.begin(),variables.end());
+   
 
-    
+    cout << "adding in variables" << endl;
     for (auto& var : variables) {
         // cout << "var idx is " << var.getVarIndx() << endl;
         double var_lb = var.getLB();
@@ -41,6 +41,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
         }
     }
 
+    cout << "adding in constraints" << endl;
     //add all constraints to the model
     int constraints_added = 0;
     for (auto& constraint : MP.constraints) {
@@ -52,8 +53,8 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
         }
         // cout << "const exp is " << constraint_exp << " : RHS is " << constraint.getRHS() << endl;
         double RHS = constraint.getRHS();
-
         if (constraint.getBoundType() == Greater) {
+            // IloRange r1(env, RHS, constraint_exp, std::numeric_limits<double>::max());
             IloRange r1(env, RHS, constraint_exp, std::numeric_limits<double>::max());
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
@@ -62,15 +63,17 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
         } else if (constraint.getBoundType() == Less) {
-            IloRange r1(env, std::numeric_limits<double>::min(),constraint_exp, RHS);
+            // IloRange r1(env, -infinity,constraint_exp, RHS);
+            IloRange r1(env, -std::numeric_limits<double>::max(),constraint_exp, RHS);
             subproblem_constraints_cplex.add(r1);
             ++constraints_added;
         }
       
     }
-    // cout << "number of constraints added is " << constraints_added << endl;
+    cout << "number of constraints added is " << constraints_added << endl;
     model.add(subproblem_constraints_cplex);
     
+    cout << "creating obj function" << endl;
     // add objective function to cplex model
     IloNumExpr obj_exp(env);
     int obj_term_count = 0;
@@ -78,13 +81,21 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
         int var_idx = obj_term.first;
         double coeff = obj_term.second;
         obj_exp += (coeff * subproblem_vars_cplex[var_idx]);
-        obj_term_count++;
+        ++obj_term_count;
     }
-    // cout << "number of objective function terms is " << obj_term_count << endl;
+    cout << "number of objective function terms is " << obj_term_count << endl;
     IloObjective obj_fn = IloMinimize(env, obj_exp);
     model.add(obj_fn);
 
+    cout << "creating cplex object" << endl;
+    // try{
     IloCplex cplex(model);
+    // }
+    // catch(IloException e){
+    //     cout << "exception error is " << e.getMessage() << endl; 
+    // }
+    
+    cout << "created cplex object" << endl;
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     // if solving as a ILP, set a time limit, otherwise solve the LP to optimality
     if (!LP){
@@ -96,7 +107,8 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
         cplex.setParam(IloCplex::Param::RandomSeed, 0); // set random seed to 0 for consistency in testing
     }
 
-
+    // solving mip
+    cout << "solving MIP" << endl;
     bool solve_status = cplex.solve();
     vector<double> dual_vals;
     if (LP){
@@ -110,6 +122,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
    
     //default bound and integer solution values
     double best_int_sol = -999999999999999999;
+    // double best_bound_val = 0;
     double best_bound_val = cplex.getBestObjValue();
     // cplex.solve() status indicates if a feasible solution was found
     if (solve_status == false) {

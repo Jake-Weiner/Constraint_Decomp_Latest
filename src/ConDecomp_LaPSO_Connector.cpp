@@ -154,7 +154,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                 IloNumVar x(*(sp.envPtr), var_lb, var_ub, ILOINT);
                 subproblem_vars_cplex.add(x);
             } else if (variable.getVarType() == Bin){
-                IloNumVar x(*(sp.envPtr), 0, 1, ILOBOOL);
+                IloNumVar x(*(sp.envPtr), var_lb, var_ub, ILOBOOL);
                 subproblem_vars_cplex.add(x);
             } else if (variable.getVarType() == Cont) {
                 IloNumVar x(*(sp.envPtr), var_lb, var_ub, ILOFLOAT);
