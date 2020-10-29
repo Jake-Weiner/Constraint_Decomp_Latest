@@ -439,6 +439,13 @@ int main(int argc,const char** argv)
     ParamAdapter PA(para);
     Writer w;
     string MIP_Problem_File = PA.getProblemFilename();
+
+    // make sure mps file exists
+    if (!fileExists(MIP_Problem_File)){
+        cout << "Input MPS file cannot be found" << endl;
+        exit(EXIT_FAILURE);
+    }
+
     MIP_Parsing_Test_struct MPTS;
     // solve generic MIP
     if (PA.get_generic_MIP_Solver_Flag() == true || PA.get_run_MIP_Parse_testing_flag() == true) {
@@ -502,7 +509,7 @@ int main(int argc,const char** argv)
         exit(0);
     }
 
-    bool printMIPProblem = false;
+    bool printMIPProblem = true;
     if (printMIPProblem == true) {
         MP.printObjectiveFn();
         MP.printVariables();
