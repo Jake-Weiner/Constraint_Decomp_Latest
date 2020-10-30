@@ -305,34 +305,40 @@ vector<Partition_Struct> Hypergraph::getPartitionStruct(const vector<bool>& con_
     return PS;
 }
 
-vector<bool> Hypergraph::removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges)
+//
+vector<int> Hypergraph::removeRelaxedConstraintRedundancies(const vector<int>& relaxed_edges)
 {
 
-    vector<bool> new_constraint_vector;
-    new_constraint_vector.resize(relaxed_edges.size());
+    vector<int> new_constraint_vector;
+    // new_constraint_vector.resize(relaxed_edges.size());
 
-    // partition the hypergraph
-    partition(relaxed_edges, false);
+    // relaxed edges as bool vec
+    bool print = false;
+    vector<bool> relaxed_edges_bool;
+    relaxed_edges_bool.resize(num_edges, false);
+
+    for (const auto& con_idx : relaxed_edges){
+        relaxed_edges_bool[con_idx] = true;
+    }
+
+    // partition the hypergraph based on the relaxed edges provided
+    partition(relaxed_edges_bool, false);
     //loop through the constraints and see if the variables in each constraint is contained within any of the subproblems
-    for (int con_idx = 0; con_idx < relaxed_edges.size(); ++con_idx) {
-        if (relaxed_edges[con_idx] == true) {
-            // if relaxed constraint is redundant, set it to false
-            bool print = false;
-            if (isConstraintRedundant(HG_edges[con_idx], print)) {
-                std::cout << "redundant constraint found " << std::endl;
-                new_constraint_vector[con_idx] = false;
-            } else {
-                new_constraint_vector[con_idx] = true;
-            }
+    for (const auto& con_idx : relaxed_edges) {
 
+        // if constraint is redundant, discard it as part of relaxed onstraints
+        // otherwise keep it
+        if (isConstraintRedundant(HG_edges[con_idx], print)) {
+            std::cout << "redundant constraint found " << std::endl;
         } else {
-            new_constraint_vector[con_idx] = false;
+            new_constraint_vector.push_back(con_idx);
         }
     }
     return new_constraint_vector;
 }
 
-// check if the edge in question is contained within one of the subproblem partitions
+// check if the edge in question is already contained within one of the subproblem partitions
+// if it is, unrelax the constraint as relaxing this constraint doesn't provide any benefit
 bool Hypergraph::isConstraintRedundant(HG_Edge& edge_to_check, bool print)
 {
     bool ret_val = false;
@@ -374,7 +380,7 @@ bool Hypergraph::isConstraintRedundant(HG_Edge& edge_to_check, bool print)
         }
 
         // if constraint nodes are a subset of partition nodes, redundant constaint is found and there is no need to
-        // check the remainin partitions
+        // check the remaining partitions
         if (all_nodes_found == true) {
             ret_val = true;
             break;

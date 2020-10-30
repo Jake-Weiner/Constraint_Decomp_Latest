@@ -100,7 +100,7 @@ public:
     void constraintNumberCheck(const int& num_constraints_relaxed);
     void variableNumberCheck();
 
-    vector<bool> removeRelaxedConstraintRedundancies(const vector<bool>& relaxed_edges);
+    vector<int> removeRelaxedConstraintRedundancies(const vector<int>& relaxed_edges);
     
 
     

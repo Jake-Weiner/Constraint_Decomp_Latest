@@ -1035,6 +1035,8 @@ GreedyDecompCreator.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/GreedyDecompCreator.h
 Hypergraph.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Hypergraph.h
+LaPSOHandler.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LaPSOHandler.h
 MIPProblemProbe.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.h
 MIP_Fileparser.h
@@ -1053,8 +1055,6 @@ Random.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Random.h
 SolveGenericMIP.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/SolveGenericMIP.h
-LaPSOHandler.h
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LaPSOHandler.h
 Util.h
 /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Util.h
 WriteResults.h

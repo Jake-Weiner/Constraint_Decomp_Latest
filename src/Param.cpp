@@ -42,15 +42,23 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_Hypergraph_Partitioning_testing");  
     parser.setOption("run_NSGA_testing");  
     parser.setOption("run_MIP_Parse_testing");
-    parser.setOption("run_constraint_redundancy_testing");
+    
     parser.setOption("run_greedy_decomposition_testing");
     parser.setOption("run_MIP_Duals_testing");
     parser.setOption("run_LR_testing");
     parser.setOption("run_statistic_testing_flag");
  
-   
+    
+    // input files
+    parser.setOption("decomps_to_remove_red_const_file");
+    parser.setOption("decomps_to_remove_duplicates_file");
+    
+
     // output files
     parser.setOption("subproblem_statistics_filename");
+    parser.setOption("redundant_const_removed_output_file");
+    parser.setOption("duplicates_removed_output_file");
+    
 
 
 
@@ -70,7 +78,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_parsed_MIP_solver");
     parser.setOption("run_lapso");
     parser.setOption("run_greedy_decomp");
-    
+    parser.setOption("run_constraint_redundancy");
+    parser.setOption("run_remove_duplicate_constraints");
    
     parser.setOption("random_lb_output");
     parser.setOption("con_vec_filename");
@@ -137,6 +146,10 @@ void Param::parse(int argc, const char** argv)
     
     if (parser.getValue("run_greedy_decomp"))
         run_greedy_decomp = parser.getValue("run_greedy_decomp");
+    
+    if (parser.getValue("run_remove_duplicate_constraints"))
+        run_remove_duplicate_constraints = parser.getValue("run_remove_duplicate_constraints");
+
 
     // decomp parameters
     if (parser.getValue("greedy_decomp_size"))
@@ -147,8 +160,19 @@ void Param::parse(int argc, const char** argv)
     if (parser.getValue("nsga_decomp_output_file"))
         nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");  
     if (parser.getValue("greedy_decomp_output_file"))
-        greedy_decomp_output_file = parser.getValue("greedy_decomp_output_file");  
+        greedy_decomp_output_file = parser.getValue("greedy_decomp_output_file");
+    if (parser.getValue("redundant_const_removed_output_file"))
+        redundant_const_removed_output_file = parser.getValue("redundant_const_removed_output_file");
+
+    // const char* decomps_to_remove_duplicates_file = "";
+
+    // // output decompositions
+
+    // const char* duplicates_removed_output_file = "";
     
+    // decomp input files
+    if (parser.getValue("decomps_to_remove_red_const_file"))
+        decomps_to_remove_red_const_file = parser.getValue("decomps_to_remove_red_const_file");
     
     // output files
     if (parser.getValue("subproblem_statistics_filename"))
@@ -160,8 +184,8 @@ void Param::parse(int argc, const char** argv)
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");
     if (parser.getValue("run_NSGA_testing"))
         run_NSGA_testing = parser.getValue("run_NSGA_testing");
-    if (parser.getValue("run_constraint_redundancy_testing"))
-        run_constraint_redundancy_testing = parser.getValue("run_constraint_redundancy_testing");
+    if (parser.getValue("run_constraint_redundancy"))
+        run_constraint_redundancy = parser.getValue("run_constraint_redundancy");
     if (parser.getValue("run_greedy_decomposition_testing"))
         run_greedy_decomposition_testing = parser.getValue("run_greedy_decomposition_testing");
     if (parser.getValue("run_MIP_Duals_testing"))

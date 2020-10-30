@@ -67,9 +67,9 @@ public:
     {
         return run_NSGA_testing_flag;
     }
-    bool get_run_constraint_redundancy_testing_flag()
+    bool get_run_constraint_redundancy_flag()
     {
-        return run_constraint_redundancy_testing_flag;
+        return run_constraint_redundancy_flag;
     }
     bool get_run_greedy_decomposition_testing_flag()
     {
@@ -110,6 +110,10 @@ public:
         return run_NSGA_decomp_flag;
     }
 
+    bool get_run_remove_duplicate_constraints_flag()
+    {
+        return run_remove_duplicate_constraints_flag;
+    }
 
 
     std::vector<double> get_nsga_props()
@@ -146,12 +150,13 @@ private:
     bool run_MIP_Parse_testing_flag = false;
     bool run_Hypergraph_Partitioning_testing_flag = false;
     bool run_NSGA_testing_flag = false;
-    bool run_constraint_redundancy_testing_flag = false;
+    bool run_constraint_redundancy_flag = false;
     bool run_greedy_decomposition_testing_flag = false;
     bool run_evaluate_decompositions_testing_flag = false;
     bool run_MIP_Duals_testing_flag = false;
     bool run_LR_testing_flag = false;
     bool run_statistic_testing_flag = false;
+    bool run_remove_duplicate_constraints_flag = false;
 
     // decomposition flags
     bool run_greedy_decomp_flag = false;

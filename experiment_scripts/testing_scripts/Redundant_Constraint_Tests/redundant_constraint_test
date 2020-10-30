@@ -1,8 +1,8 @@
 #!/bin/bash
 
-INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/redunant_constraint"
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/dataset/network_flow_problems"
 executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
-instance_name="redundant_constraint.mps"
+instance_name="cost266-UUE.mps"
 
 if test -f $INPUT_FILE; then
     echo "$INPUT_FILE exists."
@@ -12,12 +12,11 @@ else
 fi
 
 $executable_path/main_test --input_root_folder=$INPUT_DIR \
---subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9 --nsga_pop_size=8 --printLevel=3 \
---output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
---nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps \
---solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP \
---set_ub=40417 --run_nsga_decomp=true --nsga_gen=5 --input_instance_name=$instance_name --decomp_type=NSGA --maxCPU=1000 \
---run_constraint_redundancy_testing=true \
+--printLevel=3 \
+--input_instance_name=$instance_name \
+--run_constraint_redundancy=true \
+--decomps_to_remove_red_const_file=/home/jake/PhD/Decomposition/Input/Unit_Testing/redunant_constraint/convec_file1.csv \
+--redundant_const_removed_output_file=/home/jake/PhD/Decomposition/Output/testing/Constraint_redundancy/output1.csv
 
 
 

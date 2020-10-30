@@ -54,7 +54,7 @@ struct Param {
     const char* run_MIP_Parse_testing = "false";
     const char* run_Hypergraph_Partitioning_testing = "false";
     const char* run_NSGA_testing = "false";
-    const char* run_constraint_redundancy_testing = "false";
+    
     const char* run_greedy_decomposition_testing = "false";
     const char* run_evaluate_decompositions_testing_flag = "false";
     const char* run_MIP_Duals_testing = "false";
@@ -85,7 +85,17 @@ struct Param {
     const char* solve_parsed_MIP_output_filename = "";   
     const char* run_nsga_decomp = "";
 
+    // input decompositions
+    const char* decomps_to_remove_red_const_file = "";
+    const char* decomps_to_remove_duplicates_file = "";
 
+    // output decompositions
+    const char* redundant_const_removed_output_file = "";
+    const char* duplicates_removed_output_file = "";
+    
+    // run flags
+    const char* run_constraint_redundancy = "false";
+    const char* run_remove_duplicate_constraints = "false";
     const char* run_lapso = "false";
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";

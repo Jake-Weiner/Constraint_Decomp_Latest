@@ -34,12 +34,15 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     run_MIP_Parse_testing_flag = getBoolVal(p.run_MIP_Parse_testing);
     run_Hypergraph_Partitioning_testing_flag = getBoolVal(p.run_Hypergraph_Partitioning_testing);
     run_NSGA_testing_flag = getBoolVal(p.run_NSGA_testing);
-    run_constraint_redundancy_testing_flag = getBoolVal(p.run_constraint_redundancy_testing);
+    run_constraint_redundancy_flag = getBoolVal(p.run_constraint_redundancy);
     run_greedy_decomposition_testing_flag = getBoolVal(p.run_greedy_decomposition_testing);
     run_evaluate_decompositions_testing_flag = getBoolVal(p.run_evaluate_decompositions_testing_flag);
     run_MIP_Duals_testing_flag = getBoolVal(p.run_MIP_Duals_testing);
     run_LR_testing_flag = getBoolVal(p.run_LR_testing);
     run_statistic_testing_flag = getBoolVal(p.run_statistic_testing_flag);
+
+    // running flags
+    run_remove_duplicate_constraints_flag = getBoolVal(p.run_remove_duplicate_constraints;
 
     // decomp flags
     run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
