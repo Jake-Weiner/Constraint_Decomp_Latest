@@ -150,6 +150,33 @@ src/ConDecomp_LaPSO_Connector.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.s
 .PHONY : src/ConDecomp_LaPSO_Connector.cpp.s
 
+src/ConstraintFileProcessing.o: src/ConstraintFileProcessing.cpp.o
+
+.PHONY : src/ConstraintFileProcessing.o
+
+# target to build an object file
+src/ConstraintFileProcessing.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.o
+.PHONY : src/ConstraintFileProcessing.cpp.o
+
+src/ConstraintFileProcessing.i: src/ConstraintFileProcessing.cpp.i
+
+.PHONY : src/ConstraintFileProcessing.i
+
+# target to preprocess a source file
+src/ConstraintFileProcessing.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.i
+.PHONY : src/ConstraintFileProcessing.cpp.i
+
+src/ConstraintFileProcessing.s: src/ConstraintFileProcessing.cpp.s
+
+.PHONY : src/ConstraintFileProcessing.s
+
+# target to generate assembly for a file
+src/ConstraintFileProcessing.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.s
+.PHONY : src/ConstraintFileProcessing.cpp.s
+
 src/CpuTimer.o: src/CpuTimer.cpp.o
 
 .PHONY : src/CpuTimer.o
@@ -756,6 +783,9 @@ help:
 	@echo "... src/ConDecomp_LaPSO_Connector.o"
 	@echo "... src/ConDecomp_LaPSO_Connector.i"
 	@echo "... src/ConDecomp_LaPSO_Connector.s"
+	@echo "... src/ConstraintFileProcessing.o"
+	@echo "... src/ConstraintFileProcessing.i"
+	@echo "... src/ConstraintFileProcessing.s"
 	@echo "... src/CpuTimer.o"
 	@echo "... src/CpuTimer.i"
 	@echo "... src/CpuTimer.s"

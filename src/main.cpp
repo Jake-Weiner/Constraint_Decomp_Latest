@@ -117,7 +117,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     MIPProblemProbe MPP(&MP);
 
     //generate relaxed constraint statistics
-    Relaxed_Constraint_Statistics rcs = {};
     std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr = std::make_shared<Relaxed_Constraint_Statistics>();
     rcs_ptr->decomposition_idx = decomposition_idx;
 
@@ -560,10 +559,7 @@ int main(int argc, const char** argv)
     }
 
     // remove duplicate constraints
-
     if (PA.get_run_remove_duplicate_constraints_flag()){
-        
-        // 
         ConstraintFileProcessing CFP;
         CFP.removeDuplicateConstraints(para.decomps_to_remove_duplicates_file,
         para.duplicates_removed_output_file);

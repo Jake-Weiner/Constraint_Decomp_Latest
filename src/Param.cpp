@@ -163,16 +163,16 @@ void Param::parse(int argc, const char** argv)
         greedy_decomp_output_file = parser.getValue("greedy_decomp_output_file");
     if (parser.getValue("redundant_const_removed_output_file"))
         redundant_const_removed_output_file = parser.getValue("redundant_const_removed_output_file");
-
-    // const char* decomps_to_remove_duplicates_file = "";
-
-    // // output decompositions
-
-    // const char* duplicates_removed_output_file = "";
+    if (parser.getValue("duplicates_removed_output_file"))
+        duplicates_removed_output_file = parser.getValue("duplicates_removed_output_file");
+    
     
     // decomp input files
     if (parser.getValue("decomps_to_remove_red_const_file"))
         decomps_to_remove_red_const_file = parser.getValue("decomps_to_remove_red_const_file");
+
+    if (parser.getValue("decomps_to_remove_duplicates_file"))
+        decomps_to_remove_duplicates_file = parser.getValue("decomps_to_remove_duplicates_file");
     
     // output files
     if (parser.getValue("subproblem_statistics_filename"))

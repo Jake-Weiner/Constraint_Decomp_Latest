@@ -42,7 +42,7 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     run_statistic_testing_flag = getBoolVal(p.run_statistic_testing_flag);
 
     // running flags
-    run_remove_duplicate_constraints_flag = getBoolVal(p.run_remove_duplicate_constraints;
+    run_remove_duplicate_constraints_flag = getBoolVal(p.run_remove_duplicate_constraints);
 
     // decomp flags
     run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
