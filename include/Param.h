@@ -61,6 +61,14 @@ struct Param {
     const char* run_LR_testing = "false";
     const char* run_statistic_testing_flag = "false";
 
+    
+    // statistics output files
+    const char* subproblem_statistics_folder = "";
+    const char* relaxed_constraint_statistics_filename = "";
+    const char* instance_statistics_filename = "";
+
+
+
     // decomposition flags
     const char* run_greedy_decomp = "false";
     const char* run_NSGA_decomp = "false";
@@ -70,7 +78,7 @@ struct Param {
     const char* greedy_decomp_output_file = "";
 
     const char* con_vec_filename = "";
-    const char* subproblem_statistics_filename = "";
+    
 
     const char* MIP_Parse_testing_output_filename = "";
     const char* input_root_folder;

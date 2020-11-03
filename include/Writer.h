@@ -4,7 +4,12 @@
 #include <vector>
 #include <string>
 #include "Util.h"
+#include "Decomposition_Statistics.h"
 #include <memory>
+
+using Decomposition_Statistics::RelaxedConstraints;
+using Decomposition_Statistics::Subproblems;
+using Decomposition_Statistics::Instance;
 
 class Writer{
 
@@ -54,13 +59,14 @@ class Writer{
         void writeRelaxedConstraintStatistics(){};
         void writeCPLEXResults(const std::string& output_filename, const std::string& instnace_name, const CPLEX_Return_struct& CRS);
         void writeMIPParsingResults(const std::string& output_filename, const MIP_Parsing_Test_struct& MPTS);
-        void writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblem_Statistics> ss_ptr);
-        void writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblem_Statistics> ss_ptr);    
-        void writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr);
+        void writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblems> ss_ptr);
+        void writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblems> ss_ptr);    
+        void writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<RelaxedConstraints> rcs_ptr);
+        void writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr);
+    
     private:
 
         // generic raw subproblem statistics output
-
         // required filename, decomposition idx, vector of data
         template<class T1>
         void genericRawSubproblemOutput(const string& output_filename, int decomposition_idx, vector<T1> raw_data){      
@@ -70,7 +76,7 @@ class Writer{
                 std::ofstream outfile;
                 outfile.open(output_filename);
                 if (outfile){
-                    outfile << "Decompsitions Index" << "," << "Raw Data" << std::endl;
+                    outfile << "Decomposition Index" << "," << "Raw Data" << std::endl;
                 }
                 outfile.close();
             }
@@ -86,6 +92,8 @@ class Writer{
                 outfile << endl;
             }
         }
+
+        void writeRelaxedConstraintSingleValues(const string& output_filename, int decomposition_idx, std::shared_ptr<RelaxedConstraints> rcs_ptr);
 };
 
 

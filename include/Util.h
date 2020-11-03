@@ -20,7 +20,7 @@ struct individual_information_struct{
     unsigned int largest_sp;
 };
 
-struct SubproblemRawData{
+struct SubproblemRawDataFilenames{
     // MIP Times
     string MIP_times_filename;
     // MIP Bounds
@@ -33,12 +33,37 @@ struct SubproblemRawData{
     string sum_obj_filename;
     // Block SUM abs(obj) vals
     string sum_absobj_filename;
-    // block RHS vals
-    string rhs_filename;
-    // Block largest RHSLHS ratios
+    // block average RHS vals
+    string average_rhs_filename;
+    // block average abs(RHS) vals
+    string average_absrhs_filename;
+    // Block largest abs(RHSLHS) ratios
     string largestRHSLHS_filename;
     // Block RHS range
     string RHS_range_filename;
+    // Block Const props
+    string const_props_filename;
+    // Block equality props filename
+    string equality_props_filename;
+    // Block densities
+    string densities_filename;
+    // Block Shapes
+    string shapes_filename;
+};
+
+struct RelaxedConstraintsRawDataFilenames{
+    // props filename inludes single prop values - relaxed constraint prop, equality prop, bin prop, int prop, cont prop
+    string props_filename;
+    // non zero props of all relaxed constraints
+    string non_zero_props_filename; 
+    // Largest abs(RHS/LHS) ratios
+    string largest_RHSLHS_ratios_filename;
+    // Sum obj Coeffs
+    string sum_obj_coeffs_of_constraints_filename;
+    // Sum abs(obj coeffs)
+    string sum_abs_obj_coeffs_of_constraints_filename;
+    // Block SUM RHS vals
+    string RHS_values_filename;
 };
 
 
@@ -121,8 +146,12 @@ struct LaPSOOutputFilenames{
     string output_best_lb_filename;
     string output_average_lb_filename;
     string final_lb_filename;
-    string subproblem_statistics_filename;
-    SubproblemRawData raw_data_filenames;
+    string subproblem_statistics_folder;
+    string instance_statistics_folder;
+    string relaxed_constraints_statistics_folder;
+    // SubproblemRawDataFilenames raw_subproblem_data_filenames;
+    // RelaxedConstraintsRawDataFilenames raw_rc_data_filenames;
+    string instance_statistics_filename;
 
 };
 
@@ -365,7 +394,7 @@ std::tuple<T1,T1,double,double> getStatistics(const std::vector<T1>& input_vec){
 
     T1 sum = 0;
     T1 min = std::numeric_limits<T1>::max();
-    T1 max = std::numeric_limits<T1>::min();
+    T1 max = -std::numeric_limits<T1>::max();
     for (const auto& element : input_vec){
         if (element > max){
             max = element;

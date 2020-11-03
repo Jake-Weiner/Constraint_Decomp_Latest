@@ -8,6 +8,7 @@
 #include "Subproblem_Constraints.h"
 #include "Variable.h"
 #include "Util.h"
+#include "Decomposition_Statistics.h"
 #include <ilcplex/ilocplex.h>
 #include <map>
 #include <string>
@@ -16,6 +17,7 @@
 
 using namespace LaPSO;
 using namespace std;
+using Decomposition_Statistics::Subproblems;
 
 class IloSmartPointer { 
     IloEnv* ptr; //  
@@ -109,10 +111,9 @@ public:
 // this is the general method class which implements solve, reduced costs, heursistic for this particular
 // constraint relaxation problem
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
-
 public:
     ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<bool>& con_vec,const bool printing, const double sp_solve_time_limit, 
-    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr);
+    std::shared_ptr<Subproblems> subproblem_statistics_ptr);
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
@@ -146,7 +147,7 @@ private:
     double sp_solve_time_limit;
     unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
     unordered_map<int, int> orig_constraint_idx_to_dual_idx_map;
-    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr;
+    std::shared_ptr<Subproblems> subproblem_statistics_ptr;
 };
 
 #endif

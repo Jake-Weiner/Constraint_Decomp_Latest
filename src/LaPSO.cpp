@@ -311,9 +311,9 @@ void Problem::solve(UserHooks& hooks)
             printf("best_solution lower bound so far is %f \n", best_solution->lb);
         }
 
-        for (int dual_idx =0; dual_idx < best_solution->dual.size(); ++dual_idx){
-            cout << "Dual[" << dual_idx << "] = " <<  best_solution->dual[dual_idx] << std::endl;
-        }
+        // for (int dual_idx =0; dual_idx < best_solution->dual.size(); ++dual_idx){
+        //     cout << "Dual[" << dual_idx << "] = " <<  best_solution->dual[dual_idx] << std::endl;
+        // }
 
         // cpu time is within the limit
         // best_lb_tracking.push_back(best_solution->lb);
@@ -433,8 +433,8 @@ void Problem::solve(UserHooks& hooks)
 
     // update final dual min and max values
 
-    final_dual_min = current_solution->dual.min();
-    final_dual_max = current_solution->dual.max();
+    // final_dual_min = current_solution->dual.min();
+    // final_dual_max = current_solution->dual.max();
 }
 
 double Problem::wallTime() const

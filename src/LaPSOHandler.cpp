@@ -32,7 +32,8 @@ void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequireme
 
 }
 
-void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
+
+ void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
 
     solver.solve(CLC);
     // // // // // // // // // // // \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
@@ -51,9 +52,9 @@ void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
 
     // print out dual variable solutions
 
-    for (int dual_idx = 0; dual_idx<solver.best_solution->dual.size(); ++dual_idx){
-        std::cout << "constraint idx: " << CLC.getOriginalConIdx(dual_idx)
-        << " with dual value: " << solver.best_solution->dual[dual_idx] << std::endl;
-    }
+    // for (int dual_idx = 0; dual_idx<solver.best_solution->dual.size(); ++dual_idx){
+    //     std::cout << "constraint idx: " << CLC.getOriginalConIdx(dual_idx)
+    //     << " with dual value: " << solver.best_solution->dual[dual_idx] << std::endl;
+    // }
 
 }

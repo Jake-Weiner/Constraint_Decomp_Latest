@@ -20,10 +20,11 @@
 
 using namespace boost;
 using namespace std;
+using Decomposition_Statistics::Subproblems;
 
 ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions,
     const vector<bool>& con_vec, const bool printing, const double sp_solve_time_limit, 
-    std::shared_ptr<Subproblem_Statistics> subproblem_statistics_ptr)
+    std::shared_ptr<Subproblems> subproblem_statistics_ptr)
 {
     this->OP = original_problem;
     this->debug_printing = printing;
@@ -277,6 +278,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 // returns 0 for success, -1 for failure
 int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, DblVec& rc, DblVec& x)
 {
+    int ret_val = 0;
     //if subproblem size is 1 solve without cplex
     if (sp.subproblemVarIdx_to_originalVarIdx.size() == 1) {
         int original_var_idx = sp.subproblemVarIdx_to_originalVarIdx[0];
@@ -325,18 +327,30 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     cplex.setParam(IloCplex::TiLim, sp_solve_time_limit);
     cplex.setOut((*(sp.envPtr)).getNullStream());
-    if (!cplex.solve()) {
-        cout << "Failed to find feasible/optimal subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
+    bool feasible_sol = cplex.solve();
+    
+    // if MIP subproblem is not solved to optimality
+    if ((cplex.getStatus() != CPX_STAT_OPTIMAL) && (cplex.getStatus() != CPXMIP_OPTIMAL)){
+        cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
+        // if no feasible solution is found
+        subproblem_statistics_ptr->subproblem_solve_success.push_back(false);
+        if (!feasible_sol){
+            cout << "Failed to find feasible subproblem solution" << endl;
+            subproblem_statistics_ptr->mip_obj_solutions.push_back(-INF);
+        }
         sp.model.remove(obj_fn);
         cplex.end();
-        exit(EXIT_FAILURE);
+        ret_val = -1;
+    }
+    else{
+        // capture the mip solution quality
+        subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getObjValue());
+        subproblem_statistics_ptr->subproblem_solve_success.push_back(true);
     }
 
-     //capture the mip runtime in cpu seconds
+    //capture the mip runtime in cpu seconds
     subproblem_statistics_ptr->mip_times.push_back(cplex.getTime());
-    // capture the mip solution quality
-    subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getObjValue());
-    
+
     // solve the subproblem as a LP and get the statistics
     IloModel relax(*sp.envPtr);
     relax.add(sp.model);
@@ -346,17 +360,18 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     cplex_relaxed.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     cplex_relaxed.setParam(IloCplex::TiLim, sp_solve_time_limit);
     cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
-    if (!cplex_relaxed.solve()) {
-        cout << "Failed to find feasible/optimal subproblem solution" << endl;
+    // not able to solve LP subproblem to optimal
+    if ((cplex.getStatus() != CPX_STAT_OPTIMAL)) {
+        cout << "Failed to find optimal subproblem LP Solution" << endl;
         sp.model.remove(obj_fn);
         cplex_relaxed.end();
-        exit(EXIT_FAILURE);
+        ret_val = -1;
     }
 
      //capture the lp runtime in cpu seconds
     subproblem_statistics_ptr->lp_times.push_back(cplex_relaxed.getTime());
     // capture the milp solution quality
-    subproblem_statistics_ptr->lp_obj_solutions.push_back( cplex_relaxed.getObjValue());
+    subproblem_statistics_ptr->lp_obj_solutions.push_back(cplex_relaxed.getObjValue());
     // end the LP relaxed environment to free up memory
     cplex_relaxed.end();
     
@@ -367,7 +382,6 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
         try {
             IloNum val = cplex.getValue(sp.variables[i]);
             Variable_Type vt = OP.variables[orig_idx].getVarType();
-            
             if (vt == Int || vt == Bin) {
                 // in case of rounding errors, add in slight perturbation and then convert to int to round down
                 int x_val = (int)(val + 0.1);
@@ -387,7 +401,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Db
     }
     sp.model.remove(obj_fn);
     cplex.end();
-    return 0;
+    return ret_val;
 }
 
 void ConDecomp_LaPSO_Connector::updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s)
@@ -441,6 +455,7 @@ void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_Connector_Sol
     }
 }
 
+// solveSubproblem updates both solution viol and LB
 Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
 {
 
@@ -453,16 +468,22 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     int subproblem_solve_error = 0;
     // for each subproblem, feed in new objective function, solve and update x
     for (auto& subproblem : MS) {
-
         int subproblem_status = solveSubproblemCplex(subproblem, s.rc, s.x);
-        if (subproblem_status == 1) {
+        if (subproblem_status == -1) {
             subproblem_solve_error = 1;
             break;
         }
     }
 
-    updateParticleViol(s);
-    updateParticleLB(s);
+    // if one or more subproblems can't be solved, set the output as -INF (for minimisation problems)
+    if (subproblem_solve_error){
+        s.lb = -INF;
+    }
+    else{
+        updateParticleViol(s);
+        updateParticleLB(s);
+    }
+    
 
     if (debug_printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "

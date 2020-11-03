@@ -30,11 +30,11 @@ struct Partition_Struct{
         cout << endl;
     }
 
-    int getNumNodes(){
+    int getNumNodes() const {
         return node_idxs.size();
     }
 
-    int getNumEdges(){
+    int getNumEdges() const {
         return edge_idxs.size();
     }
     

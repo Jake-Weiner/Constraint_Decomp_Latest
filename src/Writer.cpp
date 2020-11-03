@@ -139,7 +139,7 @@ void Writer::writeMIPParsingResults(const std::string& output_filename, const MI
 
 
 //
-void Writer::writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblem_Statistics> ss_ptr){
+void Writer::writeSubproblemStatistics(const std::string& output_filename, std::shared_ptr<Subproblems> ss_ptr){
 
     // If file doesn't exist populate the column names for features
     if (!fileExists(output_filename)){
@@ -198,48 +198,134 @@ void Writer::writeSubproblemStatistics(const std::string& output_filename, std::
 
 
 // write out raw data for subproblem statistics which might require scaling/normalisation
-void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblem_Statistics> ss_ptr){
+void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblems> ss_ptr){
+    // Subproblem Success
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Subproblem_success.csv", ss_ptr->decomposition_idx, ss_ptr->mip_times);
     // MIP Times
-    genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_times_filename, ss_ptr->decomposition_idx, ss_ptr->mip_times);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/MIP_times.csv", ss_ptr->decomposition_idx, ss_ptr->mip_times);
     // MIP Bounds
-    genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_bounds_filename, ss_ptr->decomposition_idx, ss_ptr->mip_obj_solutions);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/MIP_bounds.csv", ss_ptr->decomposition_idx, ss_ptr->mip_obj_solutions);
     // LP Bounds
-    genericRawSubproblemOutput(LOF.raw_data_filenames.LP_bounds_filename, ss_ptr->decomposition_idx, ss_ptr->lp_obj_solutions);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/LP_bounds.csv", ss_ptr->decomposition_idx, ss_ptr->lp_obj_solutions);
     // LP Times
-    genericRawSubproblemOutput(LOF.raw_data_filenames.LP_time_filename, ss_ptr->decomposition_idx, ss_ptr->lp_times);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/LP_times.csv", ss_ptr->decomposition_idx, ss_ptr->lp_times);
     // Block SUM obj vals
-    genericRawSubproblemOutput(LOF.raw_data_filenames.sum_obj_filename, ss_ptr->decomposition_idx, ss_ptr->sum_block_obj_values);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Sum_obj.csv", ss_ptr->decomposition_idx, ss_ptr->sum_block_obj_values);
     // Block SUM abs(obj) vals
-    genericRawSubproblemOutput(LOF.raw_data_filenames.sum_absobj_filename, ss_ptr->decomposition_idx, ss_ptr->sum_abs_block_obj_values);
-    // block RHS vals
-    genericRawSubproblemOutput(LOF.raw_data_filenames.rhs_filename, ss_ptr->decomposition_idx, ss_ptr->average_block_RHS_values);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Sum_abs_obj.csv", ss_ptr->decomposition_idx, ss_ptr->sum_abs_block_obj_values);
+    // block average RHS vals
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/average_RHS.csv", ss_ptr->decomposition_idx, ss_ptr->average_block_RHS_values);
+    // block average abs(RHS) vals
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/average_abs_RHS.csv", ss_ptr->decomposition_idx, ss_ptr->average_block_absRHS_values);
     // Block largest RHSLHS ratios
-    genericRawSubproblemOutput(LOF.raw_data_filenames.largestRHSLHS_filename, ss_ptr->decomposition_idx, ss_ptr->average_block_Largest_RHSLHS_ratio);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Largest_RHSLHS.csv", ss_ptr->decomposition_idx, ss_ptr->average_block_Largest_RHSLHS_ratio);
     // Block RHS range
-    genericRawSubproblemOutput(LOF.raw_data_filenames.RHS_range_filename, ss_ptr->decomposition_idx, ss_ptr->block_RHS_range);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/RHS_range.csv", ss_ptr->decomposition_idx, ss_ptr->block_RHS_range);
+    // block constraint props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Const_props.csv", ss_ptr->decomposition_idx, ss_ptr->total_constr_props);
+    // block shapes
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Shapes.csv",ss_ptr->decomposition_idx, ss_ptr->average_block_shape);
+    // block densities
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Densities.csv",ss_ptr->decomposition_idx, ss_ptr->block_densities);
+    // block variable props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Var_props.csv",ss_ptr->decomposition_idx, ss_ptr->block_variable_props);
+    // block const props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Const_props.csv",ss_ptr->decomposition_idx, ss_ptr->total_constr_props);
+
+    // bin, int cont props
+    // equality props
 }
 
 // write out raw data for subproblem statistics which might require scaling/normalisation
-void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Relaxed_Constraint_Statistics> rcs_ptr){
-    // MIP Times
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_times_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // MIP Bounds
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.MIP_bounds_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // LP Bounds
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.LP_bounds_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // LP Times
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.LP_time_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // Block SUM obj vals
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.sum_obj_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // Block SUM abs(obj) vals
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.sum_absobj_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // block RHS vals
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.rhs_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // Block largest RHSLHS ratios
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.largestRHSLHS_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
-    // // Block RHS range
-    // genericRawSubproblemOutput(LOF.raw_data_filenames.RHS_range_filename, rcs_ptr->decomposition_idx, rcs_ptr->mip_times);
+void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<RelaxedConstraints> rcs_ptr){
+   
+    // non zero counts of all relaxed constraints
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Non_zero_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->non_zero_props);
+       
+    // Largest RHS/LHS of relaxed constraints
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Largest_RHSLHS.csv", rcs_ptr->decomposition_idx, rcs_ptr->largest_RHSLHS_ratios);
+
+    // sum obj coeffs of constraints
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Sum_obj.csv", rcs_ptr->decomposition_idx, rcs_ptr->sum_obj_coeffs_of_constraints);
+
+     // sum abs(obj coeffs) of constraints
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Sum_abs_obj.csv", rcs_ptr->decomposition_idx, rcs_ptr->sum_abs_obj_coeffs_of_constraints);
+
+    // RHS vals of constraints
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/RHS_vals.csv", rcs_ptr->decomposition_idx, rcs_ptr->RHS_values);
+
 }
+
+// write out the instance statistics
+void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr){
+
+    string output_filename = LOF.instance_statistics_filename;
+      // If file doesn't exist populate the column names for features
+    if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile) {
+            outfile << "No. Var" << "," << "No. Constr"<< "," << "No. Bin" 
+            << "," << "No. Int" << "," << "No. Cont" << "," << "No. Non-Zeroes" 
+            << "," << "Min Obj Term" << "," << "Max Obj Term" << "," << "Min Rhs"
+            << "," << "Max Rhs"
+            << endl;
+        }
+        else{
+            cout << "unable to open Instance Statistics File: " << output_filename << endl;
+        }
+        outfile.close();
+    }
+    // Then populate file with statistics
+    
+    std::ofstream outfile;
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << ins_ptr->num_var << "," << ins_ptr->num_const << "," << ins_ptr->num_bin
+        << "," << ins_ptr->num_int << "," << ins_ptr->num_non_zeroes << "," << ins_ptr->min_obj
+        << "," << ins_ptr->max_obj << "," << ins_ptr->min_rhs << "," << ins_ptr->max_rhs
+        << endl;
+    }
+  
+    else{
+        cout << "unable to open Instance Statistics File: " << output_filename << endl;
+    }
+    outfile.close();
+    cout << "finished writing Instance Statistics" << endl;
+}
+
+ void Writer::writeRelaxedConstraintSingleValues(const string& output_filename, int decomposition_idx, std::shared_ptr<RelaxedConstraints> rcs_ptr){
+
+     if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile) {
+            outfile << "Decomposition Index" << "Relaxed Constraint Prop" << "," << "Equality Prop"<< "," << "Bin Prop" 
+            << "," << "Int Prop" << "," << "Cont Prop"
+            << endl;
+        }
+        else{
+            cout << "unable to open Relaxed Constraints Single Statistics File: " << output_filename << endl;
+        }
+        outfile.close();
+    }
+    // Then populate file with statistics
+    
+    std::ofstream outfile;
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << rcs_ptr->decomposition_idx << "," << rcs_ptr->relaxed_constraint_prop << "," << rcs_ptr->equality_prop
+        << "," << rcs_ptr->bin_prop << "," << rcs_ptr->int_prop << "," << rcs_ptr->cont_prop
+        << endl;
+    }
+    
+    else{
+        cout << "unable to open Relaxed Constraints Single Statistics File: " << output_filename << endl;
+    }
+    outfile.close();
+    cout << "finished writing Relaxed Constraints Single Statistics" << endl;
+
+ }
 
 
 

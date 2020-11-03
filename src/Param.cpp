@@ -55,7 +55,12 @@ void Param::parse(int argc, const char** argv)
     
 
     // output files
-    parser.setOption("subproblem_statistics_filename");
+    // statistics folders
+    parser.setOption("subproblem_statistics_folder");
+    parser.setOption("relaxed_constraint_statistics_folder");
+    parser.setOption("instance_statistics_folder");
+    
+    // decomposition redundancy removal
     parser.setOption("redundant_const_removed_output_file");
     parser.setOption("duplicates_removed_output_file");
     
@@ -174,11 +179,14 @@ void Param::parse(int argc, const char** argv)
     if (parser.getValue("decomps_to_remove_duplicates_file"))
         decomps_to_remove_duplicates_file = parser.getValue("decomps_to_remove_duplicates_file");
     
-    // output files
-    if (parser.getValue("subproblem_statistics_filename"))
-        subproblem_statistics_filename = parser.getValue("subproblem_statistics_filename");
-    
-    
+    // statistics output files
+    if (parser.getValue("subproblem_statistics_folder"))
+        subproblem_statistics_folder = parser.getValue("subproblem_statistics_folder");
+    if (parser.getValue("instance_statistics_filename"))
+        instance_statistics_filename = parser.getValue("instance_statistics_filename");
+    if (parser.getValue("relaxed_constraint_statistics_folder"))
+        relaxed_constraint_statistics_folder = parser.getValue("relaxed_constraint_statistics_folder");
+   
     // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");

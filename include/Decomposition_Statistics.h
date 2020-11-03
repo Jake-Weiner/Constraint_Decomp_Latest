@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "MIPProblemProbe.h"
+#include "Hypergraph.h"
 
 using std::vector;
 
@@ -16,14 +17,10 @@ class Subproblems {
 
     public:
 
-        void generate_statistics(MIPProblemProbe& MPP, const vector<int>& relaxed_constraint_indices);
+        void generateBlockStatistics(const Partition_Struct& ps, MIPProblemProbe& MPP);
 
-
-
-        int decomposition_idx;
-
-       
-
+        int decomposition_idx;       
+        vector<bool> subproblem_solve_success;
         // for each subproblem, store the time required to solve the subproblem
         vector<double> mip_times;
         vector<double> mip_obj_solutions;
@@ -82,7 +79,7 @@ class Subproblems {
         double average_inequality_prop;
         double stddev_inequality_prop;
 
-        // average of objective coefficients in each of the blocks - This will
+        
 
         // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
         vector<double> sum_block_obj_values;
@@ -94,10 +91,18 @@ class Subproblems {
         double average_of_sum_abs_block_obj_values;
         double stddev_of_sum_abs_block_obj_values;
 
-        // average abs(RHS) value of each block
+        vector<double> block_obj_val_ranges;
+
+        // average RHS value of each block
         vector<double> average_block_RHS_values;
         double average_of_average_block_RHS_values;
         double stddev_of_average_block_RHS_values;
+
+
+        // average abs(RHS) value of each block
+        vector<double> average_block_absRHS_values;
+        double average_of_average_block_absRHS_values;
+        double stddev_of_average_block_absRHS_values;
 
         //average of block largest RHS/LHS ratios
         vector<double> average_block_Largest_RHSLHS_ratio;
@@ -120,54 +125,80 @@ class Subproblems {
         double stddev_block_density;
 };
 
-class Relaxed_Constraints {
+class RelaxedConstraints {
 
-     ~Relaxed_Constraints(){};
+    public:
+        RelaxedConstraints(const int& decomposition_idx) : decomposition_idx(decomposition_idx){};
+        ~RelaxedConstraints(){};
 
-    int decomposition_idx;
-    
-    // constraint statistics
-    vector<double> equality_props;
-    double average_equality_prop;
-    double stddev_equality_prop;
-    
-    vector<double> inequality_props;
-    double average_inequality_prop;
-    double stddev_inequality_prop;
-    
-    // proportion of relaxed constraints compared to all constraints in the original problem
-    double relaxed_constraint_prop;
-    // variable statistics
-    // proportion of problem variables in the subproblem
-    double bin_prop;
-    double int_prop;
-    double cont_prop;
-    
-    // non zero counts of all relaxed constraints
-    vector<double> non_zero_props;
-    double average_non_zero_prop;
-    double stddev_non_zero_prop;
-    
-    vector<double> largest_RHSLHS_ratios;
-    double average_RHSLHS_ratio;
-    double stddev_RHSLHS_ratio;
+        void generate_statistics(MIPProblemProbe& MPP, const vector<int>& relaxed_constraint_indices);
+        int decomposition_idx;
+        
+        // constraint statistics
+        double equality_prop;
+     
+        // proportion of relaxed constraints compared to all constraints in the original problem
+        double relaxed_constraint_prop;
+        // variable statistics
+        // proportion of problem variables in the subproblem
+        double bin_prop;
+        double int_prop;
+        double cont_prop;
+        
+        // non zero props of all relaxed constraints
+        //
+        vector<double> non_zero_props;
+        // double average_non_zero_prop;
+        // double stddev_non_zero_prop;
+        
+        vector<double> largest_RHSLHS_ratios;
+        // double average_RHSLHS_ratio;
+        // double stddev_RHSLHS_ratio;
 
-    vector<double> sum_obj_coeffs_of_constraints;
-    double average_sum_obj_coeffs;
-    double stddev_sum_obj_coeffs;
+        vector<double> sum_obj_coeffs_of_constraints;
+        // double average_sum_obj_coeffs;
+        // double stddev_sum_obj_coeffs;
 
-    vector<double> sum_abs_obj_coeffs_of_constraints;
-    double average_abs_sum_obj_coeffs;
-    double stddev_abs_sum_obj_coeffs;
+        vector<double> sum_abs_obj_coeffs_of_constraints;
+        // double average_abs_sum_obj_coeffs;
+        // double stddev_abs_sum_obj_coeffs;
 
-    vector<double> RHS_values;
-    double average_RHS;
-    double stddev_RHS;
+        vector<double> RHS_values;
+        // double average_RHS;
+        // double stddev_RHS;
 
-    vector<double> sum_LHS_values;
-    double average_sum_LHS;
-    double stddev_sum_LHS;
+        vector<double> sum_LHS_values;
+        // double average_sum_LHS;
+        // double stddev_sum_LHS;
    
+};
+
+class Instance{
+
+    public: 
+
+        Instance(MIPProblemProbe& MPP){
+            populateInstanceStatistics(MPP);
+        };
+        ~Instance(){};
+
+        void populateInstanceStatistics(MIPProblemProbe& MPP);
+
+        void getObjExtremes(MIPProblemProbe& MPP);
+        void getRHSExtremes(MIPProblemProbe& MPP);
+
+        int num_var;
+        int num_const;
+        int num_bin;
+        int num_cont;
+        int num_int;
+        int num_non_zeroes;
+        int max_obj;
+        int min_obj;
+        int max_rhs;
+        int min_rhs;
+        double best_known_bound;
+
 };
 
 

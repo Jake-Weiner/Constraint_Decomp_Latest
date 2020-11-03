@@ -117,8 +117,7 @@ class MIP_Problem{
         int getNumCont();
         int getnumNonZero();
         Constraint getConstraint(const int& constraint_idx);
-        double getConstraintSumObj(const int& constraint_idx);
-        double getConstraintAbsSumObj(const int& constraint_idx);
+        double getConstraintSumObj(const int& constraint_idx, const bool& abs_flag);
         double getAverageConstraintDensity();
         double getStddevConstraintDensity();
         double getEqualityConstraintProp();

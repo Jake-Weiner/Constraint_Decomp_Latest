@@ -210,7 +210,7 @@ Constraint MIP_Problem::getConstraint(const int& constraint_idx){
 }
 
 // returns the sum(obj coeff) for the supplied constraint
-double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
+double MIP_Problem::getConstraintSumObj(const int& constraint_idx, const bool& abs_flag){
     double sum_obj_ceoff = 0.00;
     // get the variables in the constraint
     if (constraint_idx < getNumConstraints()){
@@ -218,7 +218,12 @@ double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
             //search through the objective function for the variable 
             for (const auto& obj_pair : objective_fn){
                 if (obj_pair.first == variable_index){
-                    sum_obj_ceoff += obj_pair.second;
+                    if (abs_flag){
+                        sum_obj_ceoff += abs(obj_pair.second);
+                    }
+                    else{
+                        sum_obj_ceoff += obj_pair.second;
+                    }
                     break;
                 }
             }
@@ -227,23 +232,6 @@ double MIP_Problem::getConstraintSumObj(const int& constraint_idx){
     return sum_obj_ceoff;   
 }
 
-// returns the sum (abs(obj coeff) for the supplied constraint
-double MIP_Problem::getConstraintAbsSumObj(const int& constraint_idx){
-    double sum_obj_ceoff = 0.00;
-    // get the variables in the constraint
-    if (constraint_idx < getNumConstraints()){
-        for (const auto& variable_index : constraints[constraint_idx].getVarIndxs()){
-            //search through the objective function for the variable 
-            for (const auto& obj_pair : objective_fn){
-                if (obj_pair.first == variable_index){
-                    sum_obj_ceoff += abs(obj_pair.second);
-                    break;
-                }
-            }
-        }
-    }
-    return sum_obj_ceoff;   
-}
 
 
 // returns the objective coefficient of the variable if the variable is contained within the objective function
