@@ -231,9 +231,14 @@ void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Var_props.csv",ss_ptr->decomposition_idx, ss_ptr->block_variable_props);
     // block const props
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Const_props.csv",ss_ptr->decomposition_idx, ss_ptr->total_constr_props);
-
-    // bin, int cont props
-    // equality props
+    // block bin props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Bin_props.csv",ss_ptr->decomposition_idx, ss_ptr->bin_props);
+    // block int props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Int_props.csv",ss_ptr->decomposition_idx, ss_ptr->int_props);
+    // block cont props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Cont_props.csv",ss_ptr->decomposition_idx, ss_ptr->cont_props);
+    // block equality props
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Cont_props.csv",ss_ptr->decomposition_idx, ss_ptr->equality_props);
 }
 
 // write out raw data for subproblem statistics which might require scaling/normalisation
@@ -241,19 +246,14 @@ void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF
    
     // non zero counts of all relaxed constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Non_zero_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->non_zero_props);
-       
     // Largest RHS/LHS of relaxed constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Largest_RHSLHS.csv", rcs_ptr->decomposition_idx, rcs_ptr->largest_RHSLHS_ratios);
-
     // sum obj coeffs of constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Sum_obj.csv", rcs_ptr->decomposition_idx, rcs_ptr->sum_obj_coeffs_of_constraints);
-
      // sum abs(obj coeffs) of constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Sum_abs_obj.csv", rcs_ptr->decomposition_idx, rcs_ptr->sum_abs_obj_coeffs_of_constraints);
-
     // RHS vals of constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/RHS_vals.csv", rcs_ptr->decomposition_idx, rcs_ptr->RHS_values);
-
 }
 
 // write out the instance statistics
@@ -294,8 +294,9 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
     cout << "finished writing Instance Statistics" << endl;
 }
 
- void Writer::writeRelaxedConstraintSingleValues(const string& output_filename, int decomposition_idx, std::shared_ptr<RelaxedConstraints> rcs_ptr){
+ void Writer::writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr){
 
+     string output_filename = LOF.relaxed_constraints_statistics_folder + "/single_stats.csv";
      if (!fileExists(output_filename)){
         std::ofstream outfile;
         outfile.open(output_filename);

@@ -64,8 +64,9 @@ struct Param {
     
     // statistics output files
     const char* subproblem_statistics_folder = "";
-    const char* relaxed_constraint_statistics_filename = "";
-    const char* instance_statistics_filename = "";
+    const char* relaxed_constraint_statistics_folder = "";
+    const char* instance_statistics_folder = "";
+
 
 
 

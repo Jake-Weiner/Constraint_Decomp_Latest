@@ -1,5 +1,6 @@
 #include "ConstraintFileProcessing.h"
 #include "Util.h"
+#include "RelaxedConstraintRedundancyChecker.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -19,6 +20,7 @@ void ConstraintFileProcessing::removeRedundantConstraints(const string& input_fi
     std::ofstream output_fs(output_file);
     // vector of relaxed constraints read in via input file
 
+    RelaxedConstraintRedundancyChecker rcrc;
     // input file successfully opened
     if (input_fs) {
         string line_read;
@@ -34,7 +36,8 @@ void ConstraintFileProcessing::removeRedundantConstraints(const string& input_fi
                 cout << "constraint idx is " << relaxed_constraints_str[i] << endl;
             }
             // new decomp with redundant constraints removed
-            vector<int> new_relaxed_constraints = HG.removeRelaxedConstraintRedundancies(relaxed_constraints_int);
+            // get 
+            vector<int> new_relaxed_constraints = rcrc.removeRedundantConstraints(relaxed_constraints_int, HG);
 
             // write out new deompositions to output file
             if (output_fs) {

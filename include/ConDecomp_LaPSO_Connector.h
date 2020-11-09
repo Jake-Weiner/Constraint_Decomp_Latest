@@ -44,41 +44,11 @@ public:
 
 
 class CPLEX_MIP_Subproblem {
+
 public:
         
-    // CPLEX_MIP_Subproblem(){
-    //     this->env.end();
-    // };
     CPLEX_MIP_Subproblem(){};
 
-    // CPLEX_MIP_Subproblem(IloModel model,
-    //     IloNumVarArray numvararray, int subproblem_var_idx)
-    // {   
-    //     this->model = model;
-    //     this->variables = numvararray;
-    //     this->num_subproblem_vars = subproblem_var_idx;
-    // }
-
-    // ~CPLEX_MIP_Subproblem(){
-    //     this->env.end();
-    // }
-    // CPLEX_MIP_Subproblem(CPLEX_MIP_Subproblem& other)
-    // {
-    //     this->env.end();
-    //     this->env = IloEnv(other.env.getImpl());
-    //     this->model = other.model;
-    //     this->variables = other.variables;
-    //     this->subproblemVarIdx_to_originalVarIdx = other.subproblemVarIdx_to_originalVarIdx;
-    //     this->originalVarIdx_to_subproblemVarIdx = other.originalVarIdx_to_subproblemVarIdx;
-    //     this->num_subproblem_vars = other.num_subproblem_vars;
-    // }
-    //     this->env = IloEnv(other.env.getImpl());
-
-    // }
-    // void initialise_environment(){
-    //     env_ptr = &IloEnv();
-
-    // }
     int num_subproblem_vars;
     
     unordered_map<int, int> subproblemVarIdx_to_originalVarIdx;
@@ -134,12 +104,12 @@ public:
     vector<initial_dual_value_pair> convertOriginalConstraintInitialDualIndicies(const std::vector<initial_dual_value_pair>& original_initial_dual_pairs);
 
 private:
-    void updateParticleLB(ConDecomp_LaPSO_Connector_Solution& s);
+    void addConstLagMult(ConDecomp_LaPSO_Connector_Solution& s);
     void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);
     vector<CPLEX_MIP_Subproblem> MS;
     void initSubproblems(const vector<Partition_Struct>& ps);
     void initOriginalCosts();
-    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, DblVec& rc, DblVec& x);
+    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s);
     bool debug_printing;
     void populateDualIdxToOrigIdxMap(const vector<bool>& con_relax_vector);
     MIP_Problem OP;

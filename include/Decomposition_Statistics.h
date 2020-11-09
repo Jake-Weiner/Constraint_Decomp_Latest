@@ -11,16 +11,18 @@ namespace Decomposition_Statistics {
 
 class Subproblems {
 
-    Subproblems(int decomposition_idx) : decomposition_idx(decomposition_idx){};
-    ~Subproblems(){};
+  
 
 
     public:
-
+        Subproblems(int decomposition_idx) : decomposition_idx(decomposition_idx){};
+        ~Subproblems(){};
         void generateBlockStatistics(const Partition_Struct& ps, MIPProblemProbe& MPP);
 
         int decomposition_idx;       
-        vector<bool> subproblem_solve_success;
+        // if there exists a subproblem in which the root node couldn't be found, then set this flag to false
+        vector<bool> subproblem_optimality_success;
+        vector<bool> subproblem_lp_found;
         // for each subproblem, store the time required to solve the subproblem
         vector<double> mip_times;
         vector<double> mip_obj_solutions;
@@ -29,6 +31,7 @@ class Subproblems {
         double min_mip_time;
         double stddev_mip_time;
 
+       
         double average_mip_obj_soln;
         double max_mip_obj_soln;
         double min_mip_obj_soln;

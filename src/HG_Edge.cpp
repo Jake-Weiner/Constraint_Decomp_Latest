@@ -4,15 +4,15 @@ using namespace std;
 
 
 
-vector<int> HG_Edge::getNodeIdxs(){
+vector<int> HG_Edge::getNodeIdxs() const {
     return node_idxs;
 }
 
-int HG_Edge::getEdgeIdx(){
+int HG_Edge::getEdgeIdx() const {
     return edge_idx;
 }
 
-int HG_Edge::getNumNodes(){
+int HG_Edge::getNumNodes() const {
     return node_idxs.size();
 }
 

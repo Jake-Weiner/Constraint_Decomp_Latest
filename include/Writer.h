@@ -63,7 +63,7 @@ class Writer{
         void writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblems> ss_ptr);    
         void writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<RelaxedConstraints> rcs_ptr);
         void writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr);
-    
+        void writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr);
     private:
 
         // generic raw subproblem statistics output
@@ -93,7 +93,7 @@ class Writer{
             }
         }
 
-        void writeRelaxedConstraintSingleValues(const string& output_filename, int decomposition_idx, std::shared_ptr<RelaxedConstraints> rcs_ptr);
+       
 };
 
 

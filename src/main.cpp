@@ -130,9 +130,10 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
 
     rcs_ptr->generate_statistics(MPP, relaxed_constraint_indices);
 
-    // write out raw relaxed constraint statistis
+    // write out raw relaxed constraint statistics
     w.writeRawRelaxedConstraintStatistics(LOF, rcs_ptr);
-
+    w.writeRelaxedConstraintSingleValues(LOF,rcs_ptr);
+   
     // free up memory instead of storing all raw data
     rcs_ptr.reset();
 
@@ -188,7 +189,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     
     // output subproblem statistics
     w.writeRawSubproblemStatistics(LOF,ss_ptr);
-
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -381,11 +381,9 @@ int main(int argc, const char** argv)
 
     //test constraint redundancy for decompositions
     if (PA.get_run_constraint_redundancy_flag()) {
-
         ConstraintFileProcessing CFP;
         CFP.removeRedundantConstraints(para.decomps_to_remove_red_const_file
         ,para.redundant_const_removed_output_file, HG);
-      
     }
 
     // remove duplicate constraints
@@ -561,24 +559,51 @@ int main(int argc, const char** argv)
         int decomposition_idx = 0;
         // for test_mip 1...
         // get the constraint vector from external file.
-
-        vector<bool> con_vec_readin = readInConVecFromFile(string(para.con_vec_filename));
-        vector<initial_dual_value_pair> test_dual_values;
-        for (int i = 0; i < con_vec_readin.size(); ++i) {
-            test_dual_values.push_back({ i, 0 });
-        }
-        bool set_initial_dual_values = true;
-        LaPSOOutputFilenames LOF = {};
-        LOF.subproblem_statistics_folder = string(para.subproblem_statistics_folder);
-        LOF.relaxed_const
-        // LOF.instance_statistics_filename = string(para.)
-        cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
-        int LR_iter_limit = para.maxIter;
-        int subproblem_solver_time_lim = 300;
-        solveLapso(argc, argv, MP, HG, con_vec_readin, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim,
-            LR_iter_limit, test_dual_values, set_initial_dual_values);
+       
+            
+        std::ifstream input_fs(string(para.con_vec_filename));
+      
+        // input file successfully opened
+        if (input_fs) {
+        string line_read;
+        while (getline(input_fs, line_read)) {
+            vector<string> relaxed_constraints_str;
+            vector<int> relaxed_constraints_int;
+            // split the line based on ,
+            boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+            // first line contains the number of nodes
+            // last element will be empty because of ending final comma
+            for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
+                relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+            }
+            // set all dual values to 0
+            vector<initial_dual_value_pair> test_dual_values;
+            for (int i = 0; i < relaxed_constraints_int.size(); ++i) {
+                test_dual_values.push_back({ i, 0 });
+            }
+            bool set_initial_dual_values = true;
+            LaPSOOutputFilenames LOF = {};
+            LOF.subproblem_statistics_folder = string(para.subproblem_statistics_folder);
+            LOF.relaxed_constraints_statistics_folder = string(para.relaxed_constraint_statistics_folder);
+            LOF.instance_statistics_folder = string(para.instance_statistics_folder);
+            // LOF.relaxed_const
+            // LOF.instance_statistics_filename = string(para.)
+            cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
+            int LR_iter_limit = para.maxIter;
+            int subproblem_solver_time_lim = 300;
+            solveLapso(argc, argv, MP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim,
+                LR_iter_limit, test_dual_values, set_initial_dual_values);
 
         exit(0);
+
+        }
+    }
+
+    else {
+        cout << "redundant constraint input file unable to be found/opened" << endl;
+    }
+        vector<bool> con_vec_readin = readInConVecFromFile(string(para.con_vec_filename));
+
         // for test_mip 2...
         //vector<bool> test_convec2 = {true, true, true, false, false, false, false, false};
 

@@ -182,8 +182,8 @@ void Param::parse(int argc, const char** argv)
     // statistics output files
     if (parser.getValue("subproblem_statistics_folder"))
         subproblem_statistics_folder = parser.getValue("subproblem_statistics_folder");
-    if (parser.getValue("instance_statistics_filename"))
-        instance_statistics_filename = parser.getValue("instance_statistics_filename");
+    if (parser.getValue("instance_statistics_folder"))
+        instance_statistics_folder = parser.getValue("instance_statistics_folder");
     if (parser.getValue("relaxed_constraint_statistics_folder"))
         relaxed_constraint_statistics_folder = parser.getValue("relaxed_constraint_statistics_folder");
    

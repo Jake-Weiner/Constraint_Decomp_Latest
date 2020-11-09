@@ -355,14 +355,7 @@ std::pair<double,double> MIPProblemProbe::getRHSExtremes(){
     return std::make_pair(min,max);
 }
 
-int MIPProblemProbe::getNumMIPConst(){
-    
-    int ret_val = -1;
-    if (MP_ptr != nullptr){
-        ret_val = MP_ptr->getNumConstraints();
-    }
-    return ret_val;
-}
+
 int MIPProblemProbe::getNumMIPVar(){
 
     int ret_val = -1;

@@ -323,9 +323,9 @@ vector<int> Hypergraph::removeRelaxedConstraintRedundancies(const vector<int>& r
 
     // partition the hypergraph based on the relaxed edges provided
     partition(relaxed_edges_bool, false);
+    // generate hashmap of all single variable indicies
     //loop through the constraints and see if the variables in each constraint is contained within any of the subproblems
     for (const auto& con_idx : relaxed_edges) {
-
         // if constraint is redundant, discard it as part of relaxed onstraints
         // otherwise keep it
         if (isConstraintRedundant(HG_edges[con_idx], print)) {

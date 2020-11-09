@@ -102,6 +102,17 @@ public:
 
     vector<int> removeRelaxedConstraintRedundancies(const vector<int>& relaxed_edges);
     
+    HG_Edge getEdge(const int& edge_idx){
+        HG_Edge e;
+        if ((edge_idx >=0) && (edge_idx < num_edges)){
+            e = HG_edges[edge_idx];
+        }
+        else{
+            cout << "Invalid Edge index supplied" << endl;
+            exit(EXIT_FAILURE);
+        }
+        return e;
+    }
 
     
 private:

@@ -18,9 +18,9 @@ public:
     HG_Edge(int edge_idx){
         this->edge_idx = edge_idx;
     };
-    int getEdgeIdx();
-    vector<int> getNodeIdxs();
-    int getNumNodes();
+    int getEdgeIdx() const;
+    vector<int> getNodeIdxs() const;
+    int getNumNodes() const;
     
     void printNodes();
     void addNodeIdx(int node_idx);

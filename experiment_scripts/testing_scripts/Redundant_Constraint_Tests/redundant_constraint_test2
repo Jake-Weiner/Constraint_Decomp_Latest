@@ -1,0 +1,22 @@
+#!/bin/bash
+
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/redunant_constraint"
+executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
+instance_name="redundant_constraint.mps"
+
+if test -f $INPUT_FILE; then
+    echo "$INPUT_FILE exists."
+else
+    echo "$INPUT_FILE does not exist" 
+    exit 99
+fi
+
+$executable_path/main_test --input_root_folder=$INPUT_DIR \
+--printLevel=3 \
+--input_instance_name=$instance_name \
+--run_constraint_redundancy=true \
+--decomps_to_remove_red_const_file=/home/jake/PhD/Decomposition/Input/Unit_Testing/redunant_constraint/convec_file2.csv \
+--redundant_const_removed_output_file=/home/jake/PhD/Decomposition/Output/testing/Constraint_redundancy/output2.csv
+
+
+

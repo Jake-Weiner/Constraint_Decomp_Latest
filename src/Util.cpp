@@ -12,6 +12,7 @@ bool fileExists(const std::string& filename)
     return f.good();
 }
 
+// read in convec from file as a bool
 vector<bool> readInConVecFromFile(const std::string& filename)
 {
 
