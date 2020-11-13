@@ -52,20 +52,21 @@ void Param::parse(int argc, const char** argv)
     // input files
     parser.setOption("decomps_to_remove_red_const_file");
     parser.setOption("decomps_to_remove_duplicates_file");
-    
+    parser.setOption("general_decomp_file");
+ 
 
     // output files
     // statistics folders
     parser.setOption("subproblem_statistics_folder");
     parser.setOption("relaxed_constraint_statistics_folder");
     parser.setOption("instance_statistics_folder");
+    parser.setOption("LR_outputs_folder");
+    
     
     // decomposition redundancy removal
     parser.setOption("redundant_const_removed_output_file");
     parser.setOption("duplicates_removed_output_file");
     
-
-
 
     parser.setOption("run_evaluate_decompositions_testing_flag");
     parser.setOption("MIP_Parse_testing_output_filename");
@@ -79,6 +80,9 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("nsga_decomp_output_file");
     parser.setOption("greedy_decomp_output_file");
     
+    // debug flags
+    parser.setOption("debug_printing");
+
     // running flags/parameters
     parser.setOption("run_parsed_MIP_solver");
     parser.setOption("run_lapso");
@@ -175,9 +179,14 @@ void Param::parse(int argc, const char** argv)
     // decomp input files
     if (parser.getValue("decomps_to_remove_red_const_file"))
         decomps_to_remove_red_const_file = parser.getValue("decomps_to_remove_red_const_file");
-
     if (parser.getValue("decomps_to_remove_duplicates_file"))
         decomps_to_remove_duplicates_file = parser.getValue("decomps_to_remove_duplicates_file");
+    if (parser.getValue("general_decomp_file"))
+        general_decomp_file = parser.getValue("general_decomp_file");
+    
+    // debug flags
+    if (parser.getValue("debug_printing"))
+        debug_printing = parser.getValue("debug_printing");
     
     // statistics output files
     if (parser.getValue("subproblem_statistics_folder"))
@@ -186,6 +195,10 @@ void Param::parse(int argc, const char** argv)
         instance_statistics_folder = parser.getValue("instance_statistics_folder");
     if (parser.getValue("relaxed_constraint_statistics_folder"))
         relaxed_constraint_statistics_folder = parser.getValue("relaxed_constraint_statistics_folder");
+    if (parser.getValue("LR_outputs_folder"))
+        LR_outputs_folder = parser.getValue("LR_outputs_folder");
+
+        
    
     // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))

@@ -40,7 +40,7 @@ namespace LaPSO {
             subgradFactor(2.0)
             , subgradFmult(0.6)
             , subgradFmin(0.0001)
-            , maxIter(10000)
+            , maxIter(1)
             , maxCPU(100)
             , maxWallTime(INF)
             , printLevel(1)

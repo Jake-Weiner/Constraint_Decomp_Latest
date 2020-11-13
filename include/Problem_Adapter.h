@@ -24,7 +24,7 @@ class Problem_Adapter{
         Problem_Adapter();
 
         void createNSGADecomps(Hypergraph& HG, const int& num_gen, 
-        const string& output_file, const int& pop_size);
+        const string& output_file, const int& pop_size, const bool& print_objective);
 };
 
 #endif

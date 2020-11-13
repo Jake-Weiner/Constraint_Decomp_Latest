@@ -47,7 +47,9 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     // decomp flags
     run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
     run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);
- 
+    
+    // debug printing flags
+    debug_printing_flag = getBoolVal(p.debug_printing);
 }
 
 // return a bool val from the given input char*

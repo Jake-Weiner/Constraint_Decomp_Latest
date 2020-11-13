@@ -149,6 +149,7 @@ struct LaPSOOutputFilenames{
     string subproblem_statistics_folder;
     string instance_statistics_folder;
     string relaxed_constraints_statistics_folder;
+    string LR_outputs_folder;
     // SubproblemRawDataFilenames raw_subproblem_data_filenames;
     // RelaxedConstraintsRawDataFilenames raw_rc_data_filenames;
     string instance_statistics_filename;
@@ -447,7 +448,7 @@ struct container_hash {
     //average, stddev sum/coefficients (RHS/LHS)
 
 bool fileExists (const std::string& name);
-vector<bool> readInConVecFromFile(const std::string& name);
+vector<vector<int>> readInConVecFromFile(const std::string& name);
 vector<double> readInDualsFromFile(const std::string& filename);
 
 

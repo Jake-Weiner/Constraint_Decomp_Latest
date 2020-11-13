@@ -19,10 +19,13 @@ class MIPProblemProbe{
         std::vector<double> getConstraintSumAbsObjs(const std::vector<int>& constraint_idxs);
         std::vector<double> getConstraintRHSVals(const std::vector<int>& constraint_idxs);
         
-        std::vector<double> getConstraintNonZeroProps(const std::vector<int>& constraint_idxs);
+        std::vector<int> getConstraintNonZeroCounts(const std::vector<int>& constraint_idxs);
         double getBlockSumObjs(const std::vector<int>& variable_idxs, const bool& abs);
         // get prop of var types from constraint indices provided
-        std::tuple<double, double, double> getVariableProps(const std::vector<int>& constraint_idxs);
+        std::tuple<vector<double>, vector<double>, vector<double>> getVariableProps(const std::vector<int>& constraint_idxs);
+        // get variable props from single constraint
+        std::tuple<double, double, double> getVariablePropsConstraint(const int& constraint_idx);
+
         // given a vector of constraints, count the total number of variables
         int getVarCount(const std::vector<int>& constraint_idxs);
         double getAverageBlockRHS(const std::vector<int>& constraint_idxs, const bool& abs_flag);

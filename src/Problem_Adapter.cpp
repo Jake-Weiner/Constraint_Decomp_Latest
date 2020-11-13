@@ -19,12 +19,12 @@ using std::ostream;
 
 typedef std::pair<unsigned int,unsigned int> pair_int;
 
-void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec);
+void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double con_relaxed, double LSP, bool print_objectives);
 
 Problem_Adapter::Problem_Adapter(){};
 
 void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
-    const string& output_file, const int& pop_size)
+    const string& output_file, const int& pop_size, const bool& print_objectives)
 {
     // vector<individual_information_struct> ris;
     Decomp udp = Decomp(HG.getNumEdges(), HG);
@@ -58,8 +58,6 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
 
     cout << "initialised initial population" << endl;
     cout << "starting to evolve population" << endl;
-    
-
 
     // Decompositions are written out to a file in case the process is interrupted on MASSIVE
     // if file doesn't exist, create it 
@@ -72,18 +70,8 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
         while (gen_counter < (num_gen - 1)) {
             cout << "number of generations evolved is " << gen_counter << endl;
             for (int pop_idx = 0; pop_idx < pop.size(); pop_idx++) {
-
                 // write every individual to the output file, duplicates can be processed later
-                writeDecompToFile(outfile, pop.get_x()[pop_idx]);
-                // unsigned int largest_subproblem = int(floor(pop.get_f()[pop_idx][largest_sp_idx] + 0.1));
-                // unsigned int number_constraints_relaxed = int(floor(pop.get_f()[pop_idx][num_con_relaxed_idx] + 0.1));
-                // pair_int map_key = std::make_pair(largest_subproblem, number_constraints_relaxed);
-                // // if key doesn't exist, at it to the map and write out the individual to the file
-                // if (uo_map.find(map_key) == uo_map.end()){
-                //     uo_map[map_key] = true;
-                     // write out each individual to the required file
-                    
-                
+                writeDecompToFile(outfile, pop.get_x()[pop_idx], pop.get_f()[pop_idx][0], pop.get_f()[pop_idx][1], print_objectives);
             }
             // evolve the population
             pop = algo.evolve(pop); 
@@ -97,7 +85,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
 }
 
 // write out NSGA decompositions as the constraint indexes relaxed to the file specified 
-void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec){
+void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double LSP, double con_relaxed, bool print_objectives){
     
     cout << "writing decomp to file" << endl;
     for (int i = 0; i< con_vec.size(); ++i){
@@ -105,6 +93,10 @@ void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec){
         if (static_cast<int>(con_vec[i] + 0.1) == 1){
             outfile << i << ",";
         }
+    }
+
+    if (print_objectives){
+        outfile << "," << con_relaxed << "," << LSP;
     }
     outfile << endl;
 }

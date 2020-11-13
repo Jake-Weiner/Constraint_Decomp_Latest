@@ -25,8 +25,7 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
     // get block equality/inequality constraint props
     double equality_const_prop = MPP.getEqualityConstraintProp(ps.edge_idxs);
     equality_props.push_back(equality_const_prop);
-    inequality_props.push_back(1.00 - equality_const_prop);
-
+    
     // sum of obj coefficients of variables in each block
     double sum_block_obj_val = MPP.getBlockSumObjs(ps.node_idxs, false);
     sum_block_obj_values.push_back(sum_block_obj_val);
@@ -66,18 +65,18 @@ void RelaxedConstraints::generate_statistics(MIPProblemProbe& MPP, const vector<
     equality_prop = MPP.getEqualityConstraintProp(relaxed_constraint_indices);
    
     // var props in the relaxed constraints
-    tuple<double, double, double> relaxed_const_var_props = MPP.getVariableProps(relaxed_constraint_indices);
-    bin_prop = get<0>(relaxed_const_var_props);
-    int_prop = get<1>(relaxed_const_var_props);
-    cont_prop = get<2>(relaxed_const_var_props);
+    tuple<vector<double>, vector<double>, vector<double>> relaxed_const_var_props = MPP.getVariableProps(relaxed_constraint_indices);
+    bin_props = get<0>(relaxed_const_var_props);
+    int_props = get<1>(relaxed_const_var_props);
+    cont_props = get<2>(relaxed_const_var_props);
 
     // non zero props of relaxed constraints
-    non_zero_props = MPP.getConstraintNonZeroProps(relaxed_constraint_indices);
+    non_zero_counts = MPP.getConstraintNonZeroCounts(relaxed_constraint_indices);
     // tuple<double, double, double, double> relaxed_const_nonzero_stats = getStatistics(non_zero_props);
     // average_non_zero_prop = get<2>(relaxed_const_nonzero_stats);
     // stddev_non_zero_prop = get<3>(relaxed_const_nonzero_stats);
 
-    // Largest RHS/LHS ratio
+    // Largest abs(RHS/LHS) ratio
     largest_RHSLHS_ratios = MPP.getLargestRHSLHSRatios(relaxed_constraint_indices);
     // tuple<double, double, double, double> relaxed_const_LargestRHSLHS_stats = getStatistics(largest_RHSLHS_ratios);
     // average_RHSLHS_ratio = get<2>(relaxed_const_LargestRHSLHS_stats);

@@ -182,37 +182,52 @@ double MIPProblemProbe::getEqualityConstraintProp(const std::vector<int>& constr
 }
 
 // returns bin,int and cont props of supplied constraints
-std::tuple<double, double, double> MIPProblemProbe::getVariableProps(const std::vector<int>& constraint_idxs)
+std::tuple<vector<double>, vector<double>, vector<double>> MIPProblemProbe::getVariableProps(const std::vector<int>& constraint_idxs)
 {
+    vector<double> bin_props;
+    vector<double> int_props;
+    vector<double> cont_props;
+    
+    // need to keep count of bin, int and cont vars as well as total number of variables seen so far
+    for (const auto& con_idx : constraint_idxs) {
+        std::tuple<double, double, double> con_var_props = getVariablePropsConstraint(con_idx);
+        bin_props.push_back(get<0>(con_var_props));
+        int_props.push_back(get<1>(con_var_props));
+        cont_props.push_back(get<2>(con_var_props));
+    }
+    return std::make_tuple(bin_props,int_props,cont_props);
+}
+
+std::tuple<double, double, double> MIPProblemProbe::getVariablePropsConstraint(const int& constraint_idx){
 
     //total variable count in the constraint idx's provided
-    int var_count = getVarCount(constraint_idxs);
-
+    int var_count = MP_ptr->getConstraint(constraint_idx).getNumVar();
     int bin_count = 0;
     int int_count = 0;
     int cont_count = 0;
 
     // need to keep count of bin, int and cont vars as well as total number of variables seen so far
-    for (const auto& con_idx : constraint_idxs) {
-        if (MP_ptr->constraintIndexValidity(con_idx)) {
-            vector<int> variable_idxs = MP_ptr->getConstraint(con_idx).getVarIndxs();
-            for (const auto& var_idx : variable_idxs) {
-                Variable v = MP_ptr->getVariable(var_idx);
-                if (v.getVarType() == Bin) {
-                    ++bin_count;
-                } else if (v.getVarType() == Int) {
-                    ++int_count;
-                } else {
-                    ++cont_count;
-                }
+  
+    if (MP_ptr->constraintIndexValidity(constraint_idx)) {
+        vector<int> variable_idxs = MP_ptr->getConstraint(constraint_idx).getVarIndxs();
+        for (const auto& var_idx : variable_idxs) {
+            Variable v = MP_ptr->getVariable(var_idx);
+            if (v.getVarType() == Bin) {
+                ++bin_count;
+            } else if (v.getVarType() == Int) {
+                ++int_count;
+            } else {
+                ++cont_count;
             }
         }
     }
     
+
     return std::make_tuple(static_cast<double>(bin_count)/ static_cast<double>(var_count)
     , static_cast<double>(int_count)/ static_cast<double>(var_count)
     , static_cast<double>(cont_count)/ static_cast<double>(var_count));
-   
+
+
 }
 
 // for the input constraint indices, create a hashmap for
@@ -236,20 +251,18 @@ int MIPProblemProbe::getVarCount(const std::vector<int>& constraint_idxs)
     return var_count;
 }
 
-// returns the vector of non zero props contained withint the constriants supplied
-std::vector<double> MIPProblemProbe::getConstraintNonZeroProps(const std::vector<int>& constraint_idxs){
-    vector<double> constraint_non_zeroes_props;
+// returns the vector of non zero props contained within the constriants supplied
+std::vector<int> MIPProblemProbe::getConstraintNonZeroCounts(const std::vector<int>& constraint_idxs){
+    vector<int> constraint_non_zeroes_counts;
     int non_zero_total = MP_ptr->getnumNonZero();
     int number_of_vars_in_mip = MP_ptr->getNumVariables();
     for (const auto& con_idx : constraint_idxs){
         if (MP_ptr->constraintIndexValidity(con_idx)) {
             int const_num_of_non_zeroes = MP_ptr->getConstraint(con_idx).getNumVar();
-
-            constraint_non_zeroes_props.push_back(static_cast<double>(const_num_of_non_zeroes)
-            / static_cast<double>(non_zero_total));
+            constraint_non_zeroes_counts.push_back(const_num_of_non_zeroes);
         }
     }
-    return constraint_non_zeroes_props;
+    return constraint_non_zeroes_counts;
 }
 
 double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs, const bool& abs_flag)

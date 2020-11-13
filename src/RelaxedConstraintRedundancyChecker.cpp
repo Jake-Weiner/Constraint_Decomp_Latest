@@ -9,15 +9,7 @@ vector<int> RelaxedConstraintRedundancyChecker::removeRedundantConstraints(const
 
     // relaxed edges as bool vec
     bool print = false;
-    vector<bool> relaxed_edges_bool;
-
-    relaxed_edges_bool.resize(HG.getNumEdges(), false);
-
-    for (const auto& con_idx : original_relaxed_constraints) {
-        relaxed_edges_bool[con_idx] = true;
-    }
-
-    vector<Partition_Struct> partitions = HG.getPartitionStruct(relaxed_edges_bool, false);
+    vector<Partition_Struct> partitions = HG.getPartitionStruct(original_relaxed_constraints, false);
     // create hashmap of single variable problems
 
     populateSingleVarHashmap(partitions);

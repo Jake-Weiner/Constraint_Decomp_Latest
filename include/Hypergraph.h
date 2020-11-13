@@ -64,9 +64,9 @@ public:
     void printPartitions();
     void partitionValidity(const vector<int>& relaxed_edge_idxs);
     int getLargestPartition();
-    void partition(const vector<bool>& constraints_selected, bool test_partition_validity);
+    void partition(const vector<int>& constraints_selected, bool test_partition_validity);
 
-    vector<Partition_Struct> getPartitionStruct(const vector<bool>& con_relax_vec, bool check_partition_validity);
+    vector<Partition_Struct> getPartitionStruct(const vector<int>& con_relax_vec, bool check_partition_validity);
     
     int getNumEdges(){
         return HG_edges.size();
@@ -122,7 +122,7 @@ private:
     vector<HG_Edge> HG_edges;
     vector<HG_Node> HG_nodes;
     void printPartitions(vector<vector<int>> partitions);
-    void identifyPartitions(const vector<bool>& relaxed_edges);
+    void identifyPartitions(const vector<int>& relaxed_edges);
     void updateNodes(const vector<double>& constraints_selected, vector<HG_Node>& updated_nodes);
     int largest_partition = 0;
     vector<Partition_Struct> PS;

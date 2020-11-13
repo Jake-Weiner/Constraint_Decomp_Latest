@@ -116,6 +116,12 @@ public:
     }
 
 
+    bool get_debug_printing_flag()
+    {
+        return debug_printing_flag;
+    }
+
+
     std::vector<double> get_nsga_props()
     {
         return nsga_props;
@@ -157,6 +163,9 @@ private:
     bool run_LR_testing_flag = false;
     bool run_statistic_testing_flag = false;
     bool run_remove_duplicate_constraints_flag = false;
+
+    // debug flags
+    bool debug_printing_flag = false;
 
     // decomposition flags
     bool run_greedy_decomp_flag = false;

@@ -10,6 +10,7 @@
 using Decomposition_Statistics::RelaxedConstraints;
 using Decomposition_Statistics::Subproblems;
 using Decomposition_Statistics::Instance;
+using Decomposition_Statistics::LROutputs;
 
 class Writer{
 
@@ -64,6 +65,7 @@ class Writer{
         void writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<RelaxedConstraints> rcs_ptr);
         void writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr);
         void writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr);
+        void writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LROutputs> lro_ptr);
     private:
 
         // generic raw subproblem statistics output

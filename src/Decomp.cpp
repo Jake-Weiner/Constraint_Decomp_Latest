@@ -40,14 +40,14 @@ Decomp::Decomp(int dim, const Hypergraph& hypergraph) : m_dim(dim), HG(hypergrap
 vector_double Decomp::fitness(const vector_double& dv) const
 {
     vector_double objective;
-    vector<bool> con_vec;
-    con_vec.resize(dv.size(), false);
+    vector<int> con_vec;
+    // con_vec.resize(dv.size(), false);
     int con_idx = 0;
     for (auto& con_val: dv){
-        if (floor(con_val + 0.1) == 1){
-            con_vec[con_idx] = true;
+        if (static_cast<int>(con_val + 0.1) == 1){
+            con_vec.push_back(con_idx);
         }
-        con_idx++;
+        ++con_idx;
     }
     // create the partition and get the largest partition
     HG.partition(con_vec, false);

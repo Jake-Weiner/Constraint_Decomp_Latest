@@ -1,6 +1,8 @@
 #include "ConDecomp_LaPSO_Connector.h"
+#include "ConstraintFileProcessing.h"
 #include "Decomp.hpp"
 #include "DecompMIP.h"
+#include "Decomposition_Statistics.h"
 #include "GreedyDecompCreator.h"
 #include "Hypergraph.h"
 #include "LaPSOHandler.h"
@@ -16,8 +18,6 @@
 #include "Util.h"
 #include "WriteResults.h"
 #include "Writer.h"
-#include "ConstraintFileProcessing.h"
-#include "Decomposition_Statistics.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -35,128 +35,116 @@
 #include <string>
 #include <vector>
 
+using Decomposition_Statistics::Instance;
+using Decomposition_Statistics::RelaxedConstraints;
+using Decomposition_Statistics::Subproblems;
+using Decomposition_Statistics::LROutputs;
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
-using Decomposition_Statistics::Subproblems;
-using Decomposition_Statistics::RelaxedConstraints;
-using Decomposition_Statistics::Instance;
 
 using namespace pagmo;
 
-void solveDecompMIP(Hypergraph& HG, const double subproblem_prop, const char* output_filename, bool warm_start, const char* warm_start_filename)
-{
-    // solve decomposition using MIP
-    DecompMIP DM;
-    DecompInfo DI;
+// void solveDecompMIP(Hypergraph& HG, const double subproblem_prop, const char* output_filename, bool warm_start, const char* warm_start_filename)
+// {
+//     // solve decomposition using MIP
+//     DecompMIP DM;
+//     DecompInfo DI;
 
-    DI = DM.solveMIP(HG.getHGEdges(), HG.getHGNodes(), subproblem_prop * HG.getNumNodes(),
-        50, true, output_filename, 1800, warm_start, warm_start_filename);
-}
+//     DI = DM.solveMIP(HG.getHGEdges(), HG.getHGNodes(), subproblem_prop * HG.getNumNodes(),
+//         50, true, output_filename, 1800, warm_start, warm_start_filename);
+// }
 
-vector<double> getCplexConVector(string cplex_filename)
-{
-    vector<double> test_partition;
-    ifstream input(cplex_filename);
-    if (input.is_open()) {
-        bool vector_reached = false;
-        while (!input.eof()) {
-            string line;
-            getline(input, line);
-            if (line.empty()) {
-                continue;
-            }
-            trim(line);
-            vector<string> line_split;
-            boost::split(line_split, line, boost::is_any_of(" \t"), boost::token_compress_on);
+// vector<double> getCplexConVector(string cplex_filename)
+// {
+//     vector<double> test_partition;
+//     ifstream input(cplex_filename);
+//     if (input.is_open()) {
+//         bool vector_reached = false;
+//         while (!input.eof()) {
+//             string line;
+//             getline(input, line);
+//             if (line.empty()) {
+//                 continue;
+//             }
+//             trim(line);
+//             vector<string> line_split;
+//             boost::split(line_split, line, boost::is_any_of(" \t"), boost::token_compress_on);
 
-            if (line.find("vector") != std::string::npos) {
-                vector_reached = true;
-                continue;
-            }
-            if (vector_reached == true) {
-                boost::split(line_split, line, boost::is_any_of(","), boost::token_compress_on);
-                for (auto& val : line_split) {
-                    boost::erase_all(val, "[");
-                    boost::erase_all(val, "]");
-                    double constraint_val;
-                    try {
-                        constraint_val = stod(val);
-                        test_partition.push_back(constraint_val);
-                    } catch (...) {
-                    }
-                    cout << val << " ";
-                }
-                cout << endl;
-            }
-        }
-    }
-    return test_partition;
-}
+//             if (line.find("vector") != std::string::npos) {
+//                 vector_reached = true;
+//                 continue;
+//             }
+//             if (vector_reached == true) {
+//                 boost::split(line_split, line, boost::is_any_of(","), boost::token_compress_on);
+//                 for (auto& val : line_split) {
+//                     boost::erase_all(val, "[");
+//                     boost::erase_all(val, "]");
+//                     double constraint_val;
+//                     try {
+//                         constraint_val = stod(val);
+//                         test_partition.push_back(constraint_val);
+//                     } catch (...) {
+//                     }
+//                     cout << val << " ";
+//                 }
+//                 cout << endl;
+//             }
+//         }
+//     }
+//     return test_partition;
+// }
 
-void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
+void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<int>& con_relax_vector,
     const double& best_ub_sol, const LaPSOOutputFilenames& LOF, int decomposition_idx,
     const double sp_solver_time_limit, const int LR_iter_limit, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
-    bool debug_printing = false)
+    bool debug_printing = false, bool capture_statistics = false)
 {
 
     // calculate number of constraints relaxed and
     // create vector of constraint indices which are relaxed
-    int num_con_relaxed = 0;
-    vector<int> relaxed_constraint_indices;
-    for (int con_idx = 0; con_idx < con_relax_vector.size(); ++con_idx) {
-        if (con_relax_vector[con_idx]) {
-            ++num_con_relaxed;
-            relaxed_constraint_indices.push_back(con_idx);
-        }
-    }
-
+    int num_con_relaxed = con_relax_vector.size();
     // writer object to write necessary information to files
     Writer w;
     // test partition if required
     bool test_hypergraph_partitioning = false;
-
     // MIPProblem probe object used to get statistics from MIP problem
     MIPProblemProbe MPP(&MP);
-
     //generate instance statistics
-    std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
-
-    w.writeInstanceStatistics(LOF, ins_ptr);
-
-    //generate relaxed constraint statistics
-    std::shared_ptr<RelaxedConstraints> rcs_ptr = std::make_shared<RelaxedConstraints>(decomposition_idx);
-
-    rcs_ptr->generate_statistics(MPP, relaxed_constraint_indices);
-
-    // write out raw relaxed constraint statistics
-    w.writeRawRelaxedConstraintStatistics(LOF, rcs_ptr);
-    w.writeRelaxedConstraintSingleValues(LOF,rcs_ptr);
-   
-    // free up memory instead of storing all raw data
-    rcs_ptr.reset();
-
+    if (capture_statistics){
+        // capture and write out instance statistics
+        std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
+        w.writeInstanceStatistics(LOF, ins_ptr);
+        //generate relaxed constraint statistics
+        std::shared_ptr<RelaxedConstraints> rcs_ptr = std::make_shared<RelaxedConstraints>(decomposition_idx);
+        rcs_ptr->generate_statistics(MPP, con_relax_vector);
+        // write out raw relaxed constraint statistics
+        w.writeRawRelaxedConstraintStatistics(LOF, rcs_ptr);
+        w.writeRelaxedConstraintSingleValues(LOF, rcs_ptr);
+        // free up memory instead of storing all raw data
+        rcs_ptr.reset();
+    }
     // subproblem_statistics structure is used
     std::shared_ptr<Subproblems> ss_ptr = std::make_shared<Subproblems>(decomposition_idx);
-    // assign decomposition index
-  
     // generate the different subproblem structures from relaxing the constaints. Structures are node and edge idx's in each subproblem
     std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
-
     // the LaPSO method
-    debug_printing = false;
+
+    if(debug_printing){
+        MP.printObjectiveFn();
+        MP.printConstraints();
+        MP.printVariables();
+    }
     ConDecomp_LaPSO_Connector CLC(MP, ps, con_relax_vector, debug_printing, sp_solver_time_limit, ss_ptr);
-
     // based on the partitioned structures, calculate variable/constraint information.
-
     CLC.maxsolves = LR_iter_limit;
     CLC.nsolves = 0;
-
-    for (int partition_idx = 0; partition_idx < ps.size(); ++partition_idx) {
-        ss_ptr->generateBlockStatistics(ps[partition_idx], MPP);
+    if (capture_statistics){
+        for (int partition_idx = 0; partition_idx < ps.size(); ++partition_idx) {
+            ss_ptr->generateBlockStatistics(ps[partition_idx], MPP);
+        }
     }
-
     // // calculate required statistical measures from data collected
     // // min,max,average,stddev
 
@@ -171,11 +159,13 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
 
     // set up the initial requirements for LaPSO initialisation
     LaPSO::LaPSORequirements LR = {};
+    // convert the indices of the original mip problem to the relaxed problem for constraint types
     LR.cti = CLC.convertOriginalConstraintTypeIndicies(original_constraint_indices);
     LR.nVar = HG.getNumNodes();
     LR.nConstr = num_con_relaxed;
     LR.best_ub = best_ub_sol;
     LR.benchmark_ub_flag = true;
+    // assign the dual values from the original problem (LP) as initial values in the relaxed problem
     LR.intial_dual_value_pairs = CLC.convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
     LR.set_initial_dual_values = set_initial_dual_values;
 
@@ -186,9 +176,19 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     // solve Lagrangian Relaxation
     cout << "solving Lagrangian Relaxation" << endl;
     LH.solve(CLC);
+
+    // get the bounds and solve times for the Lagrangian Relaxation process
+    std::tuple<double,double> LaPSO_outputs = LH.getLaPSOOutputs();
+    std::shared_ptr<LROutputs> lro_ptr = std::make_shared<LROutputs>(decomposition_idx, get<0>(LaPSO_outputs), get<1>(LaPSO_outputs));
     
+    if (capture_statistics){
+        w.writeRawSubproblemStatistics(LOF, ss_ptr);
+        w.writeLROutputs(LOF, lro_ptr); 
+    }
+    // explicity end CPLEX enviromments 
+    CLC.endCplexEnvs();
     // output subproblem statistics
-    w.writeRawSubproblemStatistics(LOF,ss_ptr);
+    
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -222,37 +222,37 @@ void writeConVecToFile(const vector<double>& con_vec, string filename)
 //     outfile.close();
 // }
 
-vector<bool> getNSGAConVec(const string& input_file)
-{
-    vector<bool> con_vec;
-    ifstream input(input_file);
-    if (input.is_open()) {
-        bool vector_reached = false;
-        while (!input.eof()) {
-            string line;
-            getline(input, line);
-            if (line.empty()) {
-                continue;
-            }
-            trim(line);
-            vector<string> line_split;
-            boost::split(line_split, line, boost::is_any_of(","), boost::token_compress_on);
-            for (auto& val : line_split) {
-                double constraint_val;
-                try {
-                    constraint_val = stod(val);
-                    if (floor(constraint_val + 0.1) == 1.0)
-                        con_vec.push_back(true);
-                    else {
-                        con_vec.push_back(false);
-                    }
-                } catch (...) {
-                }
-            }
-        }
-    }
-    return con_vec;
-}
+// vector<bool> getNSGAConVec(const string& input_file)
+// {
+//     vector<bool> con_vec;
+//     ifstream input(input_file);
+//     if (input.is_open()) {
+//         bool vector_reached = false;
+//         while (!input.eof()) {
+//             string line;
+//             getline(input, line);
+//             if (line.empty()) {
+//                 continue;
+//             }
+//             trim(line);
+//             vector<string> line_split;
+//             boost::split(line_split, line, boost::is_any_of(","), boost::token_compress_on);
+//             for (auto& val : line_split) {
+//                 double constraint_val;
+//                 try {
+//                     constraint_val = stod(val);
+//                     if (floor(constraint_val + 0.1) == 1.0)
+//                         con_vec.push_back(true);
+//                     else {
+//                         con_vec.push_back(false);
+//                     }
+//                 } catch (...) {
+//                 }
+//             }
+//         }
+//     }
+//     return con_vec;
+// }
 
 int main(int argc, const char** argv)
 {
@@ -362,11 +362,15 @@ int main(int argc, const char** argv)
     if (PA.get_run_Hypergraph_Partitioning_testing_flag()) {
         MP.printConstraints();
         cout << "running hypergraph partitioning test" << endl;
-        vector<bool> test_convec = { true, true, true, false, false };
+
         bool test_partitioning = true;
+        vector<vector<int>> test_decompositions = readInConVecFromFile(para.general_decomp_file);
         // partition function will print error message if partitioing was unsuccessful
-        HG.partition(test_convec, test_partitioning);
-        HG.printPartitions();
+        for (const auto& test_convec : test_decompositions) {
+            HG.partition(test_convec, test_partitioning);
+            HG.printPartitions();
+        }
+
         exit(0);
     }
 
@@ -375,22 +379,22 @@ int main(int argc, const char** argv)
         cout << "running NSGA testing" << endl;
         Problem_Adapter ProblemAdapter;
         // Decompositions are written to a file as the population is evolved
-        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
+        bool print_objectives = true;
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size, print_objectives);
         exit(0);
     }
 
     //test constraint redundancy for decompositions
     if (PA.get_run_constraint_redundancy_flag()) {
         ConstraintFileProcessing CFP;
-        CFP.removeRedundantConstraints(para.decomps_to_remove_red_const_file
-        ,para.redundant_const_removed_output_file, HG);
+        CFP.removeRedundantConstraints(para.decomps_to_remove_red_const_file, para.redundant_const_removed_output_file, HG);
     }
 
     // remove duplicate constraints
-    if (PA.get_run_remove_duplicate_constraints_flag()){
+    if (PA.get_run_remove_duplicate_constraints_flag()) {
         ConstraintFileProcessing CFP;
         CFP.removeDuplicateConstraints(para.decomps_to_remove_duplicates_file,
-        para.duplicates_removed_output_file);
+            para.duplicates_removed_output_file);
     }
 
     //test greedy decomposition creation
@@ -465,7 +469,8 @@ int main(int argc, const char** argv)
 
         Problem_Adapter ProblemAdapter;
         // write out to a file the different decompositions found
-        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size);
+        bool print_objectives = false;
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size, print_objectives);
     }
 
     // Evaluate Decompositions
@@ -501,43 +506,21 @@ int main(int argc, const char** argv)
     }
 
     if (PA.get_run_LR_testing_flag() == true) {
-
         //test_instance 1, relaxing constraint 1
         cout << "running LR testing" << endl;
         MP.printConstraints();
         LaPSOOutputFilenames LOF = {};
-        vector<bool> test_convec1 = { true, false, false };
-        std::cout << "original constraint relaxed vector is " << std::endl;
-        for (const auto& con_val : test_convec1) {
-            std::cout << con_val << " ";
-        }
-        std::cout << std::endl;
-        //void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<bool>& con_relax_vector,
-        //const double& best_ub_sol, const LaPSOOutputFilenames& LOF, const double sp_solver_time_limit)
-        std::vector<initial_dual_value_pair> idvp;
         int decomposition_idx = 0;
-        solveLapso(argc, argv, MP, HG, test_convec1, para.set_ub, LOF, decomposition_idx, 100, 100, idvp, false);
-
-        vector<bool> test_convec2 = { false, true, true };
-        std::cout << "original constraint relaxed vector is " << std::endl;
-        for (const auto& con_val : test_convec2) {
-            std::cout << con_val << " ";
-        }
-        ++decomposition_idx;
+        vector<vector<int>> test_decompositions = readInConVecFromFile(para.general_decomp_file);
         std::vector<initial_dual_value_pair> idvp_2;
-        idvp_2.push_back({ 0, -11 });
-        idvp_2.push_back({ 1, 0 });
-
+        idvp_2.push_back({ 0, -1 });
+        idvp_2.push_back({ 1, -11 });
+        idvp_2.push_back({ 2,  0});
         bool set_inital_dual_values = true;
-
-        //  solveLapso(argc, argv, MP, HG, test_decomposition, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim,
-        // LR_iter_limit, &dual_values_from_LP, set_initial_dual_values);
-        solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values);
-        std::cout << std::endl;
+        bool debug_printing = PA.get_debug_printing_flag();
+        solveLapso(argc, argv, MP, HG, test_decompositions[0], para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values, debug_printing);
         exit(0);
     }
-
-    
 
     if (PA.get_run_statistic_testing_flag() == true) {
 
@@ -554,62 +537,53 @@ int main(int argc, const char** argv)
         //     cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         // }
 
-  
         // assign a decomposition index
         int decomposition_idx = 0;
         // for test_mip 1...
         // get the constraint vector from external file.
-       
-            
+
         std::ifstream input_fs(string(para.con_vec_filename));
-      
+
         // input file successfully opened
         if (input_fs) {
-        string line_read;
-        while (getline(input_fs, line_read)) {
-            vector<string> relaxed_constraints_str;
-            vector<int> relaxed_constraints_int;
-            // split the line based on ,
-            boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
-            // first line contains the number of nodes
-            // last element will be empty because of ending final comma
-            for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
-                relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
-            }
-            // set all dual values to 0
-            vector<initial_dual_value_pair> test_dual_values;
-            for (int i = 0; i < relaxed_constraints_int.size(); ++i) {
-                test_dual_values.push_back({ i, 0 });
-            }
-            bool set_initial_dual_values = true;
             LaPSOOutputFilenames LOF = {};
             LOF.subproblem_statistics_folder = string(para.subproblem_statistics_folder);
             LOF.relaxed_constraints_statistics_folder = string(para.relaxed_constraint_statistics_folder);
             LOF.instance_statistics_folder = string(para.instance_statistics_folder);
-            // LOF.relaxed_const
-            // LOF.instance_statistics_filename = string(para.)
-            cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
-            int LR_iter_limit = para.maxIter;
-            int subproblem_solver_time_lim = 300;
-            solveLapso(argc, argv, MP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim,
-                LR_iter_limit, test_dual_values, set_initial_dual_values);
-
-        exit(0);
-
+            LOF.LR_outputs_folder = string(para.LR_outputs_folder);
+            string line_read;
+            while (getline(input_fs, line_read)) {
+                vector<string> relaxed_constraints_str;
+                vector<int> relaxed_constraints_int;
+                // split the line based on ,
+                boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+                // first line contains the number of nodes
+                // last element will be empty because of ending final comma
+                for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
+                    relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+                }
+                // set all dual values to 0
+                vector<initial_dual_value_pair> test_dual_values;
+                for (int i = 0; i < relaxed_constraints_int.size(); ++i) {
+                    test_dual_values.push_back({ i, 0 });
+                }
+                bool set_initial_dual_values = true;
+                // LOF.instance_statistics_filename = string(para.)
+                cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
+                int LR_iter_limit = para.maxIter;
+                int subproblem_solver_time_lim = 300;
+                bool capture_statistics = true;
+                bool debug_printing = false;
+                solveLapso(argc, argv, MP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim,
+                    LR_iter_limit, test_dual_values, set_initial_dual_values, debug_printing, capture_statistics);
+               
+            }
         }
-    }
 
-    else {
-        cout << "redundant constraint input file unable to be found/opened" << endl;
-    }
-        vector<bool> con_vec_readin = readInConVecFromFile(string(para.con_vec_filename));
-
-        // for test_mip 2...
-        //vector<bool> test_convec2 = {true, true, true, false, false, false, false, false};
-
-        // solveLapso(argc, argv, MP, HG, test_convec2, para.set_ub, LOF, decomposition_idx,  subproblem_solver_time_lim,
-        // LR_iter_limit
-        // , &dual_values_from_LP, set_initial_dual_values);
+        else {
+            cout << "redundant constraint input file unable to be found/opened" << endl;
+        }
+        exit(EXIT_SUCCESS);
     }
     //  run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
     //     run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);

@@ -61,11 +61,15 @@ struct Param {
     const char* run_LR_testing = "false";
     const char* run_statistic_testing_flag = "false";
 
+    // debug flags
+    const char* debug_printing = "false";
     
     // statistics output files
     const char* subproblem_statistics_folder = "";
     const char* relaxed_constraint_statistics_folder = "";
     const char* instance_statistics_folder = "";
+    // bound and time outputs
+    const char* LR_outputs_folder = "";
 
 
 
@@ -97,6 +101,7 @@ struct Param {
     // input decompositions
     const char* decomps_to_remove_red_const_file = "";
     const char* decomps_to_remove_duplicates_file = "";
+    const char* general_decomp_file = "";
 
     // output decompositions
     const char* redundant_const_removed_output_file = "";

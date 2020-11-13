@@ -31,7 +31,6 @@ class Subproblems {
         double min_mip_time;
         double stddev_mip_time;
 
-       
         double average_mip_obj_soln;
         double max_mip_obj_soln;
         double min_mip_obj_soln;
@@ -82,8 +81,6 @@ class Subproblems {
         double average_inequality_prop;
         double stddev_inequality_prop;
 
-        
-
         // average abs(objective coefficients) in each block... = sum(objective coeffs of constraints) / num constraints
         vector<double> sum_block_obj_values;
         double average_of_sum_block_obj_values;
@@ -94,6 +91,7 @@ class Subproblems {
         double average_of_sum_abs_block_obj_values;
         double stddev_of_sum_abs_block_obj_values;
 
+        // range of objective values in block
         vector<double> block_obj_val_ranges;
 
         // average RHS value of each block
@@ -143,14 +141,13 @@ class RelaxedConstraints {
         // proportion of relaxed constraints compared to all constraints in the original problem
         double relaxed_constraint_prop;
         // variable statistics
-        // proportion of problem variables in the subproblem
-        double bin_prop;
-        double int_prop;
-        double cont_prop;
+        // proportion of variable types in each of the relaxed constraints 
+        vector<double> bin_props;
+        vector<double> int_props;
+        vector<double> cont_props;
         
-        // non zero props of all relaxed constraints
-        //
-        vector<double> non_zero_props;
+        // non zero counts of all relaxed constraints
+        vector<int> non_zero_counts;
         // double average_non_zero_prop;
         // double stddev_non_zero_prop;
         
@@ -196,12 +193,22 @@ class Instance{
         int num_cont;
         int num_int;
         int num_non_zeroes;
-        int max_obj;
-        int min_obj;
-        int max_rhs;
-        int min_rhs;
+        double max_obj;
+        double min_obj;
+        double max_rhs;
+        double min_rhs;
         double best_known_bound;
+};
 
+class LROutputs{
+
+    public:
+        LROutputs( int decomposition_idx, double bound, double time) : 
+        decomposition_idx(decomposition_idx), bound(bound), time(time)
+        {};
+        int decomposition_idx;
+        double bound;
+        double time;
 };
 
 

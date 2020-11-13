@@ -33,12 +33,9 @@ void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequireme
 }
 
 
- void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
+void LaPSOHandler::solve(ConDecomp_LaPSO_Connector& CLC){
 
     solver.solve(CLC);
-    // // // // // // // // // // // \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
-    // end all CPLEX environments and clear all subproblem information
-    CLC.endCplexEnvs();
 
     //if (printing == true) { // always show the final result
     std::cout << "Best Upper Bound solution  " << solver.best_solution->ub
@@ -57,4 +54,9 @@ void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequireme
     //     << " with dual value: " << solver.best_solution->dual[dual_idx] << std::endl;
     // }
 
+}
+
+std::tuple<double,double> LaPSOHandler::getLaPSOOutputs(){
+
+    return std::make_tuple(solver.best_solution->lb, solver.cpuTime());
 }

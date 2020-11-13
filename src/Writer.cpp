@@ -213,6 +213,8 @@ void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Sum_obj.csv", ss_ptr->decomposition_idx, ss_ptr->sum_block_obj_values);
     // Block SUM abs(obj) vals
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Sum_abs_obj.csv", ss_ptr->decomposition_idx, ss_ptr->sum_abs_block_obj_values);
+    // Block Obj Ranges
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Obj_range.csv", ss_ptr->decomposition_idx, ss_ptr->block_obj_val_ranges);
     // block average RHS vals
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/average_RHS.csv", ss_ptr->decomposition_idx, ss_ptr->average_block_RHS_values);
     // block average abs(RHS) vals
@@ -229,8 +231,6 @@ void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Densities.csv",ss_ptr->decomposition_idx, ss_ptr->block_densities);
     // block variable props
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Var_props.csv",ss_ptr->decomposition_idx, ss_ptr->block_variable_props);
-    // block const props
-    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Const_props.csv",ss_ptr->decomposition_idx, ss_ptr->total_constr_props);
     // block bin props
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Bin_props.csv",ss_ptr->decomposition_idx, ss_ptr->bin_props);
     // block int props
@@ -238,14 +238,18 @@ void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::
     // block cont props
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Cont_props.csv",ss_ptr->decomposition_idx, ss_ptr->cont_props);
     // block equality props
-    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Cont_props.csv",ss_ptr->decomposition_idx, ss_ptr->equality_props);
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Equality_props.csv",ss_ptr->decomposition_idx, ss_ptr->equality_props);
 }
 
 // write out raw data for subproblem statistics which might require scaling/normalisation
 void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<RelaxedConstraints> rcs_ptr){
-   
+    
+    // var props of each of the constraints 
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Bin_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->bin_props);
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Int_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->int_props);
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Cont_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->cont_props);
     // non zero counts of all relaxed constraints
-    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Non_zero_props.csv", rcs_ptr->decomposition_idx, rcs_ptr->non_zero_props);
+    genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Non_zero_counts.csv", rcs_ptr->decomposition_idx, rcs_ptr->non_zero_counts);
     // Largest RHS/LHS of relaxed constraints
     genericRawSubproblemOutput(LOF.relaxed_constraints_statistics_folder + "/Largest_RHSLHS.csv", rcs_ptr->decomposition_idx, rcs_ptr->largest_RHSLHS_ratios);
     // sum obj coeffs of constraints
@@ -259,7 +263,7 @@ void Writer::writeRawRelaxedConstraintStatistics(const LaPSOOutputFilenames& LOF
 // write out the instance statistics
 void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr){
 
-    string output_filename = LOF.instance_statistics_filename;
+    string output_filename = LOF.instance_statistics_folder + "/Instance_Statistics.csv";
       // If file doesn't exist populate the column names for features
     if (!fileExists(output_filename)){
         std::ofstream outfile;
@@ -282,7 +286,7 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
     outfile.open(output_filename, std::ofstream::app);
     if (outfile) {
         outfile << ins_ptr->num_var << "," << ins_ptr->num_const << "," << ins_ptr->num_bin
-        << "," << ins_ptr->num_int << "," << ins_ptr->num_non_zeroes << "," << ins_ptr->min_obj
+        << "," << ins_ptr->num_int << "," << ins_ptr->num_cont << "," << ins_ptr->num_non_zeroes << "," << ins_ptr->min_obj
         << "," << ins_ptr->max_obj << "," << ins_ptr->min_rhs << "," << ins_ptr->max_rhs
         << endl;
     }
@@ -301,8 +305,7 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
         std::ofstream outfile;
         outfile.open(output_filename);
         if (outfile) {
-            outfile << "Decomposition Index" << "Relaxed Constraint Prop" << "," << "Equality Prop"<< "," << "Bin Prop" 
-            << "," << "Int Prop" << "," << "Cont Prop"
+            outfile << "Decomposition Index" << "," << "Relaxed Constraint Prop" << "," << "Equality Prop"
             << endl;
         }
         else{
@@ -316,10 +319,8 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
     outfile.open(output_filename, std::ofstream::app);
     if (outfile) {
         outfile << rcs_ptr->decomposition_idx << "," << rcs_ptr->relaxed_constraint_prop << "," << rcs_ptr->equality_prop
-        << "," << rcs_ptr->bin_prop << "," << rcs_ptr->int_prop << "," << rcs_ptr->cont_prop
         << endl;
     }
-    
     else{
         cout << "unable to open Relaxed Constraints Single Statistics File: " << output_filename << endl;
     }
@@ -328,5 +329,35 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
 
  }
 
+void Writer::writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LROutputs> lro_ptr){
 
+    string output_filename = LOF.LR_outputs_folder + "/LR_outputs.csv";
+     if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile) {
+            outfile << "Decomposition Index" << "LR Bound" << "," << "LR Solve Time(s)"
+            << endl;
+        }
+        else{
+            cout << "unable to open LR Outputs File: " << output_filename << endl;
+        }
+        outfile.close();
+    }
+    // Then populate file with LR outputs
+
+     std::ofstream outfile;
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << lro_ptr->decomposition_idx << "," << lro_ptr->bound << "," << lro_ptr->time
+        << endl;
+    }
+    else{
+        cout << "unable to open LR Outputs File: " << output_filename << endl;
+    }
+    outfile.close();
+
+    cout << "finished writing LR Outputs" << endl;
+
+}
 
