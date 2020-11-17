@@ -70,6 +70,7 @@ struct RelaxedConstraintsRawDataFilenames{
 struct CPLEX_Return_struct{
     double bound;
     double obj_val;
+    double solve_time;
     vector<double> dual_vals;
 };
 
@@ -150,10 +151,7 @@ struct LaPSOOutputFilenames{
     string instance_statistics_folder;
     string relaxed_constraints_statistics_folder;
     string LR_outputs_folder;
-    // SubproblemRawDataFilenames raw_subproblem_data_filenames;
-    // RelaxedConstraintsRawDataFilenames raw_rc_data_filenames;
-    string instance_statistics_filename;
-
+    string LP_output_folder;
 };
 
 

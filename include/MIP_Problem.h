@@ -38,27 +38,27 @@ class MIP_Problem{
             return NULL;
         }
 
-        int getNumConstraints(){
+        int getNumConstraints() const{
             return constraints.size();
         }
 
-        int getNumVariables(){
+        int getNumVariables() const{
             return variables.size();
         }
         
-        void printVariables(){
+        void printVariables() const{
             for (auto& variable : variables){
                 variable.printInfo();
             }
         }
 
-        void printConstraints(){
+        void printConstraints() const{
             for (auto& constraint : constraints){
                 constraint.printInfo();
             }
         }
 
-        void printObjectiveFn(){
+        void printObjectiveFn() const{
             cout << "Objective function : ";
             for (auto& obj_term : objective_fn){
                 cout << obj_term.second  << "*" << obj_term.first  << " ";
@@ -66,7 +66,7 @@ class MIP_Problem{
             cout <<endl;
         }
 
-        vector<int> getConGreaterBounds(){
+        vector<int> getConGreaterBounds() const{
             vector<int> idxs;
             for (auto& constraint: constraints){
                 if (constraint.getBoundType() == Greater){
@@ -75,7 +75,7 @@ class MIP_Problem{
             }
             return idxs;
         }
-        vector<int> getConLesserBounds(){
+        vector<int> getConLesserBounds() const{
             vector<int> idxs;
             for (auto& constraint: constraints){
                 if (constraint.getBoundType() == Less){

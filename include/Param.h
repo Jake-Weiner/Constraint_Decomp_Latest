@@ -37,7 +37,7 @@ struct Param {
     
 
     double set_ub = std::numeric_limits<double>::max();
-    double subproblem_solver_runtime_lim = 100;
+    double subproblem_solver_runtime_lim = 300;
     double set_generic_MIP_time = 100;
   
     // generic MIP parameters
@@ -70,7 +70,7 @@ struct Param {
     const char* instance_statistics_folder = "";
     // bound and time outputs
     const char* LR_outputs_folder = "";
-
+    const char* LP_outputs_folder = "";
 
 
 
@@ -111,11 +111,17 @@ struct Param {
     const char* run_constraint_redundancy = "false";
     const char* run_remove_duplicate_constraints = "false";
     const char* run_lapso = "false";
+    const char* run_gather_statistics = "false";
+
     const char* test_greedy_decomp = "";
     const char* test_random_decomp = "";
     
     const char* random_lb_output = "";
     const char* MIP_Parse_Test_Exception = "false";
+
+    // LaPSO parameters
+    double total_LR_time_lim = 300;
+   
 };
 };
 #endif

@@ -40,17 +40,17 @@ public:
         constraint_terms.push_back(term);
     }
 
-    vector<int> getVarIndxs()
+    vector<int> getVarIndxs() const
     {
         return variable_indxs;
     }
 
-    vector<double> getVarCoeffs()
+    vector<double> getVarCoeffs() const
     {
         return variable_coeffs;
     }
 
-    int getConIdx()
+    int getConIdx() const
     {
         return constraint_idx;
     }
@@ -65,17 +65,16 @@ public:
         this->bt = bt;
     }
 
-    bound_type getBoundType()
-    {
+    bound_type getBoundType() const{
         return bt;
     }
 
-    double getRHS()
+    double getRHS() const
     {
         return RHS;
     }
 
-    void printInfo()
+    void printInfo() const
     {
         cout << "index = " << constraint_idx << " : Bound Type = " << boundtypes_strings[bt] << " : RHS = " << RHS << endl;
         cout << "constraint is: ";
@@ -85,12 +84,12 @@ public:
         cout << endl;
     }
 
-    vector<pair<int, double>> getConTerms()
+    vector<pair<int, double>> getConTerms() const
     {
         return constraint_terms;
     }
 
-    int getNumVar()
+    int getNumVar() const
     {
         return variable_indxs.size();
     }

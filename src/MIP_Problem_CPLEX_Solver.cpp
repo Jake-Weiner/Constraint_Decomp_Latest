@@ -19,14 +19,8 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
     }
     // add all variables in original problem to CPLEX environment
     cout << "number of variables in mip are " << MP.getNumVariables() << endl;
-
-
-    //ensure that variables are ordered before adding to model
-    vector<Variable> variables = MP.variables;
-   
-
     cout << "adding in variables" << endl;
-    for (auto& var : variables) {
+    for (const auto& var : MP.variables) {
         // cout << "var idx is " << var.getVarIndx() << endl;
         double var_lb = var.getLB();
         double var_ub = var.getUB();
@@ -88,14 +82,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
     model.add(obj_fn);
 
     cout << "creating cplex object" << endl;
-    // try{
     IloCplex cplex(model);
-    // }
-    // catch(IloException e){
-    //     cout << "exception error is " << e.getMessage() << endl; 
-    // }
-    
-    cout << "created cplex object" << endl;
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     // if solving as a ILP, set a time limit, otherwise solve the LP to optimality
     if (!LP){
@@ -113,24 +100,29 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
     vector<double> dual_vals;
     if (LP){
         IloNumArray dual_values_arr(env);
+        // places the dual values from the cplex constraint model into dual_values_arr
         cplex.getDuals(dual_values_arr,subproblem_constraints_cplex);
         dual_vals.resize(MP.getNumConstraints(), 0.0);
+        // copy dual values into vector
         for (int con_idx = 0; con_idx < dual_values_arr.getSize(); ++con_idx){
             dual_vals[con_idx] = dual_values_arr[con_idx];
         }
     }
    
     //default bound and integer solution values
-    double best_int_sol = -999999999999999999;
+    double best_primal_sol = -999999999999999999;
     // double best_bound_val = 0;
     double best_bound_val = cplex.getBestObjValue();
+    
+    double solve_time = cplex.getTime();
+
     // cplex.solve() status indicates if a feasible solution was found
     if (solve_status == false) {
         env.end();
         std::cerr << "CPLEX failed to find a feasible solution in MIP_Problem_CPLEX_Solver.cpp" << endl;
     }
     else{
-        best_int_sol = cplex.getObjValue();
+        best_primal_sol = cplex.getObjValue();
         env.out() << "Solution value  = " << cplex.getObjValue() << endl;
         env.end();
     }
@@ -141,7 +133,7 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
     //this value is computed for a minimization (maximization) problem as the minimum (maximum) objective function value of 
     //all remaining unexplored nodes.
 
-    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_int_sol, dual_vals};
+    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_primal_sol, solve_time, dual_vals};
     return CPLEX_results;
 }
 

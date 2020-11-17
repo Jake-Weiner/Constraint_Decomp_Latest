@@ -33,12 +33,15 @@ void ConstraintFileProcessing::removeRedundantConstraints(const string& input_fi
             // last element will be empty because of ending final comma
             for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
                 relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
-                cout << "constraint idx is " << relaxed_constraints_str[i] << endl;
             }
             // new decomp with redundant constraints removed
             // get 
             vector<int> new_relaxed_constraints = rcrc.removeRedundantConstraints(relaxed_constraints_int, HG);
 
+            // if all constraints are redundant for the current decomposition
+            if (new_relaxed_constraints.empty()){
+                cout << "all constraints are redundant" << endl;
+            }
             // write out new deompositions to output file
             if (output_fs) {
                 for (const auto& con_val : new_relaxed_constraints) {

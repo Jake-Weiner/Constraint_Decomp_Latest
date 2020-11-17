@@ -23,6 +23,7 @@ class Subproblems {
         // if there exists a subproblem in which the root node couldn't be found, then set this flag to false
         vector<bool> subproblem_optimality_success;
         vector<bool> subproblem_lp_found;
+        vector<bool> subproblem_attempted;
         // for each subproblem, store the time required to solve the subproblem
         vector<double> mip_times;
         vector<double> mip_obj_solutions;

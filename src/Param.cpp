@@ -61,6 +61,8 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("relaxed_constraint_statistics_folder");
     parser.setOption("instance_statistics_folder");
     parser.setOption("LR_outputs_folder");
+    parser.setOption("LP_outputs_folder");
+    
     
     
     // decomposition redundancy removal
@@ -75,6 +77,7 @@ void Param::parse(int argc, const char** argv)
 
     //LR Parameters
     parser.setOption("maxIter");
+    parser.setOption("total_LR_time_lim");
 
     // decomp output files
     parser.setOption("nsga_decomp_output_file");
@@ -89,9 +92,12 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_greedy_decomp");
     parser.setOption("run_constraint_redundancy");
     parser.setOption("run_remove_duplicate_constraints");
-   
+    parser.setOption("run_gather_statistics");
+
     parser.setOption("random_lb_output");
     parser.setOption("con_vec_filename");
+
+    
 
     if (argc == -1) // abuse of function
         parser.processFile(*argv);
@@ -187,6 +193,11 @@ void Param::parse(int argc, const char** argv)
     // debug flags
     if (parser.getValue("debug_printing"))
         debug_printing = parser.getValue("debug_printing");
+
+    // running flags
+    if (parser.getValue("run_gather_statistics"))
+        run_gather_statistics = parser.getValue("run_gather_statistics");
+
     
     // statistics output files
     if (parser.getValue("subproblem_statistics_folder"))
@@ -197,9 +208,9 @@ void Param::parse(int argc, const char** argv)
         relaxed_constraint_statistics_folder = parser.getValue("relaxed_constraint_statistics_folder");
     if (parser.getValue("LR_outputs_folder"))
         LR_outputs_folder = parser.getValue("LR_outputs_folder");
+    if (parser.getValue("LP_outputs_folder"))
+        LP_outputs_folder = parser.getValue("LP_outputs_folder");
 
-        
-   
     // unit testing flags
     if (parser.getValue("run_Hypergraph_Partitioning_testing"))
         run_Hypergraph_Partitioning_testing = parser.getValue("run_Hypergraph_Partitioning_testing");
@@ -237,6 +248,10 @@ void Param::parse(int argc, const char** argv)
     if (parser.getValue("maxIter")){
         maxIter = atoi(parser.getValue("maxIter"));
     }
+    if (parser.getValue("total_LR_time_lim")){
+        total_LR_time_lim = atof(parser.getValue("total_LR_time_lim"));
+    }
+    
 
 }
 };

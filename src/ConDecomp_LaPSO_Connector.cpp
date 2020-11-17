@@ -23,15 +23,14 @@ using namespace std;
 using Decomposition_Statistics::Subproblems;
 
 ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions,
-    const vector<int>& con_vec, const bool printing, const double sp_solve_time_limit, 
-    std::shared_ptr<Subproblems> subproblem_statistics_ptr)
+    const vector<int>& con_vec, const bool printing, const double& total_solve_time, 
+    std::shared_ptr<Subproblems> subproblem_statistics_ptr) : total_solve_time_lim(total_solve_time)
 {
     this->OP = original_problem;
     this->debug_printing = printing;
-    this->sp_solve_time_limit = sp_solve_time_limit;
     initOriginalCosts();
     populateDualIdxToOrigIdxMap(con_vec);
-    initSubproblems(partitions);
+    initSubproblems(partitions, original_problem.getNumVariables());
     this->subproblem_statistics_ptr = subproblem_statistics_ptr;
 }
 
@@ -113,7 +112,7 @@ void ConDecomp_LaPSO_Connector::populateDualIdxToOrigIdxMap(const vector<int>& c
 }
 
 // Initialise the various subproblems based on the partitions created via relaxing constraints
-void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& partitions)
+void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& partitions, const int& total_num_var)
 {
     int subproblem_idx = 0;
     for (auto& partition : partitions) {
@@ -123,6 +122,8 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
 
         CPLEX_MIP_Subproblem sp;
 
+        // set the proportion of var in subproblem as proportion of total number of variables
+        sp.setSubproblemVarProp(static_cast<double>(partition.getNumNodes())  / static_cast<double>(total_num_var));
         sp.setSubproblemIdx(subproblem_idx);
         
         // creatre a new IloEnv object which is used for memory management of Ilo objects
@@ -131,8 +132,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
         IloModel model(*(sp.envPtr));
         IloNumVarArray subproblem_vars_cplex(*(sp.envPtr));
         IloRangeArray subproblem_constraints_cplex(*(sp.envPtr));
-        // unordered_map<int, int> subproblemVarIdx_to_originalVarIdx;
-        // unordered_map<int, int> originalVarIdx_to_subproblemVarIdx;
 
         // add all variables in partition to subproblem model
         vector<Variable> var_in_partition;
@@ -181,6 +180,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             // (*(sp.envPtr)).end();
             MS.push_back(sp);
             continue;
+            ++subproblem_idx;
         }
 
         //add constraints to subproblem
@@ -228,12 +228,10 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             }
             model.add(subproblem_constraints_cplex);
         }
-
         sp.model = model;
         sp.variables = subproblem_vars_cplex;
         sp.num_subproblem_vars = subproblem_var_idx;
         MS.push_back(sp);
-
         ++subproblem_idx;
     }
     cout << "finished initialising subproblems " << endl;
@@ -297,13 +295,15 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         }
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
-        int subproblem_idx = sp.getSubproblemIdx();
+       
         
         // capture the solution statistics
         subproblem_statistics_ptr->mip_times.push_back(0);
         subproblem_statistics_ptr->lp_times.push_back(0);
         subproblem_statistics_ptr->mip_obj_solutions.push_back(var_reduced_cost * s.x[original_var_idx]);
         subproblem_statistics_ptr->lp_obj_solutions.push_back(var_reduced_cost * s.x[original_var_idx]);
+        subproblem_statistics_ptr->subproblem_optimality_success.push_back(true);
+        subproblem_statistics_ptr->subproblem_attempted[sp.getSubproblemIdx()] = true;
         return 0;
     }
 
@@ -334,12 +334,16 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     // solve the subproblem as a MIP and get the statistics
     IloCplex cplex(sp.model);
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
-    cplex.setParam(IloCplex::TiLim, sp_solve_time_limit);
+
+    double mip_subproblem_solve_time = (0.8 * (sp.getSubproblemVarProp() * total_solve_time_lim)) + 0.1;
+    double lp_subproblem_solve_time = (0.2 * (sp.getSubproblemVarProp() * total_solve_time_lim)) + 0.1;
+    // subproblem time should be based on var prop
+    cplex.setParam(IloCplex::TiLim, mip_subproblem_solve_time);
     cplex.setOut((*(sp.envPtr)).getNullStream());
     bool feasible_sol = cplex.solve();
     cout << "CPLEX Status is " << cplex.getCplexStatus() << endl;
     cout << IloCplex::Status::Optimal << endl;
-    
+    subproblem_statistics_ptr->subproblem_attempted[sp.getSubproblemIdx()] = true;
     // if MIP subproblem is not solved to optimality
     if (cplex.getCplexStatus() != IloCplex::Status::Optimal){
         cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
@@ -395,7 +399,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
 
     IloCplex cplex_relaxed(relax);
     cplex_relaxed.setParam(IloCplex::Threads, 1); // solve using 1 thread only
-    cplex_relaxed.setParam(IloCplex::TiLim, sp_solve_time_limit);
+    cplex_relaxed.setParam(IloCplex::TiLim, lp_subproblem_solve_time);
     cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
     // get the best dual bound
     bool solve_relaxed_status = cplex_relaxed.solve();

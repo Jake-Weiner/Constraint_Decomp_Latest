@@ -199,8 +199,12 @@ void Writer::writeSubproblemStatistics(const std::string& output_filename, std::
 
 // write out raw data for subproblem statistics which might require scaling/normalisation
 void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Subproblems> ss_ptr){
-    // Subproblem Success
-    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Subproblem_success.csv", ss_ptr->decomposition_idx, ss_ptr->mip_times);
+    // Subproblem MIP Success
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Subproblem_MIP_success.csv", ss_ptr->decomposition_idx, ss_ptr->subproblem_optimality_success);
+    // Subproblem LP Success
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Subproblem_LP_success.csv", ss_ptr->decomposition_idx, ss_ptr->subproblem_lp_found);
+    // Subproblem attempted
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Subproblem_attempted.csv", ss_ptr->decomposition_idx, ss_ptr->subproblem_attempted);
     // MIP Times
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/MIP_times.csv", ss_ptr->decomposition_idx, ss_ptr->mip_times);
     // MIP Bounds
@@ -346,7 +350,7 @@ void Writer::writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LRO
     }
     // Then populate file with LR outputs
 
-     std::ofstream outfile;
+    std::ofstream outfile;
     outfile.open(output_filename, std::ofstream::app);
     if (outfile) {
         outfile << lro_ptr->decomposition_idx << "," << lro_ptr->bound << "," << lro_ptr->time
@@ -356,8 +360,34 @@ void Writer::writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LRO
         cout << "unable to open LR Outputs File: " << output_filename << endl;
     }
     outfile.close();
-
     cout << "finished writing LR Outputs" << endl;
-
 }
 
+void Writer::writeLPOutputs(const string& output_filename, double bound, double time){
+
+    if (!fileExists(output_filename)){
+        std::ofstream outfile;
+        outfile.open(output_filename);
+        if (outfile) {
+            outfile << "LP Bound" << "," << "Solve Time(s)" 
+            << endl;
+        }
+        else{
+            cout << "unable to open LP Output File: " << output_filename << endl;
+        }
+        outfile.close();
+    }
+    // Then populate file with LR outputs
+    std::ofstream outfile;
+    outfile.open(output_filename, std::ofstream::app);
+    if (outfile) {
+        outfile << bound << "," << time
+        << endl;
+    }
+    else{
+        cout << "unable to open LP Outputs File: " << output_filename << endl;
+    }
+    outfile.close();
+    cout << "finished writing LP Outputs" << endl;
+
+}

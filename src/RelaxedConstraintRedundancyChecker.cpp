@@ -23,18 +23,23 @@ vector<int> RelaxedConstraintRedundancyChecker::removeRedundantConstraints(const
         // otherwise keep it
         HG_Edge edge_to_check = HG.getEdge(con_idx);
 
-        // first check is if constraint only contains single subproblems
-        if (containsOnlySingleVarSubproblems(edge_to_check)){
-            std::cout << "redundant constraint found " << std::endl;
-        }
-        // second check is if constraint is already found within a subproblem
-        else if (isConstraintRedundant(partitions, edge_to_check, print)){
-             std::cout << "redundant constraint found " << std::endl;
-        }
-        // if constraint passes both checks, keep it relaxed still
-        else {
+        // constraint is not redundant if it does not only contain single var problems
+        // and it does not a subset of a subproblem variable
+        if (!containsOnlySingleVarSubproblems(edge_to_check) && !isConstraintRedundant(partitions, edge_to_check, print)){
             new_constraint_vector.push_back(con_idx);
         }
+        // // first check is if constraint only contains single subproblems
+        // if (containsOnlySingleVarSubproblems(edge_to_check)){
+        //     std::cout << "redundant constraint found " << std::endl;
+        // }
+        // // second check is if constraint is already found within a subproblem
+        // else if (isConstraintRedundant(partitions, edge_to_check, print)){
+        //      std::cout << "redundant constraint found " << std::endl;
+        // }
+        // // if constraint passes both checks, keep it relaxed still
+        // else {
+        //     new_constraint_vector.push_back(con_idx);
+        // }
     }
     return new_constraint_vector;
 }

@@ -41,7 +41,7 @@ namespace LaPSO {
             , subgradFmult(0.6)
             , subgradFmin(0.0001)
             , maxIter(1)
-            , maxCPU(100)
+            , maxCPU(600)
             , maxWallTime(INF)
             , printLevel(1)
             , printFreq(1)
@@ -121,6 +121,7 @@ namespace LaPSO {
         double best_lb = -INF;
         std::vector<initial_dual_value_pair> intial_dual_value_pairs;
         bool set_initial_dual_values = false;
+        double subproblem_time_lim = 150;
     };
 
     /** integer vector with  some extra convenience methods */

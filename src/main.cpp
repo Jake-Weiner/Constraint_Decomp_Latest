@@ -96,12 +96,11 @@ using namespace pagmo;
 //     return test_partition;
 // }
 
-void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, const vector<int>& con_relax_vector,
+void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, const vector<int>& con_relax_vector,
     const double& best_ub_sol, const LaPSOOutputFilenames& LOF, int decomposition_idx,
-    const double sp_solver_time_limit, const int LR_iter_limit, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
+    const double total_LR_time_lim, const int LR_iter_limit, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
     bool debug_printing = false, bool capture_statistics = false)
 {
-
     // calculate number of constraints relaxed and
     // create vector of constraint indices which are relaxed
     int num_con_relaxed = con_relax_vector.size();
@@ -109,13 +108,8 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     Writer w;
     // test partition if required
     bool test_hypergraph_partitioning = false;
-    // MIPProblem probe object used to get statistics from MIP problem
-    MIPProblemProbe MPP(&MP);
     //generate instance statistics
     if (capture_statistics){
-        // capture and write out instance statistics
-        std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
-        w.writeInstanceStatistics(LOF, ins_ptr);
         //generate relaxed constraint statistics
         std::shared_ptr<RelaxedConstraints> rcs_ptr = std::make_shared<RelaxedConstraints>(decomposition_idx);
         rcs_ptr->generate_statistics(MPP, con_relax_vector);
@@ -129,14 +123,15 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     std::shared_ptr<Subproblems> ss_ptr = std::make_shared<Subproblems>(decomposition_idx);
     // generate the different subproblem structures from relaxing the constaints. Structures are node and edge idx's in each subproblem
     std::vector<Partition_Struct> ps = HG.getPartitionStruct(con_relax_vector, test_hypergraph_partitioning);
+    // initialise subproblems attempted to false
+    ss_ptr->subproblem_attempted.resize(ps.size(), false);
     // the LaPSO method
-
     if(debug_printing){
         MP.printObjectiveFn();
         MP.printConstraints();
         MP.printVariables();
     }
-    ConDecomp_LaPSO_Connector CLC(MP, ps, con_relax_vector, debug_printing, sp_solver_time_limit, ss_ptr);
+    ConDecomp_LaPSO_Connector CLC(MP, ps, con_relax_vector, debug_printing, total_LR_time_lim, ss_ptr);
     // based on the partitioned structures, calculate variable/constraint information.
     CLC.maxsolves = LR_iter_limit;
     CLC.nsolves = 0;
@@ -145,18 +140,8 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
             ss_ptr->generateBlockStatistics(ps[partition_idx], MPP);
         }
     }
-    // // calculate required statistical measures from data collected
-    // // min,max,average,stddev
-
-    // // subproblem sizes
-    // tuple<double, double, double, double> subproblem_sizes_statistics = getStatistics(ss_ptr->block_variable_props);
-    // ss_ptr->max_block_variable_prop = get<1>(subproblem_sizes_statistics);
-    // ss_ptr->average_block_variable_prop = get<2>(subproblem_sizes_statistics);
-    // ss_ptr->stddev_block_variable_prop = get<3>(subproblem_sizes_statistics);
-
     // get the indices of the different constraint types
     LaPSO::constraint_type_indicies original_constraint_indices = { MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds() };
-
     // set up the initial requirements for LaPSO initialisation
     LaPSO::LaPSORequirements LR = {};
     // convert the indices of the original mip problem to the relaxed problem for constraint types
@@ -165,6 +150,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     LR.nConstr = num_con_relaxed;
     LR.best_ub = best_ub_sol;
     LR.benchmark_ub_flag = true;
+    // LR.subproblem_time_lim = 
     // assign the dual values from the original problem (LP) as initial values in the relaxed problem
     LR.intial_dual_value_pairs = CLC.convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
     LR.set_initial_dual_values = set_initial_dual_values;
@@ -172,15 +158,12 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     // Create the LaPSO Handler object which controls LaPSO process
     cout << "Setting up LaPSO Handler" << endl;
     LaPSOHandler LH(argc, argv, LR);
-
     // solve Lagrangian Relaxation
     cout << "solving Lagrangian Relaxation" << endl;
     LH.solve(CLC);
-
     // get the bounds and solve times for the Lagrangian Relaxation process
     std::tuple<double,double> LaPSO_outputs = LH.getLaPSOOutputs();
     std::shared_ptr<LROutputs> lro_ptr = std::make_shared<LROutputs>(decomposition_idx, get<0>(LaPSO_outputs), get<1>(LaPSO_outputs));
-    
     if (capture_statistics){
         w.writeRawSubproblemStatistics(LOF, ss_ptr);
         w.writeLROutputs(LOF, lro_ptr); 
@@ -188,7 +171,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, Hypergraph& HG, c
     // explicity end CPLEX enviromments 
     CLC.endCplexEnvs();
     // output subproblem statistics
-    
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -457,7 +439,7 @@ int main(int argc, const char** argv)
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
         bool solve_as_LP = true;
         CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
-        cout << "LP bound is" << MIP_results.bound << endl;
+        cout << "LP bound is " << MIP_results.bound << endl;
         for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
             cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         }
@@ -518,12 +500,13 @@ int main(int argc, const char** argv)
         idvp_2.push_back({ 2,  0});
         bool set_inital_dual_values = true;
         bool debug_printing = PA.get_debug_printing_flag();
-        solveLapso(argc, argv, MP, HG, test_decompositions[0], para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values, debug_printing);
+        // MIPProblem probe object used to get statistics from MIP problem
+        MIPProblemProbe MPP(&MP);
+        solveLapso(argc, argv, MP, MPP, HG, test_decompositions[0], para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values, debug_printing);
         exit(0);
     }
 
     if (PA.get_run_statistic_testing_flag() == true) {
-
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested.
         // get in the dual values for all constraints
         // vector<initial_daul_value_pair> dual_values_from_LP;
@@ -536,14 +519,11 @@ int main(int argc, const char** argv)
         //     dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
         //     cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         // }
-
         // assign a decomposition index
         int decomposition_idx = 0;
         // for test_mip 1...
         // get the constraint vector from external file.
-
         std::ifstream input_fs(string(para.con_vec_filename));
-
         // input file successfully opened
         if (input_fs) {
             LaPSOOutputFilenames LOF = {};
@@ -551,6 +531,8 @@ int main(int argc, const char** argv)
             LOF.relaxed_constraints_statistics_folder = string(para.relaxed_constraint_statistics_folder);
             LOF.instance_statistics_folder = string(para.instance_statistics_folder);
             LOF.LR_outputs_folder = string(para.LR_outputs_folder);
+            // MIPProblem probe object used to get statistics from MIP problem
+            MIPProblemProbe MPP(&MP);
             string line_read;
             while (getline(input_fs, line_read)) {
                 vector<string> relaxed_constraints_str;
@@ -571,10 +553,10 @@ int main(int argc, const char** argv)
                 // LOF.instance_statistics_filename = string(para.)
                 cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
                 int LR_iter_limit = para.maxIter;
-                int subproblem_solver_time_lim = 300;
+                double total_LR_time_lim = para.total_LR_time_lim;
                 bool capture_statistics = true;
                 bool debug_printing = false;
-                solveLapso(argc, argv, MP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, subproblem_solver_time_lim,
+                solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
                     LR_iter_limit, test_dual_values, set_initial_dual_values, debug_printing, capture_statistics);
                
             }
@@ -585,6 +567,72 @@ int main(int argc, const char** argv)
         }
         exit(EXIT_SUCCESS);
     }
+
+     if (PA.get_run_gather_statistics_flag() == true) {
+        // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested.
+        // get in the dual values for all constraints
+        vector<initial_dual_value_pair> dual_values_from_LP;
+        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
+        bool solve_as_LP = true;
+        // solve MIP as LP 
+        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
+        for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
+            dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
+            cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
+        }
+
+        // write out LP results for parsed file
+        Writer w;
+        string LP_Output_file = string(para.LP_outputs_folder) + "/LP_outputs.csv";
+        w.writeLPOutputs(LP_Output_file, MIP_results.obj_val, MIP_results.solve_time);
+
+        // initial dual values are going to be used
+        bool set_initial_dual_values = true;
+        // assign a decomposition index
+        int decomposition_idx = 0;
+        // read in con_vec from file
+        std::ifstream input_fs(string(para.con_vec_filename));
+
+        // assign output filenames
+        LaPSOOutputFilenames LOF = {};
+        LOF.subproblem_statistics_folder = string(para.subproblem_statistics_folder);
+        LOF.relaxed_constraints_statistics_folder = string(para.relaxed_constraint_statistics_folder);
+        LOF.instance_statistics_folder = string(para.instance_statistics_folder);
+        LOF.LR_outputs_folder = string(para.LR_outputs_folder);
+        
+        // MIPProblem probe object used to get statistics from MIP problem
+        MIPProblemProbe MPP(&MP);
+        // capture and write out instance statistics
+        std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
+        w.writeInstanceStatistics(LOF, ins_ptr);
+        // input file successfully opened
+        if (input_fs) {
+            string line_read;
+            while (getline(input_fs, line_read)) {
+                vector<string> relaxed_constraints_str;
+                vector<int> relaxed_constraints_int;
+                // split the line based on ,
+                boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+                // first line contains the number of nodes
+                // last element will be empty because of ending final comma
+                for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
+                    relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+                }
+                int LR_iter_limit = para.maxIter;
+                 double total_LR_time_lim = para.total_LR_time_lim;
+                bool capture_statistics = true;
+                bool debug_printing = false;
+                solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
+                    LR_iter_limit, dual_values_from_LP, set_initial_dual_values, debug_printing, capture_statistics);
+                ++decomposition_idx;
+            }
+        }
+        else {
+            cout << "redundant constraint input file unable to be found/opened" << endl;
+        }
+        exit(EXIT_SUCCESS);
+    }
+
     //  run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
     //     run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);
     if (PA.get_run_greedy_decomp_flag()) {

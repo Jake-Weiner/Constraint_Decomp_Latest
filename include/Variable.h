@@ -42,7 +42,7 @@ class Variable{
             upper_bound = bound;
         }
 
-        double getUB(){
+        double getUB() const {
             return upper_bound;
         }
 
@@ -50,12 +50,12 @@ class Variable{
             lower_bound = bound;
         }
 
-        double getLB(){
+        double getLB() const {
             return lower_bound;
         }
         
         // for type, bin = 0, cont = 1, int = 2
-        void printInfo(){
+        void printInfo() const{
             cout << "index = " << variable_idx << " : upper bound = " << upper_bound << " : lower bound = " << lower_bound
             << " bound type = " << vt << endl; 
         }
@@ -68,7 +68,7 @@ class Variable{
             return variable_idx > rhs.getVarIndx();  
         };
 
-        const Variable_Type getVarType(){
+        const Variable_Type getVarType() const {
             return vt;
         }
 

@@ -40,7 +40,7 @@ void ParamAdapter::createTestFlags(const mainParam::Param& p){
     run_MIP_Duals_testing_flag = getBoolVal(p.run_MIP_Duals_testing);
     run_LR_testing_flag = getBoolVal(p.run_LR_testing);
     run_statistic_testing_flag = getBoolVal(p.run_statistic_testing_flag);
-
+    run_gather_statistics_flag = getBoolVal(p.run_gather_statistics);
     // running flags
     run_remove_duplicate_constraints_flag = getBoolVal(p.run_remove_duplicate_constraints);
 

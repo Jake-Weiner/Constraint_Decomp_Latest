@@ -66,6 +66,7 @@ class Writer{
         void writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::shared_ptr<Instance> ins_ptr);
         void writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr);
         void writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LROutputs> lro_ptr);
+        void writeLPOutputs(const string& output_filename, double bound, double time);
     private:
 
         // generic raw subproblem statistics output

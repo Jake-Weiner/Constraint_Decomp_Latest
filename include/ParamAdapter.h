@@ -121,6 +121,10 @@ public:
         return debug_printing_flag;
     }
 
+    bool get_run_gather_statistics_flag(){
+        return run_gather_statistics_flag;
+    }
+
 
     std::vector<double> get_nsga_props()
     {
@@ -163,7 +167,7 @@ private:
     bool run_LR_testing_flag = false;
     bool run_statistic_testing_flag = false;
     bool run_remove_duplicate_constraints_flag = false;
-
+    bool run_gather_statistics_flag = false;
     // debug flags
     bool debug_printing_flag = false;
 
