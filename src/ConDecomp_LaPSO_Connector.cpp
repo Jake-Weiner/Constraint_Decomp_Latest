@@ -34,8 +34,6 @@ ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_probl
     cplex_subproblem_sum_var_squared = 0;
     initSubproblems(partitions, original_problem.getNumVariables());
     this->subproblem_statistics_ptr = subproblem_statistics_ptr;
-    
-    
 }
 
 void ConDecomp_LaPSO_Connector::initOriginalCosts()
@@ -263,7 +261,10 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
         // get original constraint idx from dual index
         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
         Constraint con = OP.constraints[original_constraint_idx];
-        cout << "for dual idx = " << dual_idx << endl;
+        if (debug_printing){
+            cout << "for dual idx = " << dual_idx << endl;
+        }
+        
         // con terms are pair<var_idx, var_coeff>
         for (auto& con_term : con.getConTerms()) {
             int var_idx = con_term.first;
@@ -351,11 +352,11 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     double mip_subproblem_solve_time = (0.9 * sp.getSubproblemRunTime()) + 0.1;
     double lp_subproblem_solve_time = (0.1 * sp.getSubproblemRunTime()) + 0.1;
+    cout << "MIP subproblem solve time is " << mip_subproblem_solve_time << endl;
     // subproblem time should be based on var prop
     if (debug_printing){
         cout << "MIP subproblem solve time is " << mip_subproblem_solve_time << endl;
     }
-    cout << "debug printing val is " << debug_printing << endl;
     cplex.setParam(IloCplex::TiLim, mip_subproblem_solve_time);
     cplex.setParam(IloCplex::EpGap, 0.99);
     cplex.setOut((*(sp.envPtr)).getNullStream());

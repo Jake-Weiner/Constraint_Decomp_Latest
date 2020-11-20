@@ -149,7 +149,7 @@ double MIPProblemProbe::getBlockLargestRHSRange(const std::vector<int>& constrai
             min_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
         }
     }
-    cout << "max rhs: " << max_rhs << " min rhs: " << min_rhs << endl;
+    // cout << "max rhs: " << max_rhs << " min rhs: " << min_rhs << endl;
     return (max_rhs - min_rhs);
 }
 

@@ -191,7 +191,7 @@ void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 {
 
     for (auto& idx : idxs) {
-        printf("constraint idx is %d", idx);
+        // printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
         dualUB[idx] = INF;
     }
@@ -199,9 +199,8 @@ void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 
 void Problem::setDualBoundsLesser(const std::vector<int>& idxs)
 {
-    
     for (auto& idx : idxs) {
-        printf("constraint idx is %d", idx);
+        // printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
         dualUB[idx] = 0;
     }
@@ -210,7 +209,7 @@ void Problem::setDualBoundsGreater(const std::vector<int>& idxs)
 {
    
     for (auto& idx : idxs) {
-        printf("constraint idx is %d", idx);
+        // printf("constraint idx is %d", idx);
         dualLB[idx] = 0;
         dualUB[idx] = INF;
     }
