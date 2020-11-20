@@ -29,6 +29,11 @@ typedef std::pair<int,double> initial_dual_value_pair;
 
 namespace LaPSO {
 
+    // indicies of dual variables with incorrect initial bounds detected
+    struct IncorrectInitialDualIndices{
+        std::vector<std::pair<int,double>> lower_bound_errors;
+        std::vector<std::pair<int,double>> upper_bound_errors;
+    };
 
     const double INF = std::numeric_limits<double>::max();
     /// parameters for use in the algorithm
@@ -384,7 +389,7 @@ namespace LaPSO {
         double initial_dual_min;
         double initial_dual_max;
 
-       
+
         
         /// ParticleIter is a convenience class to avoid double dereferencing
 
@@ -426,36 +431,10 @@ namespace LaPSO {
 
         double swarmRadius() const;
 
-        // class ParticleIter {
-        //     const std::vector<Particle*>::iterator end;
-
-        // public:
-        //     std::vector<Particle*>::iterator iter;
-        //     int idx; // current index;
-        //     ParticleIter(std::vector<Particle*>& v)
-        //         : end(v.end())
-        //         , iter(v.begin())
-        //         , idx(0)
-        //     {
-        //     }
-        //     ParticleIter(std::vector<Particle*>& v, int _idx)
-        //         : end(v.end())
-        //         , iter(v.begin() + (size_t)_idx)
-        //         , idx(_idx)
-        //     {
-        //     }
-        //     bool done() const { return iter == end; }
-        //     ParticleIter& operator++()
-        //     {
-        //         ++iter;
-        //         ++idx;
-        //         return *this;
-        //     }
-        //     Particle& operator*() { return **iter; }
-        //     Particle* operator->() { return *iter; }
-        // };
-        
-
+        IncorrectInitialDualIndices getIncorrectInitialDualIndices() const{
+            return IIDI;
+        }
+       
     private:
 
         double ub; ///< primal cost (upper bound if feasible)
@@ -467,7 +446,7 @@ namespace LaPSO {
         int nIter; ///< iteration number
         CpuTimer timer;
         double _wallTime;
-
+        IncorrectInitialDualIndices IIDI;
         void setDualBoundsLesser(const std::vector<int>& idxs);
         void setDualBoundsGreater(const std::vector<int>& idxs);
         void setDualBoundsEqual(const std::vector<int>& idxs);

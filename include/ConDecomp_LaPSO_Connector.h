@@ -114,7 +114,7 @@ public:
     int getOriginalConIdx(int dual_idx);
     LaPSO::constraint_type_indicies convertOriginalConstraintTypeIndicies(const LaPSO::constraint_type_indicies& cti);
     vector<initial_dual_value_pair> convertOriginalConstraintInitialDualIndicies(const std::vector<initial_dual_value_pair>& original_initial_dual_pairs);
-
+    int getOriginalIdxFromDual(const int dual_idx);
 private:
     void addConstLagMult(ConDecomp_LaPSO_Connector_Solution& s);
     void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);

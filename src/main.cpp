@@ -96,13 +96,18 @@ using namespace pagmo;
 //     return test_partition;
 // }
 
-void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, const vector<int>& con_relax_vector,
-    const double& best_ub_sol, const LaPSOOutputFilenames& LOF, int decomposition_idx,
-    const double total_LR_time_lim, const int LR_iter_limit, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
-    bool debug_printing = false, bool capture_statistics = false)
+void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, mainParam::Param& para, 
+    ParamAdapter& PA, const vector<int>& con_relax_vector,
+    const LaPSOOutputFilenames& LOF, int decomposition_idx,
+    const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
+    bool capture_statistics = false)
 {
     // calculate number of constraints relaxed and
     // create vector of constraint indices which are relaxed
+    int LR_iter_limit = para.maxIter;
+    double total_LR_time_lim = para.total_LR_time_lim;
+    bool debug_printing = PA.get_debug_printing_flag();
+
     int num_con_relaxed = con_relax_vector.size();
     // writer object to write necessary information to files
     Writer w;
@@ -141,15 +146,15 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
         }
     }
     // get the indices of the different constraint types
-    LaPSO::constraint_type_indicies original_constraint_indices = { MP.getConGreaterBounds(), MP.getConLesserBounds(), MP.getConEqualBounds() };
+    LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConEqualBounds(), MP.getConLesserBounds(), MP.getConGreaterBounds()};
     // set up the initial requirements for LaPSO initialisation
     LaPSO::LaPSORequirements LR = {};
     // convert the indices of the original mip problem to the relaxed problem for constraint types
     LR.cti = CLC.convertOriginalConstraintTypeIndicies(original_constraint_indices);
     LR.nVar = HG.getNumNodes();
     LR.nConstr = num_con_relaxed;
-    LR.best_ub = best_ub_sol;
-    LR.benchmark_ub_flag = true;
+    LR.best_ub = para.set_ub;
+    LR.benchmark_ub_flag = false;
     // LR.subproblem_time_lim = 
     // assign the dual values from the original problem (LP) as initial values in the relaxed problem
     LR.intial_dual_value_pairs = CLC.convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
@@ -161,6 +166,24 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     // solve Lagrangian Relaxation
     cout << "solving Lagrangian Relaxation" << endl;
     LH.solve(CLC);
+
+    if(PA.get_run_MIP_Duals_testing_flag()){
+        // get the initial dual indicie values to see where the discrepancy arrises from
+        LaPSO::IncorrectInitialDualIndices IIDI = LH.getIncorrectInitialDualIndicies();
+        // print out dual index
+        // print out dual index as original index
+        // print out constraint of that original index
+        cout << "for the dual variables with lower bound problems " << endl;
+        for (auto& lower_bound_pair :  IIDI.lower_bound_errors){
+            cout << "Dual index is " << lower_bound_pair.first << endl;
+            int original_idx = CLC.getOriginalIdxFromDual(lower_bound_pair.first);
+            cout << "Original index is " << original_idx << endl;
+            MP.getConstraint(original_idx).printInfo();
+        }
+
+    }
+    
+
     // get the bounds and solve times for the Lagrangian Relaxation process
     std::tuple<double,double> LaPSO_outputs = LH.getLaPSOOutputs();
     std::shared_ptr<LROutputs> lro_ptr = std::make_shared<LROutputs>(decomposition_idx, get<0>(LaPSO_outputs), get<1>(LaPSO_outputs));
@@ -443,7 +466,6 @@ int main(int argc, const char** argv)
         for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
             cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         }
-        exit(0);
     }
 
     // run NSGA if desired
@@ -502,7 +524,7 @@ int main(int argc, const char** argv)
         bool debug_printing = PA.get_debug_printing_flag();
         // MIPProblem probe object used to get statistics from MIP problem
         MIPProblemProbe MPP(&MP);
-        solveLapso(argc, argv, MP, MPP, HG, test_decompositions[0], para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values, debug_printing);
+        // solveLapso(argc, argv, MP, MPP, HG, test_decompositions[0], para.set_ub, LOF, decomposition_idx, 100, 100, idvp_2, set_inital_dual_values, debug_printing);
         exit(0);
     }
 
@@ -557,8 +579,8 @@ int main(int argc, const char** argv)
 
                 bool capture_statistics = true;
                 bool debug_printing = PA.get_debug_printing_flag();
-                solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
-                    LR_iter_limit, test_dual_values, set_initial_dual_values, debug_printing, capture_statistics);
+                // solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
+                //     LR_iter_limit, test_dual_values, set_initial_dual_values, debug_printing, capture_statistics);
                
             }
         }
@@ -619,12 +641,9 @@ int main(int argc, const char** argv)
                 for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
                     relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
                 }
-                int LR_iter_limit = para.maxIter;
-                double total_LR_time_lim = para.total_LR_time_lim;
-                bool debug_printing = PA.get_debug_printing_flag();
+                
                 bool capture_statistics = true;
-                solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
-                    LR_iter_limit, dual_values_from_LP, set_initial_dual_values, debug_printing, capture_statistics);
+                solveLapso(argc, argv, MP, MPP, HG, para, PA, relaxed_constraints_int, LOF, decomposition_idx, dual_values_from_LP, set_initial_dual_values, capture_statistics);
                 ++decomposition_idx;
             }
         }

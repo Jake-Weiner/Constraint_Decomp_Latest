@@ -32,18 +32,10 @@ class LaPSOHandler{
              return solver.best_lb_tracking;
         }
 
+        LaPSO::IncorrectInitialDualIndices getIncorrectInitialDualIndicies() const{
+            return solver.getIncorrectInitialDualIndices();
+        }
 
-        // std::vector<double> average_lb_tracking;
-		// std::vector<double> average_ub_tracking;
-		// std::vector<double> average_viol_tracking;
-		// std::vector<double> average_path_saved_tracking;
-		// std::vector<double> best_lb_tracking;
-		// std::vector<double> lb_comparisons;
-		// std::vector<double> best_ub_tracking;
-		// std::vector<double> dual_0_tracking;
-		// std::vector<double> dual_euclid;
-		// std::vector<double> perturb_euclid;
-		// std::vector<double> timing_tracking;
     private:
         void initSolver(int& argc, const char** argv,LaPSO::LaPSORequirements& LR);
         

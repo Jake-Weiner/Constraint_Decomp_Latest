@@ -90,6 +90,7 @@ class MIP_Problem{
                 if (constraint.getBoundType() == Equal){
                     idxs.push_back(constraint.getConIdx());
                 }
+
             }
             return idxs;
         }

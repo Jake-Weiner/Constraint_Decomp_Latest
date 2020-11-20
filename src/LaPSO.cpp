@@ -250,12 +250,14 @@ void Problem::solve(UserHooks& hooks)
                 printf("ERROR: initial dual[%d] %.2f below LB %.2f\n",
                     i, current_solution->dual[i], dualLB[i]);
             current_solution->dual[i] = dualLB[i];
+            IIDI.lower_bound_errors.push_back({i,current_solution->dual[i]});
         }
         if (current_solution->dual[i] > dualUB[i]) {
             if (param.printLevel)
                 printf("ERROR: initial dual[%d] %.2f below UB %.2f\n",
                     i, current_solution->dual[i], dualUB[i]);
             current_solution->dual[i] = dualUB[i];
+            IIDI.upper_bound_errors.push_back({i,current_solution->dual[i]});
         }
     }
 

@@ -53,6 +53,16 @@ void ConDecomp_LaPSO_Connector::initOriginalCosts()
     }
 }
 
+// return the original constraint index. -1 is returned if not found
+int ConDecomp_LaPSO_Connector::getOriginalIdxFromDual(const int dual_idx){
+
+    int ret_val = -1;
+    if (dual_idx_to_orig_constraint_idx_map.find(dual_idx) != dual_idx_to_orig_constraint_idx_map.end()){
+        ret_val = dual_idx_to_orig_constraint_idx_map[dual_idx];
+    }
+    return ret_val;
+}
+
 // converts the indicies of the equality,less,greater than indexes from the original indices to the dual indices
 LaPSO::constraint_type_indicies ConDecomp_LaPSO_Connector::convertOriginalConstraintTypeIndicies(const LaPSO::constraint_type_indicies& cti){
 
