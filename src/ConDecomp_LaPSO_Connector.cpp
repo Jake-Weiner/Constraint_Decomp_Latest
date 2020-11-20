@@ -318,7 +318,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         }
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
-       
+
+        cout << "In single var sp, rc is "<< var_reduced_cost << " and x = " << s.x[original_var_idx] << endl;
         
         // capture the solution statistics
         subproblem_statistics_ptr->mip_times.push_back(0);
@@ -385,6 +386,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     }
     else{
         s.lb += cplex.getObjValue();
+        cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
         subproblem_statistics_ptr->subproblem_optimality_success.push_back(true);
         // capture the mip solution quality
         subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getObjValue());
@@ -551,13 +553,13 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     // to calculate the true lower bound, add in lamba*RHS constants
     addConstLagMult(s);
 
-    if (debug_printing == true) {
+    // if (debug_printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "
                   << " lb=" << s.lb << " ub=" << s.ub
                   << "\trange of dual = " << s.dual.min() << " to " << s.dual.max() << std::endl
                   << "\trange of viol = " << s.viol.min() << " to " << s.viol.max() << std::endl;
         std::cout << std::endl;
-    }
+    // }
 
     LaPSO::Status status;
     if ((nsolves < maxsolves) && (subproblem_solve_error == 0)) {
