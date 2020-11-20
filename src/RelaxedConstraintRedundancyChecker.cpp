@@ -3,7 +3,6 @@
 
 vector<int> RelaxedConstraintRedundancyChecker::removeRedundantConstraints(const vector<int>& original_relaxed_constraints, Hypergraph& HG)
 {
-
     vector<int> new_constraint_vector;
     // new_constraint_vector.resize(relaxed_edges.size());
 
@@ -11,7 +10,8 @@ vector<int> RelaxedConstraintRedundancyChecker::removeRedundantConstraints(const
     bool print = false;
     vector<Partition_Struct> partitions = HG.getPartitionStruct(original_relaxed_constraints, false);
     // create hashmap of single variable problems
-
+    //reset the hashmap
+    single_var_subproblem_idxs.clear();
     populateSingleVarHashmap(partitions);
 
     // partition the hypergraph based on the relaxed edges provided
@@ -49,10 +49,7 @@ vector<int> RelaxedConstraintRedundancyChecker::removeRedundantConstraints(const
 // 2) a relaxed constraint contains only a subset of variables in single variable problems
 bool RelaxedConstraintRedundancyChecker::isConstraintRedundant(const vector<Partition_Struct>& partitions,const HG_Edge& edge_to_check, bool print)
 {
-    
-
     bool ret_val = false;
-
     // check if constraint only containts single variable subproblems
     // loop through each partition to see if constraint variables are a subset of a subproblem. If they are the relaxed constraint
     // is redundant (provides no decomposition benefit)
@@ -107,6 +104,7 @@ bool RelaxedConstraintRedundancyChecker::containsOnlySingleVarSubproblems(const 
     bool ret_val = true;
     // if constraint contains a variable that is NOT a single var subproblem, it is not redundant in this check
     for (const auto& var_idx : edge_to_check.getNodeIdxs()){
+        // edge contains a variable that is a variable that is not! in the single var subproblem
         if (single_var_subproblem_idxs.find(var_idx) == single_var_subproblem_idxs.end()){
             ret_val = false;
             break;
@@ -117,7 +115,6 @@ bool RelaxedConstraintRedundancyChecker::containsOnlySingleVarSubproblems(const 
 
 void RelaxedConstraintRedundancyChecker::populateSingleVarHashmap(const vector<Partition_Struct>& partitions)
 {
-
     // every subproblem with only 1 variable
     for (const auto& partition : partitions) {
         if (partition.getNumNodes() == 1) {

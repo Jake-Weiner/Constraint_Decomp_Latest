@@ -16,6 +16,7 @@ class LaPSOHandler{
 
     public:
         LaPSOHandler(int& argc, const char** argv, LaPSO::LaPSORequirements& LR);
+        
         void solve(ConDecomp_LaPSO_Connector& CLC);
 
         std::tuple<double,double> getLaPSOOutputs();

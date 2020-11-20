@@ -554,8 +554,9 @@ int main(int argc, const char** argv)
                 cout << "Subproblem Statistics Filename: " << string(para.subproblem_statistics_folder) << endl;
                 int LR_iter_limit = para.maxIter;
                 double total_LR_time_lim = para.total_LR_time_lim;
+
                 bool capture_statistics = true;
-                bool debug_printing = false;
+                bool debug_printing = PA.get_debug_printing_flag();
                 solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
                     LR_iter_limit, test_dual_values, set_initial_dual_values, debug_printing, capture_statistics);
                
@@ -568,7 +569,7 @@ int main(int argc, const char** argv)
         exit(EXIT_SUCCESS);
     }
 
-     if (PA.get_run_gather_statistics_flag() == true) {
+    if (PA.get_run_gather_statistics_flag() == true) {
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested.
         // get in the dual values for all constraints
         vector<initial_dual_value_pair> dual_values_from_LP;
@@ -578,7 +579,7 @@ int main(int argc, const char** argv)
         CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
         for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
             dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
-            cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
+            // cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
         }
 
         // write out LP results for parsed file
@@ -619,9 +620,9 @@ int main(int argc, const char** argv)
                     relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
                 }
                 int LR_iter_limit = para.maxIter;
-                 double total_LR_time_lim = para.total_LR_time_lim;
+                double total_LR_time_lim = para.total_LR_time_lim;
+                bool debug_printing = PA.get_debug_printing_flag();
                 bool capture_statistics = true;
-                bool debug_printing = false;
                 solveLapso(argc, argv, MP, MPP, HG, relaxed_constraints_int, para.set_ub, LOF, decomposition_idx, total_LR_time_lim,
                     LR_iter_limit, dual_values_from_LP, set_initial_dual_values, debug_printing, capture_statistics);
                 ++decomposition_idx;
@@ -634,7 +635,7 @@ int main(int argc, const char** argv)
     }
 
     //  run_greedy_decomp_flag = getBoolVal(p.run_greedy_decomp);
-    //     run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);
+    //  run_NSGA_decomp_flag = getBoolVal(p.run_NSGA_decomp);
     if (PA.get_run_greedy_decomp_flag()) {
         cout << "running greedy decomposition testing" << endl;
         GreedyDecompCreator GDC;
@@ -657,6 +658,42 @@ int main(int argc, const char** argv)
             }
             outfile.close();
         }
+    }
+
+    if (PA.get_run_LSP_testing_flag()){
+
+        // print out the largest subproblem of the read in decompositions
+        std::ifstream input_fs(string(para.con_vec_filename));
+        int total_nodes = MP.getNumVariables();
+        if (input_fs) {
+            string line_read;
+            while (getline(input_fs, line_read)) {
+                vector<string> relaxed_constraints_str;
+                vector<int> relaxed_constraints_int;
+                // split the line based on ,
+                boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+                // first line contains the number of nodes
+                // last element will be empty because of ending final comma
+                for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
+                    relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+                }
+                vector<Partition_Struct> ps = HG.getPartitionStruct(relaxed_constraints_int,false);
+                double largest_sp = 0;
+
+                for (const auto& partition : ps){
+                    int partition_num_nodes = partition.getNumNodes();
+                    if ((static_cast<double>(partition_num_nodes) / static_cast<double>(total_nodes)) > largest_sp){
+                        largest_sp = static_cast<double>(partition_num_nodes) / static_cast<double>(total_nodes);
+                    }
+                }
+                cout << "Largest SP is " << largest_sp << endl;
+            }
+        }
+        else {
+            cout << "constraint input file unable to be found/opened" << endl;
+        }
+        exit(EXIT_SUCCESS);
+
     }
 
     // flow pattern of the whole process

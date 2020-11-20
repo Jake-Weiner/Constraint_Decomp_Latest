@@ -47,7 +47,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_MIP_Duals_testing");
     parser.setOption("run_LR_testing");
     parser.setOption("run_statistic_testing_flag");
- 
+    parser.setOption("run_LSP_testing_flag");
     
     // input files
     parser.setOption("decomps_to_remove_red_const_file");
@@ -62,8 +62,6 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("instance_statistics_folder");
     parser.setOption("LR_outputs_folder");
     parser.setOption("LP_outputs_folder");
-    
-    
     
     // decomposition redundancy removal
     parser.setOption("redundant_const_removed_output_file");
@@ -193,7 +191,7 @@ void Param::parse(int argc, const char** argv)
     // debug flags
     if (parser.getValue("debug_printing"))
         debug_printing = parser.getValue("debug_printing");
-
+        
     // running flags
     if (parser.getValue("run_gather_statistics"))
         run_gather_statistics = parser.getValue("run_gather_statistics");
@@ -226,6 +224,8 @@ void Param::parse(int argc, const char** argv)
         run_LR_testing = parser.getValue("run_LR_testing");
     if (parser.getValue("run_statistic_testing_flag"))
         run_statistic_testing_flag = parser.getValue("run_statistic_testing_flag");
+    if (parser.getValue("run_LSP_testing_flag"))
+        run_LSP_testing_flag = parser.getValue("run_LSP_testing_flag");
 
     // input MIP parameters
     if (parser.getValue("MIP_num_var"))

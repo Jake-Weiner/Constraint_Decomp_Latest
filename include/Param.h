@@ -60,6 +60,7 @@ struct Param {
     const char* run_MIP_Duals_testing = "false";
     const char* run_LR_testing = "false";
     const char* run_statistic_testing_flag = "false";
+    const char* run_LSP_testing_flag = "false";
 
     // debug flags
     const char* debug_printing = "false";

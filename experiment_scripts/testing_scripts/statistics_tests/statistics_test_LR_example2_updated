@@ -15,6 +15,8 @@ $executable_path/main_test --input_root_folder=$INPUT_DIR \
 --output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
 --input_instance_name=$instance_name --maxCPU=1000 \
 --maxIter=1 \
+--total_LR_time_lim=330 \
+--debug_printing=true \
 --run_statistic_testing_flag=true --con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/test_case2_con_vec.csv \
 --subproblem_statistics_folder=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/$instance_name/Subproblem \
 --relaxed_constraint_statistics_folder=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/$instance_name/Relaxed_Constraint \

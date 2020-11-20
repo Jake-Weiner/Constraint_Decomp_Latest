@@ -8,6 +8,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <math.h>
 
 #include <type_traits>
 #include <typeinfo>
@@ -30,8 +31,11 @@ ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_probl
     this->debug_printing = printing;
     initOriginalCosts();
     populateDualIdxToOrigIdxMap(con_vec);
+    cplex_subproblem_sum_var_squared = 0;
     initSubproblems(partitions, original_problem.getNumVariables());
     this->subproblem_statistics_ptr = subproblem_statistics_ptr;
+    
+    
 }
 
 void ConDecomp_LaPSO_Connector::initOriginalCosts()
@@ -112,6 +116,7 @@ void ConDecomp_LaPSO_Connector::populateDualIdxToOrigIdxMap(const vector<int>& c
 }
 
 // Initialise the various subproblems based on the partitions created via relaxing constraints
+// total number of variables squared in each subproblem is also counted
 void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& partitions, const int& total_num_var)
 {
     int subproblem_idx = 0;
@@ -122,13 +127,12 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
 
         CPLEX_MIP_Subproblem sp;
 
-        // set the proportion of var in subproblem as proportion of total number of variables
-        sp.setSubproblemVarProp(static_cast<double>(partition.getNumNodes())  / static_cast<double>(total_num_var));
+        // // set the proportion of var in subproblem as proportion of total number of variables
+        // sp.setSubproblemVarProp(static_cast<double>(partition.getNumNodes())  / static_cast<double>(total_num_var));
         sp.setSubproblemIdx(subproblem_idx);
         
         // creatre a new IloEnv object which is used for memory management of Ilo objects
         sp.envPtr = new IloEnv;
-        // IloEnv *(sp.envPtr);
         IloModel model(*(sp.envPtr));
         IloNumVarArray subproblem_vars_cplex(*(sp.envPtr));
         IloRangeArray subproblem_constraints_cplex(*(sp.envPtr));
@@ -166,8 +170,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
 
         // if only 1 variable is involved, no need to create a mip model
         if (subproblem_var_idx == 1) {
-            sp.subproblemVarIdx_to_originalVarIdx;
-            sp.originalVarIdx_to_subproblemVarIdx;
             sp.num_subproblem_vars = subproblem_var_idx;
             if (sp.envPtr != nullptr) {
                 if ((*(sp.envPtr)).getImpl() != nullptr) {
@@ -176,63 +178,72 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                 delete sp.envPtr;
                 sp.envPtr = nullptr;
             }
-
-            // (*(sp.envPtr)).end();
-            MS.push_back(sp);
-            continue;
+            cplex_subproblems.push_back(sp);
             ++subproblem_idx;
+            // tally sum of square of number of variables
+            cplex_subproblem_sum_var_squared += 1;
+            continue;
         }
 
-        //add constraints to subproblem
-        vector<Constraint> subproblem_constraints;
-        if (!partition.edge_idxs.empty()) {
-            for (auto& constraint_idx : partition.edge_idxs) {
-                subproblem_constraints.push_back(OP.constraints[constraint_idx]);
+        //otherwise continue with creating the cplex model for the subproblem
+        else{
+            vector<Constraint> subproblem_constraints;
+            if (!partition.edge_idxs.empty()) {
+                for (auto& constraint_idx : partition.edge_idxs) {
+                    subproblem_constraints.push_back(OP.constraints[constraint_idx]);
+                }
+                if (debug_printing){
+                    cout << "For subproblem " << subproblem_idx << " Constaints are: " << endl;
+                }
+                //add constraints to the model
+                for (auto& constraint : subproblem_constraints) {
+                    IloExpr constraint_exp(*(sp.envPtr));
+                    for (auto& term : constraint.getConTerms()) {
+                        int var_idx = term.first;
+                        double var_coeff = term.second;
+                        int var_idx_in_sp = sp.originalVarIdx_to_subproblemVarIdx[var_idx];
+                        constraint_exp += (var_coeff * subproblem_vars_cplex[var_idx_in_sp]);
+                        if (debug_printing){
+                            cout << var_coeff << "x_" << var_idx <<  " ";
+                        }
+                    }
+                    if (constraint.getBoundType() == Greater) {
+                        IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, INF);
+                        subproblem_constraints_cplex.add(r1);
+                        if (debug_printing){
+                            cout << ">= " << constraint.getRHS();
+                        }
+                    } else if (constraint.getBoundType() == Equal) {
+                        IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, constraint.getRHS());
+                        subproblem_constraints_cplex.add(r1);
+                        if (debug_printing){
+                            cout << "== " << constraint.getRHS();
+                        }
+                    } else if (constraint.getBoundType() == Less) {
+                        IloRange r1(*(sp.envPtr), -INF, constraint_exp, constraint.getRHS());
+                        subproblem_constraints_cplex.add(r1);
+                        if (debug_printing){
+                            cout << "<= " << constraint.getRHS();
+                        }
+                    }
+                }
+                model.add(subproblem_constraints_cplex);
             }
+            sp.model = model;
+            sp.variables = subproblem_vars_cplex;
+            sp.num_subproblem_vars = subproblem_var_idx;
+            // tally sum of square of number of variables
+
+            cplex_subproblem_sum_var_squared += pow(subproblem_var_idx,2);
             if (debug_printing){
-                cout << "For subproblem " << subproblem_idx << " Constaints are: " << endl;
+                cout << "subproblem var idx is " << subproblem_var_idx << endl;
+                cout << "cplex_subproblem_sum_var_squared is " << cplex_subproblem_sum_var_squared << endl;
+                cout << "subprovlem var idx squared is " << pow(subproblem_var_idx,2) << endl;
             }
-            //add constraints to the model
-            for (auto& constraint : subproblem_constraints) {
-                IloExpr constraint_exp(*(sp.envPtr));
-
-                for (auto& term : constraint.getConTerms()) {
-                    int var_idx = term.first;
-                    double var_coeff = term.second;
-                    int var_idx_in_sp = sp.originalVarIdx_to_subproblemVarIdx[var_idx];
-                    constraint_exp += (var_coeff * subproblem_vars_cplex[var_idx_in_sp]);
-                    if (debug_printing){
-                        cout << var_coeff << "x_" << var_idx <<  " ";
-                    }
-                }
-
-                if (constraint.getBoundType() == Greater) {
-                    IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, INF);
-                    subproblem_constraints_cplex.add(r1);
-                    if (debug_printing){
-                        cout << ">= " << constraint.getRHS();
-                    }
-                } else if (constraint.getBoundType() == Equal) {
-                    IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, constraint.getRHS());
-                    subproblem_constraints_cplex.add(r1);
-                    if (debug_printing){
-                        cout << "== " << constraint.getRHS();
-                    }
-                } else if (constraint.getBoundType() == Less) {
-                    IloRange r1(*(sp.envPtr), -INF, constraint_exp, constraint.getRHS());
-                    subproblem_constraints_cplex.add(r1);
-                    if (debug_printing){
-                        cout << "<= " << constraint.getRHS();
-                    }
-                }
-            }
-            model.add(subproblem_constraints_cplex);
+            cplex_subproblems.push_back(sp);
+            ++subproblem_idx;
+            
         }
-        sp.model = model;
-        sp.variables = subproblem_vars_cplex;
-        sp.num_subproblem_vars = subproblem_var_idx;
-        MS.push_back(sp);
-        ++subproblem_idx;
     }
     cout << "finished initialising subproblems " << endl;
     return;
@@ -272,8 +283,9 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 // at this point the problem is solved as a MIP and then as a LP. For multiple iterations, this needs to be changed
 // so that the variables are converted back to their original types after being converted for floats for LP
 // solution
+// the solve time remaining is also updated for each subproblem solved
 // returns 0 for success, -1 for failure
-int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s)
+int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining)
 {
     int ret_val = 0;
     //if subproblem size is 1 solve without cplex
@@ -333,19 +345,24 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
   
     // solve the subproblem as a MIP and get the statistics
     IloCplex cplex(sp.model);
+    if (debug_printing){
+        cout << "MIP subproblem solve time is " << sp.getSubproblemRunTime() << endl;
+    }
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
-
-    double mip_subproblem_solve_time = (0.8 * (sp.getSubproblemVarProp() * total_solve_time_lim)) + 0.1;
-    double lp_subproblem_solve_time = (0.2 * (sp.getSubproblemVarProp() * total_solve_time_lim)) + 0.1;
+    double mip_subproblem_solve_time = (0.9 * sp.getSubproblemRunTime()) + 0.1;
+    double lp_subproblem_solve_time = (0.1 * sp.getSubproblemRunTime()) + 0.1;
     // subproblem time should be based on var prop
+    if (debug_printing){
+        cout << "MIP subproblem solve time is " << mip_subproblem_solve_time << endl;
+    }
+    cout << "debug printing val is " << debug_printing << endl;
     cplex.setParam(IloCplex::TiLim, mip_subproblem_solve_time);
+    cplex.setParam(IloCplex::EpGap, 0.99);
     cplex.setOut((*(sp.envPtr)).getNullStream());
     bool feasible_sol = cplex.solve();
-    cout << "CPLEX Status is " << cplex.getCplexStatus() << endl;
-    cout << IloCplex::Status::Optimal << endl;
     subproblem_statistics_ptr->subproblem_attempted[sp.getSubproblemIdx()] = true;
-    // if MIP subproblem is not solved to optimality
-    if (cplex.getCplexStatus() != IloCplex::Status::Optimal){
+    // if MIP subproblem is not solved to optimality or at least within optimality tolerance
+    if (cplex.getCplexStatus() != IloCplex::Status::Optimal && cplex.getCplexStatus() != IloCplex::Status::OptimalTol){
         cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
         // print out the subproblem to see why it can't be solved to optimality
         // get the best bound if optimal solution not available        
@@ -364,7 +381,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
 
     //capture the mip runtime in cpu seconds
     subproblem_statistics_ptr->mip_times.push_back(cplex.getTime());
-
+    solve_time_remaining -= cplex.getTime();
         // capture the variable values from the subproblem solutions
     for (int i = 0; i < sp.variables.getSize(); ++i) {
         int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
@@ -378,11 +395,6 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             } else if (vt == Cont) {
                 s.x[orig_idx] = val;
             }
-        // } catch (IloException& e) {
-        //     int x_val = 0;
-        //     x[orig_idx] = x_val;
-        //     // cout << e << endl;
-        //     // cout << "number of variables is " << sp.variables.getSize() << endl;
         } catch (IloException& e) {
             cout << "e" << endl;
             cout << "Exception caught in ConDecomp_LaPSO_Connector::solveSubproblemCplex()" << endl;
@@ -391,7 +403,6 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     
     // end the cplex enviroment to free up memory
     cplex.end();
-
     // solve the subproblem as a LP and get the statistics
     IloModel relax(*sp.envPtr);
     relax.add(sp.model);
@@ -403,7 +414,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
     // get the best dual bound
     bool solve_relaxed_status = cplex_relaxed.solve();
-    // if a feasible LP solution can't be found
+    // if optimal LP solution can't be found
     if (cplex_relaxed.getCplexStatus() != IloCplex::Status::Optimal) {
         cout << "Failed to find optimal LP Solution" << endl;
         subproblem_statistics_ptr->subproblem_lp_found.push_back(false);
@@ -419,13 +430,11 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
 
      //capture the lp runtime in cpu seconds
     subproblem_statistics_ptr->lp_times.push_back(cplex_relaxed.getTime());
-    
+    solve_time_remaining -= cplex_relaxed.getTime();
     // end the LP relaxed environment to free up memory
     cplex_relaxed.end();
-    
     // remove the obj_fn from the model object
     sp.model.remove(obj_fn);    
-
     return ret_val;
 }
 
@@ -434,8 +443,6 @@ void ConDecomp_LaPSO_Connector::addConstLagMult(ConDecomp_LaPSO_Connector_Soluti
 {   
     // lb = cx + \lambda(b-Ax) = (c- \lambda * A)x + \lambda * b 
     // lb = s.rc * s.x + s.dual* b
-    
-    // double lb = 0;
     
     // for each dual variable, add to lower bound dual * rhs
     for (int dual_idx = 0; dual_idx < s.dual.size(); dual_idx++) {
@@ -479,10 +486,8 @@ void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_Connector_Sol
 // solveSubproblem updates both solution viol and LB
 Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
 {
-
     ++nsolves;
     ConDecomp_LaPSO_Connector_Solution& s(static_cast<ConDecomp_LaPSO_Connector_Solution&>(p_));
-
     //reset previous primal sol
     s.x = 0;
     // reset lower bound
@@ -490,18 +495,49 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     int subproblem_solve_error = 0;
     // for each subproblem, feed in new objective function, solve and update x and lower bound for
     // the solution object
-    for (auto& subproblem : MS) {
-        int subproblem_status = solveSubproblemCplex(subproblem, s);
+    // sort subproblems based on variable size, solving the small ones first and larger ones later. The largest problem will be proportional
+    // to the number of variables or the time remaining, whichever is larger
+    std::sort(cplex_subproblems.begin(), cplex_subproblems.end());
+    int number_of_subproblems = cplex_subproblems.size();
+    double solve_time_remaining = total_solve_time_lim;
+    if (debug_printing){
+        cout << "total solve time initially is " << total_solve_time_lim << endl;
+        cout << "total num var squared is " << cplex_subproblem_sum_var_squared << endl;
+    }
+    for (int sp_idx = 0; sp_idx< number_of_subproblems; ++sp_idx) 
+    {
+        if (debug_printing){
+            cout << "number of variables in subproblem to be solved is " << cplex_subproblems[sp_idx].num_subproblem_vars << endl;
+        }
+        double allocated_subproblem_solve_time = 0;
+        if (sp_idx < number_of_subproblems - 1){
+            // assign a proportion of the total solve time proportional to the square of the number of variables in the subproblem
+            allocated_subproblem_solve_time = (static_cast<double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) / static_cast<double>(cplex_subproblem_sum_var_squared)) * total_solve_time_lim;
+            cplex_subproblems[sp_idx].setSubproblemRunTime(allocated_subproblem_solve_time);
+        }
+        // for the last and largest subproblem, give all of the remaining solve time 
+        else{
+            allocated_subproblem_solve_time = solve_time_remaining;
+            if (debug_printing){
+                double original_subproblem_solve_time = (static_cast<double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) / static_cast<double>(cplex_subproblem_sum_var_squared)) * total_solve_time_lim;
+                cout << "solving last subproblem, solve time allocated is " << allocated_subproblem_solve_time 
+                << ". If subproblem solve time was proportional to variable size, it would've been " << original_subproblem_solve_time
+                << endl;
+            }
+            cplex_subproblems[sp_idx].setSubproblemRunTime(allocated_subproblem_solve_time);
+        }
+        int subproblem_status = solveSubproblemCplex(cplex_subproblems[sp_idx], s, solve_time_remaining);
         if (subproblem_status == -1) {
             subproblem_solve_error = 1;
         }
     }
 
+    // if subproblem solve was successful, update the violation vector 
     if (subproblem_solve_error == 0){
         updateParticleViol(s);
     }
     
-    // to calculate the remaining lower bound, add in lamba*RHS constants
+    // to calculate the true lower bound, add in lamba*RHS constants
     addConstLagMult(s);
 
     if (debug_printing == true) {
@@ -538,7 +574,7 @@ Status ConDecomp_LaPSO_Connector::updateBest(Solution& p_)
 
 void ConDecomp_LaPSO_Connector::endCplexEnvs()
 {
-    for (auto& subproblem : MS) {
+    for (auto& subproblem : cplex_subproblems) {
         if (subproblem.envPtr != nullptr) {
             if ((*(subproblem.envPtr)).getImpl() != nullptr) {
                 (*(subproblem.envPtr)).end();

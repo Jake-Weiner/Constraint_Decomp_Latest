@@ -46,6 +46,7 @@ public:
         
     CPLEX_MIP_Subproblem(){};
     int num_subproblem_vars;
+    
     unordered_map<int, int> subproblemVarIdx_to_originalVarIdx;
     unordered_map<int, int> originalVarIdx_to_subproblemVarIdx;
     IloEnv* envPtr;
@@ -60,17 +61,23 @@ public:
         subproblem_idx = index;
     }
 
-    void setSubproblemVarProp(double prop){
-        subproblem_var_prop = prop;
+    void setSubproblemRunTime(double runtime){
+        total_solve_time = runtime;
     }
 
-    double getSubproblemVarProp() const{
-        return subproblem_var_prop;
+    double getSubproblemRunTime() const{
+        return total_solve_time;
+    }
+
+    // < operator overloading for sorting purposes
+    bool operator< (const CPLEX_MIP_Subproblem& other) const
+    {
+        return (num_subproblem_vars < other.num_subproblem_vars);
     }
 
 private:
     int subproblem_idx;
-    double subproblem_var_prop;
+    double total_solve_time;
 };
 
 class ConDecomp_LaPSO_Connector_Solution : public LaPSO::Solution {
@@ -111,10 +118,11 @@ public:
 private:
     void addConstLagMult(ConDecomp_LaPSO_Connector_Solution& s);
     void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);
-    vector<CPLEX_MIP_Subproblem> MS;
+    vector<CPLEX_MIP_Subproblem> cplex_subproblems;
+    int cplex_subproblem_sum_var_squared;
     void initSubproblems(const vector<Partition_Struct>& ps, const int& num_var);
     void initOriginalCosts();
-    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s);
+    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining);
     bool debug_printing;
     void populateDualIdxToOrigIdxMap(const vector<int>& con_relax_vector);
     MIP_Problem OP;
