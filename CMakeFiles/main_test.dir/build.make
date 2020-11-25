@@ -200,18 +200,18 @@ CMakeFiles/main_test.dir/src/ParamAdapter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/ParamAdapter.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/ParamAdapter.cpp -o CMakeFiles/main_test.dir/src/ParamAdapter.cpp.s
 
-CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o: CMakeFiles/main_test.dir/flags.make
-CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o: src/LaPSOHandler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LaPSOHandler.cpp
+CMakeFiles/main_test.dir/src/LRHandler.cpp.o: CMakeFiles/main_test.dir/flags.make
+CMakeFiles/main_test.dir/src/LRHandler.cpp.o: src/LRHandler.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/main_test.dir/src/LRHandler.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/LRHandler.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LRHandler.cpp
 
-CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LaPSOHandler.cpp > CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.i
+CMakeFiles/main_test.dir/src/LRHandler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/LRHandler.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LRHandler.cpp > CMakeFiles/main_test.dir/src/LRHandler.cpp.i
 
-CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LaPSOHandler.cpp -o CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.s
+CMakeFiles/main_test.dir/src/LRHandler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/LRHandler.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/LRHandler.cpp -o CMakeFiles/main_test.dir/src/LRHandler.cpp.s
 
 CMakeFiles/main_test.dir/src/Param.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/Param.cpp.o: src/Param.cpp
@@ -408,7 +408,7 @@ main_test_OBJECTS = \
 "CMakeFiles/main_test.dir/src/main.cpp.o" \
 "CMakeFiles/main_test.dir/src/Writer.cpp.o" \
 "CMakeFiles/main_test.dir/src/ParamAdapter.cpp.o" \
-"CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o" \
+"CMakeFiles/main_test.dir/src/LRHandler.cpp.o" \
 "CMakeFiles/main_test.dir/src/Param.cpp.o" \
 "CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o" \
 "CMakeFiles/main_test.dir/src/anyoption.cpp.o" \
@@ -438,7 +438,7 @@ main_test: CMakeFiles/main_test.dir/src/Problem_Adapter.cpp.o
 main_test: CMakeFiles/main_test.dir/src/main.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Writer.cpp.o
 main_test: CMakeFiles/main_test.dir/src/ParamAdapter.cpp.o
-main_test: CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o
+main_test: CMakeFiles/main_test.dir/src/LRHandler.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Param.cpp.o
 main_test: CMakeFiles/main_test.dir/src/MIP_Problem_CPLEX_Solver.cpp.o
 main_test: CMakeFiles/main_test.dir/src/anyoption.cpp.o

@@ -7,6 +7,8 @@
 #include "Hypergraph.h"
 #include "MIP_Problem.h"
 #include <boost/functional/hash.hpp>
+#include "LaPSO.hpp"
+#include "ConDecomp_LaPSO_Connector.h"
 
 using std::string;
 using std::vector;
@@ -74,6 +76,11 @@ struct CPLEX_Return_struct{
     vector<int> basic_variable_idxs;
     vector<double> dual_vals;
 };
+
+
+LaPSO::LaPSORequirements generateLaPSORequirements(std::shared_ptr<ConDecomp_LaPSO_Connector>& CLC_ptr, MIP_Problem& MP
+, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, const int& num_con_relaxed);
+  
 
 struct Common_Statistical_Measures{
     

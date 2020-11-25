@@ -5,7 +5,7 @@
 #include "Decomposition_Statistics.h"
 #include "GreedyDecompCreator.h"
 #include "Hypergraph.h"
-#include "LaPSOHandler.h"
+#include "LRHandler.h"
 #include "MIPProblemProbe.h"
 #include "MIP_Fileparser.h"
 #include "MIP_Problem_CPLEX_Solver.h"
@@ -97,9 +97,9 @@ using namespace pagmo;
 // }
 
 void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, mainParam::Param& para, 
-    ParamAdapter& PA, const vector<int>& con_relax_vector,
+    ParamAdapter& PA, vector<int>& con_relax_vector,
     const LaPSOOutputFilenames& LOF, int decomposition_idx,
-    const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, bool set_initial_dual_values = false,
+    const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, vector<int>& basic_variables_in_lp, bool set_initial_dual_values = false,
     bool capture_statistics = false)
 {
     // calculate number of constraints relaxed and
@@ -136,64 +136,58 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
         MP.printConstraints();
         MP.printVariables();
     }
-    ConDecomp_LaPSO_Connector CLC(MP, ps, con_relax_vector, debug_printing, total_LR_time_lim, ss_ptr);
+
+    
     // based on the partitioned structures, calculate variable/constraint information.
-    CLC.maxsolves = LR_iter_limit;
-    CLC.nsolves = 0;
+    
     if (capture_statistics){
         for (int partition_idx = 0; partition_idx < ps.size(); ++partition_idx) {
             ss_ptr->generateBlockStatistics(ps[partition_idx], MPP);
         }
     }
-    // get the indices of the different constraint types
-    LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConEqualBounds(), MP.getConLesserBounds(), MP.getConGreaterBounds()};
-    // set up the initial requirements for LaPSO initialisation
-    LaPSO::LaPSORequirements LR = {};
-    // convert the indices of the original mip problem to the relaxed problem for constraint types
-    LR.cti = CLC.convertOriginalConstraintTypeIndicies(original_constraint_indices);
-    LR.nVar = HG.getNumNodes();
-    LR.nConstr = num_con_relaxed;
-    LR.best_ub = para.set_ub;
-    LR.benchmark_ub_flag = false;
-    // LR.subproblem_time_lim = 
-    // assign the dual values from the original problem (LP) as initial values in the relaxed problem
-    LR.intial_dual_value_pairs = CLC.convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
-    LR.set_initial_dual_values = set_initial_dual_values;
 
+    // store the connector requirements
+    ConnectorRequirements CR = {&MP, &ps, &con_relax_vector, &basic_variables_in_lp, debug_printing, total_LR_time_lim, ss_ptr};
+
+    // initialise the LR Handler
+    LRHandler LRH;
+    // create the LaPSO connector
+
+    LRH.initConnector(CR);
+    // create the parameter requirments to set up LaPSO
+    std::shared_ptr<ConDecomp_LaPSO_Connector> CLC_ptr = LRH.getCLCPointer();
+    LaPSO::LaPSORequirements LR = generateLaPSORequirements(CLC_ptr, MP, original_intial_dual_value_pairs, num_con_relaxed);
+    // initialise the LaPSO solver
     // Create the LaPSO Handler object which controls LaPSO process
     cout << "Setting up LaPSO Handler" << endl;
-    LaPSOHandler LH(argc, argv, LR);
+    LRH.initLaPSOSolver(argc,argv,LR);
     // solve Lagrangian Relaxation
     cout << "solving Lagrangian Relaxation" << endl;
-    LH.solve(CLC);
+    LRH.solve();
 
     if(PA.get_run_MIP_Duals_testing_flag()){
         // get the initial dual indicie values to see where the discrepancy arrises from
-        LaPSO::IncorrectInitialDualIndices IIDI = LH.getIncorrectInitialDualIndicies();
+        LaPSO::IncorrectInitialDualIndices IIDI = LRH.getIncorrectInitialDualIndicies();
         // print out dual index
         // print out dual index as original index
         // print out constraint of that original index
         cout << "for the dual variables with lower bound problems " << endl;
         for (auto& lower_bound_pair :  IIDI.lower_bound_errors){
             cout << "Dual index is " << lower_bound_pair.first << endl;
-            int original_idx = CLC.getOriginalIdxFromDual(lower_bound_pair.first);
+            int original_idx = CLC_ptr->getOriginalIdxFromDual(lower_bound_pair.first);
             cout << "Original index is " << original_idx << endl;
             MP.getConstraint(original_idx).printInfo();
         }
 
     }
-    
-
     // get the bounds and solve times for the Lagrangian Relaxation process
-    std::tuple<double,double> LaPSO_outputs = LH.getLaPSOOutputs();
+    std::tuple<double,double> LaPSO_outputs = LRH.getLaPSOOutputs();
     std::shared_ptr<LROutputs> lro_ptr = std::make_shared<LROutputs>(decomposition_idx, get<0>(LaPSO_outputs), get<1>(LaPSO_outputs));
     if (capture_statistics){
         w.writeRawSubproblemStatistics(LOF, ss_ptr);
         w.writeLROutputs(LOF, lro_ptr); 
     }
-    // explicity end CPLEX enviromments 
-    CLC.endCplexEnvs();
-    // output subproblem statistics
+   
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)
@@ -470,7 +464,6 @@ int main(int argc, const char** argv)
 
     // run NSGA if desired
     if (PA.get_run_nsga_decomp_flag() == true) {
-
         Problem_Adapter ProblemAdapter;
         // write out to a file the different decompositions found
         bool print_objectives = false;
@@ -643,7 +636,9 @@ int main(int argc, const char** argv)
                 }
                 
                 bool capture_statistics = true;
-                solveLapso(argc, argv, MP, MPP, HG, para, PA, relaxed_constraints_int, LOF, decomposition_idx, dual_values_from_LP, set_initial_dual_values, capture_statistics);
+            
+                solveLapso(argc, argv, MP, MPP, HG, para, PA, relaxed_constraints_int, LOF
+                , decomposition_idx, dual_values_from_LP, MIP_results.basic_variable_idxs, set_initial_dual_values, capture_statistics);
                 ++decomposition_idx;
             }
         }

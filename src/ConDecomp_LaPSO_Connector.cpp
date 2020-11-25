@@ -23,17 +23,18 @@ using namespace boost;
 using namespace std;
 using Decomposition_Statistics::Subproblems;
 
-ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions,
-    const vector<int>& con_vec, const bool printing, const double& total_solve_time, 
-    std::shared_ptr<Subproblems> subproblem_statistics_ptr) : total_solve_time_lim(total_solve_time)
+ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(ConnectorRequirements& CR)
 {
-    this->OP = original_problem;
-    this->debug_printing = printing;
+    maxsolves = 1;
+    total_solve_time_lim = CR.total_LR_time_lim;
+    nsolves = 0;
+    OP_ptr = CR.MP_ptr;
+    debug_printing = CR.debug_printing;
     initOriginalCosts();
-    populateDualIdxToOrigIdxMap(con_vec);
+    populateDualIdxToOrigIdxMap(*CR.con_relax_vector);
     cplex_subproblem_sum_var_squared = 0;
-    initSubproblems(partitions, original_problem.getNumVariables());
-    this->subproblem_statistics_ptr = subproblem_statistics_ptr;
+    initSubproblems(*CR.ps, OP_ptr->getNumVariables());
+    subproblem_statistics_ptr = CR.ss_ptr;
 }
 
 void ConDecomp_LaPSO_Connector::initOriginalCosts()
@@ -41,8 +42,8 @@ void ConDecomp_LaPSO_Connector::initOriginalCosts()
     if (debug_printing){
         cout << "Initialisiing Original Costs" << endl;
     }
-    original_costs.resize(OP.getNumVariables(), 0);
-    for (auto& objective_term : OP.objective_fn) {
+    original_costs.resize(OP_ptr->getNumVariables(), 0);
+    for (auto& objective_term : OP_ptr->objective_fn) {
         int var_idx = objective_term.first;
         double var_coeff = objective_term.second;
         if (debug_printing){
@@ -148,7 +149,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
         // add all variables in partition to subproblem model
         vector<Variable> var_in_partition;
         for (const auto& var_idx : partition.node_idxs) {
-            var_in_partition.push_back(OP.getVariable(var_idx));
+            var_in_partition.push_back(OP_ptr->getVariable(var_idx));
         }
 
         int subproblem_var_idx = 0;
@@ -198,7 +199,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             vector<Constraint> subproblem_constraints;
             if (!partition.edge_idxs.empty()) {
                 for (auto& constraint_idx : partition.edge_idxs) {
-                    subproblem_constraints.push_back(OP.constraints[constraint_idx]);
+                    subproblem_constraints.push_back(OP_ptr->constraints[constraint_idx]);
                 }
                 if (debug_printing){
                     cout << "For subproblem " << subproblem_idx << " Constaints are: " << endl;
@@ -270,7 +271,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
     for (int dual_idx = 0; dual_idx < s.dual.size(); ++dual_idx){
         // get original constraint idx from dual index
         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
-        Constraint con = OP.constraints[original_constraint_idx];
+        Constraint con = OP_ptr->constraints[original_constraint_idx];
         if (debug_printing){
             cout << "for dual idx = " << dual_idx << endl;
         }
@@ -313,7 +314,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         int original_var_idx = sp.subproblemVarIdx_to_originalVarIdx[0];
         double var_reduced_cost = s.rc[original_var_idx];
         
-        Variable var = OP.getVariable(original_var_idx);
+        Variable var = OP_ptr->getVariable(original_var_idx);
 
         double upper_bound = var.getUB();
         double lower_bound = var.getLB();
@@ -339,7 +340,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         //     for (int dual_idx = 0; dual_idx < s.dual.size(); ++dual_idx){
         //         // get original constraint idx from dual index
         //         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
-        //         Constraint con = OP.constraints[original_constraint_idx];
+        //         Constraint con = OP_ptr->constraints[original_constraint_idx];
             
         //         // con terms are pair<var_idx, var_coeff>
         //         for (auto& con_term : con.getConTerms()) {
@@ -432,7 +433,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
         try {
             IloNum val = cplex.getValue(sp.variables[i]);
-            Variable_Type vt = OP.variables[orig_idx].getVarType();
+            Variable_Type vt = OP_ptr->variables[orig_idx].getVarType();
             if (vt == Int || vt == Bin) {
                 // in case of rounding errors, add in slight perturbation and then convert to int to round down
                 int x_val = (int)(val + 0.1);
@@ -493,7 +494,7 @@ void ConDecomp_LaPSO_Connector::addConstLagMult(ConDecomp_LaPSO_Connector_Soluti
     for (int dual_idx = 0; dual_idx < s.dual.size(); dual_idx++) {
         //get RHS for the constraint
         int constraint_orig_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
-        double constraint_bound = OP.constraints[constraint_orig_idx].getRHS();
+        double constraint_bound = OP_ptr->constraints[constraint_orig_idx].getRHS();
         s.lb += (s.dual[dual_idx] * constraint_bound);
         if (debug_printing){
             cout << "for nsolves " << nsolves << " dual[" << dual_idx << "] is: " << s.dual[dual_idx] << endl;
@@ -513,7 +514,7 @@ void ConDecomp_LaPSO_Connector::updateParticleViol(ConDecomp_LaPSO_Connector_Sol
     for (std::pair<int, int> element : dual_idx_to_orig_constraint_idx_map){
         int dual_constraint_idx = element.first;
         int original_constraint_idx = element.second;
-        Constraint con = OP.constraints[original_constraint_idx];
+        Constraint con = OP_ptr->constraints[original_constraint_idx];
         double constraint_bound = con.getRHS();
         //calculate constraint value
         double constraint_value = 0;

@@ -393,6 +393,33 @@ src/Hypergraph.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Hypergraph.cpp.s
 .PHONY : src/Hypergraph.cpp.s
 
+src/LRHandler.o: src/LRHandler.cpp.o
+
+.PHONY : src/LRHandler.o
+
+# target to build an object file
+src/LRHandler.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LRHandler.cpp.o
+.PHONY : src/LRHandler.cpp.o
+
+src/LRHandler.i: src/LRHandler.cpp.i
+
+.PHONY : src/LRHandler.i
+
+# target to preprocess a source file
+src/LRHandler.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LRHandler.cpp.i
+.PHONY : src/LRHandler.cpp.i
+
+src/LRHandler.s: src/LRHandler.cpp.s
+
+.PHONY : src/LRHandler.s
+
+# target to generate assembly for a file
+src/LRHandler.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LRHandler.cpp.s
+.PHONY : src/LRHandler.cpp.s
+
 src/LaPSO.o: src/LaPSO.cpp.o
 
 .PHONY : src/LaPSO.o
@@ -419,33 +446,6 @@ src/LaPSO.s: src/LaPSO.cpp.s
 src/LaPSO.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSO.cpp.s
 .PHONY : src/LaPSO.cpp.s
-
-src/LaPSOHandler.o: src/LaPSOHandler.cpp.o
-
-.PHONY : src/LaPSOHandler.o
-
-# target to build an object file
-src/LaPSOHandler.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.o
-.PHONY : src/LaPSOHandler.cpp.o
-
-src/LaPSOHandler.i: src/LaPSOHandler.cpp.i
-
-.PHONY : src/LaPSOHandler.i
-
-# target to preprocess a source file
-src/LaPSOHandler.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.i
-.PHONY : src/LaPSOHandler.cpp.i
-
-src/LaPSOHandler.s: src/LaPSOHandler.cpp.s
-
-.PHONY : src/LaPSOHandler.s
-
-# target to generate assembly for a file
-src/LaPSOHandler.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSOHandler.cpp.s
-.PHONY : src/LaPSOHandler.cpp.s
 
 src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
 
@@ -864,12 +864,12 @@ help:
 	@echo "... src/Hypergraph.o"
 	@echo "... src/Hypergraph.i"
 	@echo "... src/Hypergraph.s"
+	@echo "... src/LRHandler.o"
+	@echo "... src/LRHandler.i"
+	@echo "... src/LRHandler.s"
 	@echo "... src/LaPSO.o"
 	@echo "... src/LaPSO.i"
 	@echo "... src/LaPSO.s"
-	@echo "... src/LaPSOHandler.o"
-	@echo "... src/LaPSOHandler.i"
-	@echo "... src/LaPSOHandler.s"
 	@echo "... src/MIPProblemProbe.o"
 	@echo "... src/MIPProblemProbe.i"
 	@echo "... src/MIPProblemProbe.s"

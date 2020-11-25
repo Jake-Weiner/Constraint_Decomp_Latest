@@ -17,6 +17,8 @@
 
 using namespace LaPSO;
 using namespace std;
+
+using namespace LaPSO;
 using Decomposition_Statistics::Subproblems;
 
 class IloSmartPointer { 
@@ -91,15 +93,26 @@ public:
 
 // this is the general method class which implements solve, reduced costs, heursistic for this particular
 // constraint relaxation problem
+
+
+struct ConnectorRequirements{
+    MIP_Problem* MP_ptr;
+    std::vector<Partition_Struct>* ps; 
+    std::vector<int>* con_relax_vector;
+    std::vector<int>* basic_variables_in_lp;
+    bool debug_printing;
+    double total_LR_time_lim;
+    std::shared_ptr<Subproblems> ss_ptr;
+};
+
+
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 public:
-    ConDecomp_LaPSO_Connector(MIP_Problem& original_problem, const vector<Partition_Struct>& partitions, const vector<int>& con_vec
-    ,const bool printing, const double& total_solve_time_lim, 
-    std::shared_ptr<Subproblems> subproblem_statistics_ptr);
+    ConDecomp_LaPSO_Connector(ConnectorRequirements& CR);
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
-    ~ConDecomp_LaPSO_Connector(){};
+    ~ConDecomp_LaPSO_Connector(){endCplexEnvs();};
 
     Status reducedCost(Solution& s);
     Status solveSubproblem(Solution& s);
@@ -125,11 +138,11 @@ private:
     int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining);
     bool debug_printing;
     void populateDualIdxToOrigIdxMap(const vector<int>& con_relax_vector);
-    MIP_Problem OP;
+    MIP_Problem* OP_ptr;
     DblVec original_costs;
     double total_solve_time_lim;
-    unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
-    unordered_map<int, int> orig_constraint_idx_to_dual_idx_map;
+    std::unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
+    std::unordered_map<int, int> orig_constraint_idx_to_dual_idx_map;
     std::shared_ptr<Subproblems> subproblem_statistics_ptr;
 };
 

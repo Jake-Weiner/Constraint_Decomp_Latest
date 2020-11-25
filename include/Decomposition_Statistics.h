@@ -11,9 +11,6 @@ namespace Decomposition_Statistics {
 
 class Subproblems {
 
-  
-
-
     public:
         Subproblems(int decomposition_idx) : decomposition_idx(decomposition_idx){};
         ~Subproblems(){};
