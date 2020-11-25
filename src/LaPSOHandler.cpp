@@ -3,9 +3,7 @@
 
 
 LaPSOHandler::LaPSOHandler(int& argc, const char** argv, LaPSO::LaPSORequirements& lr){
-
     initSolver(argc, argv, lr);
-
 }
 
 void LaPSOHandler::initSolver(int& argc, const char** argv,LaPSO::LaPSORequirements& lr){

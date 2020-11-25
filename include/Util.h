@@ -70,7 +70,8 @@ struct RelaxedConstraintsRawDataFilenames{
 struct CPLEX_Return_struct{
     double bound;
     double obj_val;
-    double solve_time;
+    double solve_time; 
+    vector<int> basic_variable_idxs;
     vector<double> dual_vals;
 };
 

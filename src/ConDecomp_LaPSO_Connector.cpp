@@ -285,9 +285,18 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
                 cout << "s.dual[" << dual_idx << "] = " << s.dual[dual_idx] << endl;
                 cout << "-1 * var_coeff = " << (-1 * var_coeff) << endl;
             }
+
             s.rc[var_idx] += s.dual[dual_idx] * (-1 * var_coeff);
         }
     }
+
+    //reset the reduced costs to the original costs
+    for (int i = 0; i < s.rc.size(); i++) {
+        if (abs(s.rc[i]) < 0.0000000000001){
+            s.rc[i] = 0;
+        }
+    }
+
     return OK;
 }
 
@@ -319,8 +328,31 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
 
-        cout << "In single var sp, rc is "<< var_reduced_cost << " and x = " << s.x[original_var_idx] << endl;
-        
+        // if (original_var_idx == 401){
+
+            cout << "In single var sp, rc is "<< var_reduced_cost << " and x_" << original_var_idx << " = " << s.x[original_var_idx] << endl;
+        //     cout << "original costs for x_" << original_var_idx << " was " << original_costs[original_var_idx] << endl;
+        //     cout << "dual val for associated with ";
+
+        //     // get the dual val associated with the variable. I think it might be 0 but has a rounding error.
+        //     // for each dual variable, update the associated costs for each variable involved
+        //     for (int dual_idx = 0; dual_idx < s.dual.size(); ++dual_idx){
+        //         // get original constraint idx from dual index
+        //         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
+        //         Constraint con = OP.constraints[original_constraint_idx];
+            
+        //         // con terms are pair<var_idx, var_coeff>
+        //         for (auto& con_term : con.getConTerms()) {
+        //             int var_idx = con_term.first;
+        //             double var_coeff = con_term.second;
+        //             if (var_idx == original_var_idx){
+        //                 cout << "dual idx: " << dual_idx << " = " << s.dual[dual_idx] << " for x_" << original_var_idx << endl;
+        //             }
+                
+        //         }
+        //     }
+        // }
+
         // capture the solution statistics
         subproblem_statistics_ptr->mip_times.push_back(0);
         subproblem_statistics_ptr->lp_times.push_back(0);

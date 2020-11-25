@@ -108,7 +108,14 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
             dual_vals[con_idx] = dual_values_arr[con_idx];
         }
     }
-   
+
+    // store the basic variable indexes
+    vector<int> basic_variable_idxs;
+    for (int var_idx = 0; var_idx < MP.getNumVariables(); ++var_idx){
+        if (cplex.getBasisStatus(subproblem_vars_cplex[var_idx]) ==  IloCplex::BasisStatus::Basic){
+            basic_variable_idxs.push_back(var_idx);
+        }
+    }
     //default bound and integer solution values
     double best_primal_sol = -999999999999999999;
     // double best_bound_val = 0;
@@ -132,8 +139,8 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
     //this value matches the optimal solution value. If a MIP optimization is terminated before optimality has been proven, 
     //this value is computed for a minimization (maximization) problem as the minimum (maximum) objective function value of 
     //all remaining unexplored nodes.
-
-    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_primal_sol, solve_time, dual_vals};
+    
+    CPLEX_Return_struct CPLEX_results = {best_bound_val, best_primal_sol, solve_time,basic_variable_idxs, dual_vals};
     return CPLEX_results;
 }
 
