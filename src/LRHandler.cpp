@@ -6,6 +6,7 @@
 
 void LRHandler::initLaPSOSolver(int& argc, const char** argv, LaPSO::LaPSORequirements& lr){
     //initialise the solver_ptr 
+    solver_ptr = std::make_shared<LaPSO::Problem>(lr.nVar,lr.nConstr);
     solver_ptr->initProblem(lr); // 
     // override default parameter values with command line arguments
     solver_ptr->param.parse(argc, argv);
@@ -17,8 +18,8 @@ void LRHandler::initLaPSOSolver(int& argc, const char** argv, LaPSO::LaPSORequir
 void LRHandler::initConnector(ConnectorRequirements& CR){
     
     // *CR.MP_ptr, *CR.ps, *CR.con_relax_vector, CR.debug_printing, CR.total_LR_time_lim, CR.ss_ptr
-    CLC_ptr = std::make_shared<ConDecomp_LaPSO_Connector>(*CR.MP_ptr, *CR.ps, *CR.con_relax_vector, CR.debug_printing, CR.total_LR_time_lim, CR.ss_ptr);
-    Connector_initialised = false;
+    CLC_ptr = std::make_shared<ConDecomp_LaPSO_Connector>(CR);
+    Connector_initialised = true;
 }
 
 
@@ -52,4 +53,22 @@ void LRHandler::solve(){
 std::tuple<double,double> LRHandler::getLaPSOOutputs(){
 
     return std::make_tuple(solver_ptr->best_solution->lb, solver_ptr->cpuTime());
+}
+
+LaPSO::LaPSORequirements generateLaPSORequirements(std::shared_ptr<ConDecomp_LaPSO_Connector>& CLC_ptr, MIP_Problem& MP
+, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, const int& num_con_relaxed){
+
+    // get the indices of the different constraint types
+    LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConEqualBounds(), MP.getConLesserBounds(), MP.getConGreaterBounds()};
+    // set up the initial requirements for LaPSO initialisation
+    LaPSO::LaPSORequirements LR = {};
+    // convert the indices of the original mip problem to the relaxed problem for constraint types
+    LR.cti = CLC_ptr->convertOriginalConstraintTypeIndicies(original_constraint_indices);
+    LR.nVar = MP.getNumVariables();
+    LR.nConstr = num_con_relaxed;
+    // assign the dual values from the original problem (LP) as initial values in the relaxed problem
+    LR.intial_dual_value_pairs = CLC_ptr->convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
+    LR.set_initial_dual_values = true;
+    return LR;
+
 }

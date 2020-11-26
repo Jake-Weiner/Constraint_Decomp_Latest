@@ -143,7 +143,9 @@ Problem::Problem(int nVar, int nConstr)
 }
 
 void Problem::initProblem(const LaPSORequirements& LR)
-{
+{   
+    printf("Number of vars is %d\n", LR.nVar);
+    printf("Blank \n");
     psize = LR.nVar;
     printf("Number of vars is %d", psize);
     dsize = LR.nConstr;

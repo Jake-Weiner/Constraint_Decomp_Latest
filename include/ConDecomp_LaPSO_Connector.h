@@ -7,8 +7,8 @@
 #include "MIP_Problem.h"
 #include "Subproblem_Constraints.h"
 #include "Variable.h"
-#include "Util.h"
 #include "Decomposition_Statistics.h"
+#include "Util.h"
 #include <ilcplex/ilocplex.h>
 #include <map>
 #include <string>
@@ -17,8 +17,6 @@
 
 using namespace LaPSO;
 using namespace std;
-
-using namespace LaPSO;
 using Decomposition_Statistics::Subproblems;
 
 class IloSmartPointer { 
@@ -112,7 +110,10 @@ public:
     //void solve_ConDecomp_LaPSO_Connector(ConDecomp_LaPSO_ConnectorParticle &s);
     int nsolves; // number of times ConDecomp_LaPSO_Connector was solved
     int maxsolves; // abort after this many
-    ~ConDecomp_LaPSO_Connector(){endCplexEnvs();};
+    ~ConDecomp_LaPSO_Connector(){
+        cout << "ConDecomp Destructor Called" << endl;
+        endCplexEnvs();
+    };
 
     Status reducedCost(Solution& s);
     Status solveSubproblem(Solution& s);

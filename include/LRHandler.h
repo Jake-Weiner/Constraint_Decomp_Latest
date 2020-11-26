@@ -13,8 +13,10 @@ using std::vector;
 class LRHandler{
 
     public:
-        LRHandler();
-        ~LRHandler();
+        LRHandler(){};
+        ~LRHandler(){
+            cout << "LR Handler Destructor called " << endl;
+        };
         void initLaPSOSolver(int& argc, const char** argv, LaPSO::LaPSORequirements& LR);
         // initialise the LaPSO connector which is used in conjunction with the LaPSO solver_ptr
         void initConnector(ConnectorRequirements& CR);
@@ -50,10 +52,8 @@ class LRHandler{
 
 };
 
-
-// struct LaPSORequirements{
-
-// };
+LaPSO::LaPSORequirements generateLaPSORequirements(std::shared_ptr<ConDecomp_LaPSO_Connector>& CLC_ptr, MIP_Problem& MP
+,const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, const int& num_con_relaxed);
 
 
 #endif

@@ -148,11 +148,9 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
 
     // store the connector requirements
     ConnectorRequirements CR = {&MP, &ps, &con_relax_vector, &basic_variables_in_lp, debug_printing, total_LR_time_lim, ss_ptr};
-
     // initialise the LR Handler
     LRHandler LRH;
     // create the LaPSO connector
-
     LRH.initConnector(CR);
     // create the parameter requirments to set up LaPSO
     std::shared_ptr<ConDecomp_LaPSO_Connector> CLC_ptr = LRH.getCLCPointer();
@@ -164,7 +162,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     // solve Lagrangian Relaxation
     cout << "solving Lagrangian Relaxation" << endl;
     LRH.solve();
-
     if(PA.get_run_MIP_Duals_testing_flag()){
         // get the initial dual indicie values to see where the discrepancy arrises from
         LaPSO::IncorrectInitialDualIndices IIDI = LRH.getIncorrectInitialDualIndicies();
@@ -178,7 +175,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
             cout << "Original index is " << original_idx << endl;
             MP.getConstraint(original_idx).printInfo();
         }
-
     }
     // get the bounds and solve times for the Lagrangian Relaxation process
     std::tuple<double,double> LaPSO_outputs = LRH.getLaPSOOutputs();
@@ -187,7 +183,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
         w.writeRawSubproblemStatistics(LOF, ss_ptr);
         w.writeLROutputs(LOF, lro_ptr); 
     }
-   
 }
 
 void writeConVecToFile(const vector<double>& con_vec, string filename)

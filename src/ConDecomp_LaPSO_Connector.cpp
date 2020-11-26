@@ -293,7 +293,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 
     //reset the reduced costs to the original costs
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.0000000000001){
+        if (abs(s.rc[i]) < 0.0000000001){
             s.rc[i] = 0;
         }
     }

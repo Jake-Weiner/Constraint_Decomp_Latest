@@ -129,6 +129,8 @@ namespace LaPSO {
         double subproblem_time_lim = 150;
     };
 
+
+
     /** integer vector with  some extra convenience methods */
     class IntVec : public std::vector<int> {
     public:
@@ -339,6 +341,7 @@ namespace LaPSO {
         Problem(int nVar, int nConstr);
         ~Problem()
         { 
+            std::cout << "LaPSO Problem Destructor Called " << std::endl;
         }
 
         
@@ -459,6 +462,7 @@ namespace LaPSO {
                 to lead to more feasible solutions (using hooks.fixConstraint) */
     };
 };
+
 #endif
 /* Stuff for emacs/xemacs to conform to the "Visual Studio formatting standard"
  * Local Variables:

@@ -9,25 +9,6 @@ using std::endl;
 using std::ifstream;
 
 
-LaPSO::LaPSORequirements generateLaPSORequirements(std::shared_ptr<ConDecomp_LaPSO_Connector>& CLC_ptr, MIP_Problem& MP
-, const std::vector<initial_dual_value_pair>& original_intial_dual_value_pairs, const int& num_con_relaxed){
-
-    // get the indices of the different constraint types
-    LaPSO::constraint_type_indicies original_constraint_indices = {MP.getConEqualBounds(), MP.getConLesserBounds(), MP.getConGreaterBounds()};
-    // set up the initial requirements for LaPSO initialisation
-    LaPSO::LaPSORequirements LR = {};
-    // convert the indices of the original mip problem to the relaxed problem for constraint types
-    LR.cti = CLC_ptr->convertOriginalConstraintTypeIndicies(original_constraint_indices);
-    LR.nVar = MP.getNumVariables();
-    LR.nConstr = num_con_relaxed;
-    // assign the dual values from the original problem (LP) as initial values in the relaxed problem
-    LR.intial_dual_value_pairs = CLC_ptr->convertOriginalConstraintInitialDualIndicies(original_intial_dual_value_pairs);
-    LR.set_initial_dual_values = true;
-    return LR;
- 
-}
-
-
 bool fileExists(const std::string& filename)
 {
     ifstream f(filename.c_str());
