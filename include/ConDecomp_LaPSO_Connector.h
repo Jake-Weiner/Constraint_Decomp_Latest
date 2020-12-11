@@ -97,7 +97,7 @@ struct ConnectorRequirements{
     MIP_Problem* MP_ptr;
     std::vector<Partition_Struct>* ps; 
     std::vector<int>* con_relax_vector;
-    std::vector<int>* basic_variables_in_lp;
+    // std::vector<int>* basic_variables_in_lp;
     bool debug_printing;
     double total_LR_time_lim;
     std::shared_ptr<Subproblems> ss_ptr;

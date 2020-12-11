@@ -43,10 +43,13 @@ class MIPProblemProbe{
         int getNumMIPInt();
         int getNumMIPNonZero();
         
-        // min/max
+        // Instance min/max's
         std::pair<double,double> getObjExtremes();
-        // min/max
         std::pair<double,double> getRHSExtremes();
+        std::pair<double,double> getRHSLHSExtremes();
+        std::pair<double,double> getSumObjExtremes();
+        std::pair<double,double> getSumAbsObjExtremes();
+     
 
 
     private:

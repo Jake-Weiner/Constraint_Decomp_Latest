@@ -353,7 +353,6 @@ std::pair<double,double> MIPProblemProbe::getObjExtremes(){
 
 // return min/max
 std::pair<double,double> MIPProblemProbe::getRHSExtremes(){
-
     double min = std::numeric_limits<double>::max();
     double max = -std::numeric_limits<double>::max();
     for (auto& constraint : MP_ptr->constraints){
@@ -367,6 +366,53 @@ std::pair<double,double> MIPProblemProbe::getRHSExtremes(){
     }
     return std::make_pair(min,max);
 }
+
+// return min/max
+std::pair<double,double> MIPProblemProbe::getRHSLHSExtremes(){
+    double min = std::numeric_limits<double>::max();
+    double max = -std::numeric_limits<double>::max();
+    for (auto& constraint : MP_ptr->constraints){
+        double con_rhslhs = constraint.getLargestRHSLHSRatio();
+        cout << "RHS LHS ratio is " << con_rhslhs << endl;
+        if (con_rhslhs < min){
+            min = con_rhslhs;
+        }
+        if(con_rhslhs > max)
+            max = con_rhslhs;
+    }
+    return std::make_pair(min,max);
+}
+
+// return min/max
+std::pair<double,double> MIPProblemProbe::getSumObjExtremes(){
+    double min = std::numeric_limits<double>::max();
+    double max = -std::numeric_limits<double>::max();
+    for (auto& constraint : MP_ptr->constraints){
+        double con_sumobj =  MP_ptr->getConstraintSumObj(constraint.getConIdx(), false);
+        if (con_sumobj < min){
+            min = con_sumobj;
+        }
+        if(con_sumobj > max)
+            max = con_sumobj;
+    }
+    return std::make_pair(min,max);
+}
+
+// return min/max
+std::pair<double,double> MIPProblemProbe::getSumAbsObjExtremes(){
+    double min = std::numeric_limits<double>::max();
+    double max = -std::numeric_limits<double>::max();
+    for (auto& constraint : MP_ptr->constraints){
+        double con_sumobj =  MP_ptr->getConstraintSumObj(constraint.getConIdx(), true);
+        if (con_sumobj < min){
+            min = con_sumobj;
+        }
+        if(con_sumobj > max)
+            max = con_sumobj;
+    }
+    return std::make_pair(min,max);
+}
+
 
 
 int MIPProblemProbe::getNumMIPVar(){

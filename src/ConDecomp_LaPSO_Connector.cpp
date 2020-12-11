@@ -100,7 +100,6 @@ LaPSO::constraint_type_indicies ConDecomp_LaPSO_Connector::convertOriginalConstr
 // convert the original constraint indicies with dual values to the dual indicies
 vector<initial_dual_value_pair> ConDecomp_LaPSO_Connector::convertOriginalConstraintInitialDualIndicies(const std::vector<initial_dual_value_pair>& original_initial_dual_pairs){
     vector<initial_dual_value_pair> dual_index_pair_values;
-    // for each 
     for (const auto& dual_constraint_pair : original_initial_dual_pairs){
         int orig_constraint_idx = dual_constraint_pair.first;
         // check if the original constraint maps to a dual constraint (i.e is one of the relaxed constraints)
@@ -201,7 +200,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                 for (auto& constraint_idx : partition.edge_idxs) {
                     subproblem_constraints.push_back(OP_ptr->constraints[constraint_idx]);
                 }
-                if (debug_printing){
+                if (debug_printing && subproblem_idx==1){
                     cout << "For subproblem " << subproblem_idx << " Constaints are: " << endl;
                 }
                 //add constraints to the model
@@ -212,27 +211,29 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                         double var_coeff = term.second;
                         int var_idx_in_sp = sp.originalVarIdx_to_subproblemVarIdx[var_idx];
                         constraint_exp += (var_coeff * subproblem_vars_cplex[var_idx_in_sp]);
-                        if (debug_printing){
+                        if (debug_printing && subproblem_idx==1){
                             cout << var_coeff << "x_" << var_idx <<  " ";
                         }
                     }
+
+                    
                     if (constraint.getBoundType() == Greater) {
                         IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, INF);
                         subproblem_constraints_cplex.add(r1);
-                        if (debug_printing){
-                            cout << ">= " << constraint.getRHS();
+                        if (debug_printing && subproblem_idx==1){
+                            cout << ">= " << constraint.getRHS() << endl;
                         }
                     } else if (constraint.getBoundType() == Equal) {
                         IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, constraint.getRHS());
                         subproblem_constraints_cplex.add(r1);
-                        if (debug_printing){
-                            cout << "== " << constraint.getRHS();
+                        if (debug_printing && subproblem_idx==1){
+                            cout << "== " << constraint.getRHS() << endl;
                         }
                     } else if (constraint.getBoundType() == Less) {
                         IloRange r1(*(sp.envPtr), -INF, constraint_exp, constraint.getRHS());
                         subproblem_constraints_cplex.add(r1);
-                        if (debug_printing){
-                            cout << "<= " << constraint.getRHS();
+                        if (debug_printing && subproblem_idx==1){
+                            cout << "<= " << constraint.getRHS() << endl;
                         }
                     }
                 }
@@ -244,7 +245,7 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             // tally sum of square of number of variables
 
             cplex_subproblem_sum_var_squared += pow(subproblem_var_idx,2);
-            if (debug_printing){
+            if (debug_printing && subproblem_idx==1){
                 cout << "subproblem var idx is " << subproblem_var_idx << endl;
                 cout << "cplex_subproblem_sum_var_squared is " << cplex_subproblem_sum_var_squared << endl;
                 cout << "subprovlem var idx squared is " << pow(subproblem_var_idx,2) << endl;
@@ -291,9 +292,9 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
         }
     }
 
-    //reset the reduced costs to the original costs
+    // correct any rounding errors that may arise from using dual values from LP solution
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.0000000001){
+        if (abs(s.rc[i]) < 0.000000000001){
             s.rc[i] = 0;
         }
     }
@@ -328,10 +329,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         }
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
-
-        // if (original_var_idx == 401){
-
-            cout << "In single var sp, rc is "<< var_reduced_cost << " and x_" << original_var_idx << " = " << s.x[original_var_idx] << endl;
+        // cout << "In single var sp, rc is "<< var_reduced_cost << " and x_" << original_var_idx << " = " << s.x[original_var_idx] << endl;
         //     cout << "original costs for x_" << original_var_idx << " was " << original_costs[original_var_idx] << endl;
         //     cout << "dual val for associated with ";
 
@@ -355,12 +353,13 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         // }
 
         // capture the solution statistics
-        subproblem_statistics_ptr->mip_times.push_back(0);
-        subproblem_statistics_ptr->lp_times.push_back(0);
-        subproblem_statistics_ptr->mip_obj_solutions.push_back(var_reduced_cost * s.x[original_var_idx]);
-        subproblem_statistics_ptr->lp_obj_solutions.push_back(var_reduced_cost * s.x[original_var_idx]);
-        subproblem_statistics_ptr->subproblem_optimality_success.push_back(true);
-        subproblem_statistics_ptr->subproblem_attempted[sp.getSubproblemIdx()] = true;
+        int subproblem_idx = sp.getSubproblemIdx();
+        subproblem_statistics_ptr->mip_times[subproblem_idx] = 0;
+        subproblem_statistics_ptr->lp_times[subproblem_idx] = 0;
+        subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = var_reduced_cost * s.x[original_var_idx];
+        subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = var_reduced_cost * s.x[original_var_idx];
+        subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
+        subproblem_statistics_ptr->subproblem_attempted[subproblem_idx] = true;
         return 0;
     }
 
@@ -396,16 +395,16 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
     double mip_subproblem_solve_time = (0.9 * sp.getSubproblemRunTime()) + 0.1;
     double lp_subproblem_solve_time = (0.1 * sp.getSubproblemRunTime()) + 0.1;
-    cout << "MIP subproblem solve time is " << mip_subproblem_solve_time << endl;
     // subproblem time should be based on var prop
     if (debug_printing){
         cout << "MIP subproblem solve time is " << mip_subproblem_solve_time << endl;
     }
     cplex.setParam(IloCplex::TiLim, mip_subproblem_solve_time);
-    cplex.setParam(IloCplex::EpGap, 0.99);
+    cplex.setParam(IloCplex::EpGap, 0.01);
     cplex.setOut((*(sp.envPtr)).getNullStream());
     bool feasible_sol = cplex.solve();
-    subproblem_statistics_ptr->subproblem_attempted[sp.getSubproblemIdx()] = true;
+    int subproblem_idx = sp.getSubproblemIdx();
+    subproblem_statistics_ptr->subproblem_attempted[subproblem_idx] = true;
     // if MIP subproblem is not solved to optimality or at least within optimality tolerance
     if (cplex.getCplexStatus() != IloCplex::Status::Optimal && cplex.getCplexStatus() != IloCplex::Status::OptimalTol){
         cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
@@ -413,20 +412,24 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         // get the best bound if optimal solution not available        
         s.lb += cplex.getBestObjValue();
         // flag subproblem as having non optimal solution
-        subproblem_statistics_ptr->subproblem_optimality_success.push_back(false);
-        subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getBestObjValue());
+        subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = false;
+        subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getBestObjValue();
         ret_val = -1;
     }
     else{
         s.lb += cplex.getObjValue();
-        cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
-        subproblem_statistics_ptr->subproblem_optimality_success.push_back(true);
+        if (debug_printing){
+            cout << "MIP Solution status is " << cplex.getCplexStatus() << endl;
+            cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
+            cout << "MIP subproblem value is " <<  cplex.getBestObjValue() << endl;
+        }
+        subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
         // capture the mip solution quality
-        subproblem_statistics_ptr->mip_obj_solutions.push_back(cplex.getObjValue());
+        subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getObjValue();
     }
 
     //capture the mip runtime in cpu seconds
-    subproblem_statistics_ptr->mip_times.push_back(cplex.getTime());
+    subproblem_statistics_ptr->mip_times[subproblem_idx] = cplex.getTime();
     solve_time_remaining -= cplex.getTime();
         // capture the variable values from the subproblem solutions
     for (int i = 0; i < sp.variables.getSize(); ++i) {
@@ -463,19 +466,19 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     // if optimal LP solution can't be found
     if (cplex_relaxed.getCplexStatus() != IloCplex::Status::Optimal) {
         cout << "Failed to find optimal LP Solution" << endl;
-        subproblem_statistics_ptr->subproblem_lp_found.push_back(false);
+        subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = false;
         // get dual solution if lp solution is not available?
-        subproblem_statistics_ptr->lp_obj_solutions.push_back(cplex_relaxed.getBestObjValue());
+        subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getBestObjValue();
         ret_val = -1;
     }
     else{
-        subproblem_statistics_ptr->subproblem_lp_found.push_back(true);
+        subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = true;
         // capture the lp solution quality
-        subproblem_statistics_ptr->lp_obj_solutions.push_back(cplex_relaxed.getObjValue());
+        subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getObjValue();
     }
 
      //capture the lp runtime in cpu seconds
-    subproblem_statistics_ptr->lp_times.push_back(cplex_relaxed.getTime());
+    subproblem_statistics_ptr->lp_times[subproblem_idx] = cplex_relaxed.getTime();
     solve_time_remaining -= cplex_relaxed.getTime();
     // end the LP relaxed environment to free up memory
     cplex_relaxed.end();
@@ -489,20 +492,23 @@ void ConDecomp_LaPSO_Connector::addConstLagMult(ConDecomp_LaPSO_Connector_Soluti
 {   
     // lb = cx + \lambda(b-Ax) = (c- \lambda * A)x + \lambda * b 
     // lb = s.rc * s.x + s.dual* b
-    
+    double const_mult_add = 0.0;
     // for each dual variable, add to lower bound dual * rhs
     for (int dual_idx = 0; dual_idx < s.dual.size(); dual_idx++) {
         //get RHS for the constraint
         int constraint_orig_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
         double constraint_bound = OP_ptr->constraints[constraint_orig_idx].getRHS();
         s.lb += (s.dual[dual_idx] * constraint_bound);
+        const_mult_add += (s.dual[dual_idx] * constraint_bound);
         if (debug_printing){
             cout << "for nsolves " << nsolves << " dual[" << dual_idx << "] is: " << s.dual[dual_idx] << endl;
+            cout << "for nsolves " << nsolves << " constraint bound[" << dual_idx << "] is: " << constraint_bound << endl;
         }
     }
     if (debug_printing){
         cout << "solution lower bound is " << s.lb << endl;
     }
+    cout << "Constants added to lower bound is " << const_mult_add << endl;
 }
 
 // loop through all constraints, calculate Ax, viol = bound - Ax
@@ -586,6 +592,19 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     // to calculate the true lower bound, add in lamba*RHS constants
     addConstLagMult(s);
 
+    if (s.lb > 25148940.56){
+        // for (int i = 0; i < s.rc.size(); i++) {
+        //     if (abs(s.rc[i]) < 0.001){
+        //         cout << "rc[" << i << "]" << " = " << s.rc[i] << endl;
+        //         cout << "x[" << i << "]" << " = " << s.x[i] << endl;
+        //     }
+            
+        // }
+
+        cout << "x[207] = " << s.x[207] << endl;
+        cout << "x[208] = " << s.x[208] << endl;
+
+    }
     // if (debug_printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "
                   << " lb=" << s.lb << " ub=" << s.ub

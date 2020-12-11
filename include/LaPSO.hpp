@@ -27,6 +27,7 @@
 
 typedef std::pair<int,double> initial_dual_value_pair;
 
+
 namespace LaPSO {
 
     // indicies of dual variables with incorrect initial bounds detected

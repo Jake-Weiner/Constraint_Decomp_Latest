@@ -352,7 +352,7 @@ void MIP_Fileparser::createConstraint(const vector<string>& line_split,unsigned 
         constraint.setBoundType(Less);
     }
     MP.addConstraint(constraint);
-    current_constraint_number++;
+    ++current_constraint_number;
 }
 
 void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const string& variable_name)
@@ -392,7 +392,7 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
             } catch (...) {
                 cout << "error with " << line_split[i + 1] << endl;
             }
-            pair<int, double> objective_term = { obj_var_idx, obj_var_coeff };
+            pair<int, double> objective_term = {obj_var_idx, obj_var_coeff};
             MP.addObjTerm(objective_term);
         }
     }

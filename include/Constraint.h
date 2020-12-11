@@ -19,6 +19,8 @@ public:
     Constraint(int constraint_idx)
     {
         this->constraint_idx = constraint_idx;
+        // default rhs value is 0 if rhs is not included
+        RHS = 0.0;
     };
     ~Constraint(){};
     void addVarIdx(const int& var_idx_to_add)
@@ -98,9 +100,9 @@ public:
     {
         double largest_ratio = 0.00;
         for (auto& var_coeff : variable_coeffs) {
-           
+            cout << "RHS is " << RHS << endl;
+            cout << "var coeff is " << var_coeff << endl;
             if (std::abs(RHS / var_coeff) > largest_ratio) {
-            
                 largest_ratio = std::abs(RHS / var_coeff);
             }
         }
@@ -119,6 +121,7 @@ public:
 
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };
+    //default bound is 0
     double RHS;
     int constraint_idx;
     bound_type bt;
@@ -126,5 +129,6 @@ private:
     vector<int> variable_indxs;
     vector<double> variable_coeffs;
 };
+
 
 #endif

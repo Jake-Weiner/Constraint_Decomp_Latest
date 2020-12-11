@@ -14,6 +14,7 @@ class Subproblems {
     public:
         Subproblems(int decomposition_idx) : decomposition_idx(decomposition_idx){};
         ~Subproblems(){};
+        void resize(const int& number_subproblems);
         void generateBlockStatistics(const Partition_Struct& ps, MIPProblemProbe& MPP);
 
         int decomposition_idx;       
@@ -184,6 +185,9 @@ class Instance{
 
         void getObjExtremes(MIPProblemProbe& MPP);
         void getRHSExtremes(MIPProblemProbe& MPP);
+        void getRHSLHSExtremes(MIPProblemProbe& MPP);
+        void getSumObjExtremes(MIPProblemProbe& MPP);
+        void getSumAbsObjExtremes(MIPProblemProbe& MPP);
 
         int num_var;
         int num_const;
@@ -196,6 +200,14 @@ class Instance{
         double max_rhs;
         double min_rhs;
         double best_known_bound;
+        double min_sum_obj;
+        double max_sum_obj;
+        double min_sum_abs_obj;
+        double max_sum_abs_obj;
+        double min_rhslhs;
+        double max_rhslhs;
+
+
 };
 
 class LROutputs{

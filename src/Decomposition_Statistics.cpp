@@ -6,6 +6,19 @@ using Decomposition_Statistics::RelaxedConstraints;
 using Decomposition_Statistics::Instance;
 
 
+// because the order of subproblems is changed for solving purposes, size the neccesary vectors beforehand
+// so they cant be accessed via the subproblems index
+void Subproblems::resize(const int& number_subproblems){
+    mip_times.resize(number_subproblems);
+    lp_times.resize(number_subproblems);
+    mip_obj_solutions.resize(number_subproblems);
+    lp_obj_solutions.resize(number_subproblems);
+    subproblem_optimality_success.resize(number_subproblems);
+    subproblem_lp_found.resize(number_subproblems);
+    subproblem_attempted.resize(number_subproblems, false);
+}
+
+
 void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblemProbe& MPP){
     int number_of_variables_in_subproblem = ps.getNumNodes();
     int number_of_constraints_in_subproblem = ps.getNumEdges();
@@ -21,10 +34,6 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
 
     //constraint statistics
     total_constr_props.push_back(static_cast<double>(number_of_constraints_in_subproblem) / static_cast<double>(MPP.getNumMIPConst()));
-
-    // get block equality/inequality constraint props
-    double equality_const_prop = MPP.getEqualityConstraintProp(ps.edge_idxs);
-    equality_props.push_back(equality_const_prop);
     
     // sum of obj coefficients of variables in each block
     double sum_block_obj_val = MPP.getBlockSumObjs(ps.node_idxs, false);
@@ -39,6 +48,9 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
     block_obj_val_ranges.push_back(obj_val_range);
 
     if (number_of_constraints_in_subproblem != 0){
+        // get block equality/inequality constraint props
+        double equality_const_prop = MPP.getEqualityConstraintProp(ps.edge_idxs);
+        equality_props.push_back(equality_const_prop);
         // averages of rhs coefficients in each block
         average_block_RHS_values.push_back(MPP.getAverageBlockRHS(ps.edge_idxs, false));
         average_block_absRHS_values.push_back(MPP.getAverageBlockRHS(ps.edge_idxs, true));
@@ -98,42 +110,56 @@ void RelaxedConstraints::generate_statistics(MIPProblemProbe& MPP, const vector<
     // tuple<double, double, double, double> relaxed_const_RHS_stats = getStatistics(RHS_values);
     // average_RHS = get<2>(relaxed_const_RHS_stats);
     // stddev_RHS = get<3>(relaxed_const_RHS_stats);
-
 }
 
 void Instance::getObjExtremes(MIPProblemProbe& MPP){
 
     //min max pair
-
     std::pair<double,double> obj_minmax = MPP.getObjExtremes();
     min_obj = obj_minmax.first;
     max_obj = obj_minmax.second;
-    
-        
-
 }
 
 void Instance::getRHSExtremes(MIPProblemProbe& MPP){
-
     //min max pair
     std::pair<double,double> rhs_minmax = MPP.getRHSExtremes();
     min_rhs = rhs_minmax.first;
     max_rhs = rhs_minmax.second;
 }
 
+void Instance::getRHSLHSExtremes(MIPProblemProbe& MPP){
+    //min max pair
+    std::pair<double,double> rhslhs_minmax = MPP.getRHSLHSExtremes();
+    min_rhslhs = rhslhs_minmax.first;
+    max_rhslhs = rhslhs_minmax.second;
+}
+ 
+void Instance::getSumObjExtremes(MIPProblemProbe& MPP){
+    //min max pair
+    std::pair<double,double> sum_obj_minmax = MPP.getSumObjExtremes();
+    min_sum_obj = sum_obj_minmax.first;
+    max_sum_obj = sum_obj_minmax.second;
+}
+
+void Instance::getSumAbsObjExtremes(MIPProblemProbe& MPP){
+    //min max pair
+    std::pair<double,double> sum_abs_obj_minmax = MPP.getSumAbsObjExtremes();
+    min_sum_abs_obj = sum_abs_obj_minmax.first;
+    max_sum_abs_obj = sum_abs_obj_minmax.second;
+}
 
 // generate instance statistics
  void Instance::populateInstanceStatistics(MIPProblemProbe& MPP){
-
+    
     getObjExtremes(MPP);
     getRHSExtremes(MPP);
-
+    getRHSLHSExtremes(MPP);
+    getSumObjExtremes(MPP);
+    getSumAbsObjExtremes(MPP);
     num_var = MPP.getNumMIPVar();
     num_const = MPP.getNumMIPConst();
     num_bin = MPP.getNumMIPBin();
     num_cont = MPP.getNumMIPCont();
     num_int = MPP.getNumMIPInt();
     num_non_zeroes = MPP.getNumMIPNonZero();
-    
-
- }
+}

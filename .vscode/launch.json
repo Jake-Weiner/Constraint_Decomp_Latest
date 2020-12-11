@@ -14,9 +14,10 @@
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
             ,"--total_LR_time_lim=330"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/cost266_combined_decomps_redund_duplicates_removed.csv"   
-            ,"--run_MIP_Duals_testing=true" 
-            ,"--run_gather_statistics=true"],
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/cost_problem_example.csv"
+            ,"--subproblem_statistics_folder=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/cost266-UUE.mps/Subproblem"
+            ,"--run_gather_statistics=true"
+            ,"--debug_printing=true"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

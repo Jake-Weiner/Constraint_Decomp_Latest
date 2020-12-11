@@ -144,10 +144,7 @@ Problem::Problem(int nVar, int nConstr)
 
 void Problem::initProblem(const LaPSORequirements& LR)
 {   
-    printf("Number of vars is %d\n", LR.nVar);
-    printf("Blank \n");
     psize = LR.nVar;
-    printf("Number of vars is %d", psize);
     dsize = LR.nConstr;
     dualLB.resize(dsize, -INF);
     dualUB.resize(dsize, INF);
@@ -158,13 +155,10 @@ void Problem::initProblem(const LaPSORequirements& LR)
     _wallTime = omp_get_wtime();
 
     // create the best_solution and current_solution Solution objects
-
     current_solution = std::make_shared<Solution>(psize, dsize);
     printf("Number of vars in current solution rc %d", current_solution->rc.size());
     // // current_solution = new Solution(psize, dsize);
     best_solution = std::make_shared<Solution>(psize, dsize);
-    
-
     best_solution->isFeasible = false;
     best_solution->dual.resize(LR.nConstr, 0.0);
     best_solution->x.resize(psize, 0);

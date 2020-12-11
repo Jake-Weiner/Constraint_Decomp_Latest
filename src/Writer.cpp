@@ -276,7 +276,9 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
             outfile << "No. Var" << "," << "No. Constr"<< "," << "No. Bin" 
             << "," << "No. Int" << "," << "No. Cont" << "," << "No. Non-Zeroes" 
             << "," << "Min Obj Term" << "," << "Max Obj Term" << "," << "Min Rhs"
-            << "," << "Max Rhs"
+            << "," << "Max Rhs" << "," << "Max RHSLHS" << "," << "Min RHSLHS"
+            << "," << "Max Sum Obj" << "," << "Min Sum Obj" << "," << "Max Sum Abs Obj"
+            << "," << "Min Sum Abs Obj"
             << endl;
         }
         else{
@@ -292,6 +294,8 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
         outfile << ins_ptr->num_var << "," << ins_ptr->num_const << "," << ins_ptr->num_bin
         << "," << ins_ptr->num_int << "," << ins_ptr->num_cont << "," << ins_ptr->num_non_zeroes << "," << ins_ptr->min_obj
         << "," << ins_ptr->max_obj << "," << ins_ptr->min_rhs << "," << ins_ptr->max_rhs
+        << "," << ins_ptr->max_rhslhs << "," << ins_ptr->min_rhslhs << "," << ins_ptr->max_sum_obj
+        << "," << ins_ptr->min_sum_obj << "," << ins_ptr->max_sum_abs_obj << "," << ins_ptr->min_sum_abs_obj
         << endl;
     }
   
@@ -340,7 +344,7 @@ void Writer::writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LRO
         std::ofstream outfile;
         outfile.open(output_filename);
         if (outfile) {
-            outfile << "Decomposition Index" << "LR Bound" << "," << "LR Solve Time(s)"
+            outfile << "Decomposition Index" << "," << "LR Bound" << "," << "LR Solve Time(s)"
             << endl;
         }
         else{
