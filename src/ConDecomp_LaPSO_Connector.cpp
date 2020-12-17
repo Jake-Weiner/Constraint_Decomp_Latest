@@ -294,7 +294,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 
     // correct any rounding errors that may arise from using dual values from LP solution
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.000000000001){
+        if (abs(s.rc[i]) < 0.000000001){
             s.rc[i] = 0;
         }
     }

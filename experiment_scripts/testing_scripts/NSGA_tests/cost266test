@@ -15,6 +15,7 @@ fi
 $executable_path/main_test --input_root_folder=$INPUT_DIR \
 --printLevel=3 \
 --nsga_decomp_output_file=$nsga_output_folder/$instance_name \
+--nsga_pareto_optimal_output_file=$nsga_output_folder/${instance_name}_pareto_opt_sols \
 --input_instance_name=$instance_name \
---nsga_pop_size=32 --nsga_gen=5 \
+--nsga_pop_size=32 --nsga_gen=1000 \
 --run_nsga_decomp=true

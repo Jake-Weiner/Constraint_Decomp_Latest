@@ -5,9 +5,11 @@
 #include <iostream>
 #include <limits>
 
+
 using namespace std;
 
 enum Variable_Type{Bin, Cont, Int};
+
 
 class Variable{
 
@@ -20,11 +22,11 @@ class Variable{
             this->variable_idx = variable_idx;
             this->vt = vt;
             if (vt == Int){
-                upper_bound = std::numeric_limits<int>::max();
+                upper_bound = default_int_upper_bound;
                 lower_bound = 0;
             }
             else if(vt == Cont){
-                upper_bound = std::numeric_limits<double>::max();
+                upper_bound = default_double_upper_bound;
                 lower_bound = 0.00;
             }
         }
@@ -40,6 +42,24 @@ class Variable{
 
         void setUB(double bound){
             upper_bound = bound;
+        }
+
+        void setMaxUB(){
+            if(vt == Int){
+                upper_bound = default_int_upper_bound;
+            }
+            else if (vt == Cont){
+                upper_bound = default_double_upper_bound;
+            }
+        }
+
+        void setMinLB(){
+            if(vt == Int){
+                lower_bound = -default_int_upper_bound;
+            }
+            else if (vt == Cont){
+                lower_bound = -default_double_upper_bound;
+            }
         }
 
         double getUB() const {
@@ -75,12 +95,16 @@ class Variable{
         void setVarType(Variable_Type vt){
             this->vt = vt;
         }
+
+        
         
     private:
         double upper_bound = 1;
         double lower_bound = 0;
         int variable_idx;
         Variable_Type vt; 
+        static const int default_int_upper_bound = 2147483647;
+        static constexpr double default_double_upper_bound = 10000000000;
 };
 
 #endif

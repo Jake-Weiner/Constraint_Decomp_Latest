@@ -11,6 +11,7 @@
 #include <pagmo/archipelago.hpp>
 #include <pagmo/problem.hpp>
 #include <pagmo/utils/multi_objective.hpp>
+#include <pagmo/utils/hypervolume.hpp>
 #include <vector>
 #include <algorithm>
 #include "Util.h"
@@ -24,7 +25,7 @@ class Problem_Adapter{
         Problem_Adapter();
 
         void createNSGADecomps(Hypergraph& HG, const int& num_gen, 
-        const string& output_file, const int& pop_size, const bool& print_objective);
+        const string& output_file, const string& pareto_optimal_sols, const int& pop_size, const bool& print_objective);
 };
 
 #endif

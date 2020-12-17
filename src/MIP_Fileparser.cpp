@@ -465,17 +465,16 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
                     MP.variables[var_idx].setUB(bound);
                     MP.variables[var_idx].setLB(bound);
                 } else if (bt == Free) {
+                    // set lower bound. By default upper bound is already max
                     if (MP.variables[var_idx].getVarType() == Int) {
-                        MP.variables[var_idx].setLB(-std::numeric_limits<int>::max());
-                    } else if (MP.variables[var_idx].getVarType() == Cont) {
-                        MP.variables[var_idx].setLB(-std::numeric_limits<double>::max());
+                        MP.variables[var_idx].setMinLB();
                     }
                 } else if (bt == FreeNegative) {
                     if (MP.variables[var_idx].getVarType() == Int) {
-                        MP.variables[var_idx].setLB(-std::numeric_limits<int>::max());
+                        MP.variables[var_idx].setMinLB();
                         MP.variables[var_idx].setUB(0);
                     } else if (MP.variables[var_idx].getVarType() == Cont) {
-                        MP.variables[var_idx].setLB(-std::numeric_limits<double>::max());
+                        MP.variables[var_idx].setMinLB();
                         MP.variables[var_idx].setUB(0.00);
                     }
                 }

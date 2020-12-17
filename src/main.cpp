@@ -149,7 +149,7 @@ int main(int argc, const char** argv)
     // Parse in parameters
     mainParam::Param para;
     para.parse(argc, argv);
-
+        
     // Manipulate/transform parameters from char to required values through Adapter
     ParamAdapter PA(para);
     Writer w;
@@ -194,8 +194,8 @@ int main(int argc, const char** argv)
         // solve the Parsed MIP problem
         // use the same runtime as the MPS file
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-
-        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), false);
+        bool solve_as_LP = false;
+        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
         // populate the Mip Parsing Structure with Parsed MIP information
         MPTS.Parsed_bound = MIP_results.bound;
         MPTS.Parsed_obj_val = MIP_results.obj_val;
@@ -270,7 +270,7 @@ int main(int argc, const char** argv)
         Problem_Adapter ProblemAdapter;
         // Decompositions are written to a file as the population is evolved
         bool print_objectives = true;
-        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size, print_objectives);
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file),string(para.nsga_pareto_optimal_output_file), para.nsga_pop_size, print_objectives);
         exit(0);
     }
 
@@ -358,7 +358,8 @@ int main(int argc, const char** argv)
         Problem_Adapter ProblemAdapter;
         // write out to a file the different decompositions found
         bool print_objectives = false;
-        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), para.nsga_pop_size, print_objectives);
+        cout << "pareto opt sol filepath is " << string(para.nsga_pareto_optimal_output_file) << endl;
+        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), string(para.nsga_pareto_optimal_output_file), para.nsga_pop_size, print_objectives);
     }
 
     // Evaluate Decompositions

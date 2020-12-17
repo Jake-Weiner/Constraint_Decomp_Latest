@@ -79,6 +79,7 @@ void Param::parse(int argc, const char** argv)
 
     // decomp output files
     parser.setOption("nsga_decomp_output_file");
+    parser.setOption("nsga_pareto_optimal_output_file");
     parser.setOption("greedy_decomp_output_file");
     
     // debug flags
@@ -172,6 +173,8 @@ void Param::parse(int argc, const char** argv)
     // decomp output files
     if (parser.getValue("nsga_decomp_output_file"))
         nsga_decomp_output_file = parser.getValue("nsga_decomp_output_file");  
+    if (parser.getValue("nsga_pareto_optimal_output_file"))
+        nsga_pareto_optimal_output_file = parser.getValue("nsga_pareto_optimal_output_file");  
     if (parser.getValue("greedy_decomp_output_file"))
         greedy_decomp_output_file = parser.getValue("greedy_decomp_output_file");
     if (parser.getValue("redundant_const_removed_output_file"))

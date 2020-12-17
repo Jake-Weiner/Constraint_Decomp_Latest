@@ -20,11 +20,12 @@ using std::ostream;
 typedef std::pair<unsigned int,unsigned int> pair_int;
 
 void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double con_relaxed, double LSP, bool print_objectives);
+void writeParetoOptimalToFile(const string& outfile_name, const population& pop, const vector<size_t>& pareto_idxs);
 
 Problem_Adapter::Problem_Adapter(){};
 
 void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
-    const string& output_file, const int& pop_size, const bool& print_objectives)
+    const string& output_file, const string& pareto_optimal_sols, const int& pop_size, const bool& print_objectives)
 {
     // vector<individual_information_struct> ris;
     Decomp udp = Decomp(HG.getNumEdges(), HG);
@@ -74,8 +75,16 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
                 writeDecompToFile(outfile, pop.get_x()[pop_idx], pop.get_f()[pop_idx][0], pop.get_f()[pop_idx][1], print_objectives);
             }
             // evolve the population
-            pop = algo.evolve(pop); 
+            pop = algo.evolve(pop);
+            std::vector<size_t> non_dom_sols = pagmo::non_dominated_front_2d(pop.get_f());
+            cout << "printing out non-dominated sol idxs" << endl;
+            for (const auto& non_dom_idx : non_dom_sols){
+                cout << non_dom_idx << " " ;
+            }
+            cout << endl;
+            writeParetoOptimalToFile(pareto_optimal_sols, pop, non_dom_sols);
             ++gen_counter;
+            //pareto optimal convergence... 
         }
         outfile.close();
     }
@@ -86,7 +95,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
 
 // write out NSGA decompositions as the constraint indexes relaxed to the file specified 
 void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double LSP, double con_relaxed, bool print_objectives){
-    
+
     cout << "writing decomp to file" << endl;
     for (int i = 0; i< con_vec.size(); ++i){
         // in case of rounding errors, cast to an int
@@ -99,4 +108,29 @@ void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double 
         outfile << "," << con_relaxed << "," << LSP;
     }
     outfile << endl;
+}
+
+
+void writeParetoOptimalToFile(const string& outfile_name, const population& pop, const vector<size_t>& pareto_idxs){
+    // append to the end of the file
+
+    std::ofstream outfile;
+    outfile.open(outfile_name, std::ofstream::app);
+    cout << "writing pareto optimal sols" << endl;
+    cout << outfile_name << endl;
+    if(outfile){
+        cout << "writing pareto optimal sols" << endl;
+        for (const auto& pop_pareto_idx : pareto_idxs){
+            int pareto_idx_int = static_cast<int>(pop_pareto_idx);
+            for (int i = 0; i< pop.get_x()[pareto_idx_int].size(); ++i){
+        // in case of rounding errors, cast to an int
+                if (static_cast<int>(pop.get_x()[pareto_idx_int][i] + 0.1) == 1){
+                    outfile << i << ",";
+                }
+            }
+            // separate pareto individuals by a space
+            outfile << " ";
+        }
+        outfile << endl;
+    }
 }

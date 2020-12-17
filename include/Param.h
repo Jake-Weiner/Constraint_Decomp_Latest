@@ -81,6 +81,8 @@ struct Param {
     
     // decomposition output files
     const char* nsga_decomp_output_file = "";
+    const char* nsga_pareto_optimal_output_file = "";
+
     const char* greedy_decomp_output_file = "";
 
     const char* con_vec_filename = "";
