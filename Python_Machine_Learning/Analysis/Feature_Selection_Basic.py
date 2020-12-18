@@ -81,7 +81,6 @@ def main():
     print("Regression model score is " + str(reg.score(X_np, Bound_np)))
 
     # use 10 fold cross validated
-
     cv_results = cross_validate(reg, X_np, Bound_np, cv=10)
     sorted(cv_results.keys())
 

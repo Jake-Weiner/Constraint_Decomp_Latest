@@ -28,37 +28,38 @@ def main():
     X_np = X.to_numpy()
     Bound_np = Y['LR Bound'].to_numpy()
 
-    pca = PCA()  # project from 64 to 2 dimensions
+    pca = PCA(2)  # project from 64 to 2 dimensions
     # for component, score in enumerate(pca):
 
     # print(type(pca))
 
 
+    #project now contains X_np represented as first 2 dimensions in PCA
     projected = pca.fit_transform(X_np)
     print(pca.explained_variance_ratio_)
 
-    component_indices = [i for i in range(1,len(pca.explained_variance_ratio_))]
-    pca_explained_variance_ratios = [pca.explained_variance_ratio_[i] for i in range(0,len(pca.explained_variance_ratio_))]
-    pca_fig = plt.figure()
-    pca_ax = pca_fig.add_axes([0, 0, 1, 1])
-    langs = component_indices
-    students =pca_explained_variance_ratios
-    pca_ax.bar(langs, students)
-
-    pca_fig.savefig(output_folder + "/PCA_Scree")
-    print(pca_explained_variance_ratios)
-    print(component_indices)
-    print(projected.shape)
-    # print(pca.explained_variance_)
-    # plt.scatter(projected[:, 0], projected[:, 1],
-    #             c=Bound_np, edgecolor='none', alpha=0.7
-    #             ,cmap=plt.cm.Reds)
-    # plt.xlabel('component 1')
-    # plt.ylabel('component 2')
-    # cbar = plt.colorbar()
-    # cbar.set_label('LR Bound', rotation = 270, labelpad = 20)
-    # output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Machine_Learning_Outputs"
-    # plt.savefig(output_folder + "/PCA_Analysis")
+    # component_indices = [i for i in range(1,len(pca.explained_variance_ratio_))]
+    # pca_explained_variance_ratios = [pca.explained_variance_ratio_[i] for i in range(0,len(pca.explained_variance_ratio_))]
+    # pca_fig = plt.figure()
+    # pca_ax = pca_fig.add_axes([0, 0, 1, 1])
+    # langs = component_indices
+    # students =pca_explained_variance_ratios
+    # pca_ax.bar(langs, students)
+    #
+    # pca_fig.savefig(output_folder + "/PCA_Scree")
+    # print(pca_explained_variance_ratios)
+    # print(component_indices)
+    # print(projected.shape)
+    print(pca.explained_variance_)
+    plt.scatter(projected[:, 0], projected[:, 1],
+                c=Bound_np, edgecolor='none', alpha=0.7
+                ,cmap=plt.cm.Reds)
+    plt.xlabel('component 1')
+    plt.ylabel('component 2')
+    cbar = plt.colorbar()
+    cbar.set_label('LR Bound', rotation = 270, labelpad = 20)
+    output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Machine_Learning_Outputs"
+    plt.savefig(output_folder + "/PCA_Analysis")
 
         # training_data = np.reshape(num_cars + num_ops + num_classes + min_usage + ave_usage + max_usage + std_dev_usage \
         #                    + ave_ops + min_pq + ave_pq + max_pq + std_dev_pq + lcm + std_dev_classes, [14, len(mip_ub)]).T
