@@ -149,7 +149,7 @@ int main(int argc, const char** argv)
     // Parse in parameters
     mainParam::Param para;
     para.parse(argc, argv);
-        
+
     // Manipulate/transform parameters from char to required values through Adapter
     ParamAdapter PA(para);
     Writer w;
