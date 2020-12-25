@@ -373,7 +373,6 @@ std::pair<double,double> MIPProblemProbe::getRHSLHSExtremes(){
     double max = -std::numeric_limits<double>::max();
     for (auto& constraint : MP_ptr->constraints){
         double con_rhslhs = constraint.getLargestRHSLHSRatio();
-        cout << "RHS LHS ratio is " << con_rhslhs << endl;
         if (con_rhslhs < min){
             min = con_rhslhs;
         }
