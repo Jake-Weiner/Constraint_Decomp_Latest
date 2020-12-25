@@ -100,8 +100,6 @@ public:
     {
         double largest_ratio = 0.00;
         for (auto& var_coeff : variable_coeffs) {
-            cout << "RHS is " << RHS << endl;
-            cout << "var coeff is " << var_coeff << endl;
             if (std::abs(RHS / var_coeff) > largest_ratio) {
                 largest_ratio = std::abs(RHS / var_coeff);
             }
