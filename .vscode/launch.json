@@ -9,13 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
-            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics"
-            ,"--input_instance_name=cost266-UUE.mps"
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/network_design"
+            ,"--input_instance_name=germany50-UUM.mps"
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
             ,"--total_LR_time_lim=330"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Input/Unit_Testing/Subproblem_statistics/cost_problem_example.csv"
-            ,"--subproblem_statistics_folder=/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/cost266-UUE.mps/Subproblem"
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/germany50-UUM.mps/decompositions/germany_problem_decomp.csv"
             ,"--run_gather_statistics=true"
             ,"--debug_printing=true"],
             "stopAtEntry": true,

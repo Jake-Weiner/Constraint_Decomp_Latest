@@ -294,7 +294,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 
     // correct any rounding errors that may arise from using dual values from LP solution
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.000000001){
+        if (abs(s.rc[i]) < 0.00000001){
             s.rc[i] = 0;
         }
     }
@@ -405,36 +405,38 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     bool feasible_sol = cplex.solve();
     int subproblem_idx = sp.getSubproblemIdx();
     subproblem_statistics_ptr->subproblem_attempted[subproblem_idx] = true;
-    // if MIP subproblem is not solved to optimality or at least within optimality tolerance
-    if (cplex.getCplexStatus() != IloCplex::Status::Optimal && cplex.getCplexStatus() != IloCplex::Status::OptimalTol){
-        cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
-        // print out the subproblem to see why it can't be solved to optimality
-        // get the best bound if optimal solution not available        
-        s.lb += cplex.getBestObjValue();
-        // flag subproblem as having non optimal solution
-        subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = false;
-        subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getBestObjValue();
-        ret_val = -1;
-    }
-    else{
-        s.lb += cplex.getObjValue();
-        if (debug_printing){
-            cout << "MIP Solution status is " << cplex.getCplexStatus() << endl;
-            cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
-            cout << "MIP subproblem value is " <<  cplex.getBestObjValue() << endl;
+    
+    // try and gather statistics from cplex object. If there is an error, set the LB to inf so the solution can be dicarded
+    try{
+            // if MIP subproblem is not solved to optimality or at least within optimality tolerance
+        if (cplex.getCplexStatus() != IloCplex::Status::Optimal && cplex.getCplexStatus() != IloCplex::Status::OptimalTol){
+            cout << "Failed to find optimal MIP subproblem solution in subpoblem: " << sp.getSubproblemIdx() << endl;
+            // print out the subproblem to see why it can't be solved to optimality
+            // get the best bound if optimal solution not available        
+            s.lb += cplex.getBestObjValue();
+            // flag subproblem as having non optimal solution
+            subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = false;
+            subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getBestObjValue();
+            ret_val = -1;
         }
-        subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
-        // capture the mip solution quality
-        subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getObjValue();
-    }
+        else{
+            s.lb += cplex.getObjValue();
+            if (debug_printing){
+                cout << "MIP Solution status is " << cplex.getCplexStatus() << endl;
+                cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
+                cout << "MIP subproblem value is " <<  cplex.getBestObjValue() << endl;
+            }
+            subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
+            // capture the mip solution quality
+            subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getObjValue();
+        }
 
-    //capture the mip runtime in cpu seconds
-    subproblem_statistics_ptr->mip_times[subproblem_idx] = cplex.getTime();
-    solve_time_remaining -= cplex.getTime();
-        // capture the variable values from the subproblem solutions
-    for (int i = 0; i < sp.variables.getSize(); ++i) {
-        int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
-        try {
+        //capture the mip runtime in cpu seconds
+        subproblem_statistics_ptr->mip_times[subproblem_idx] = cplex.getTime();
+        solve_time_remaining -= cplex.getTime();
+            // capture the variable values from the subproblem solutions
+        for (int i = 0; i < sp.variables.getSize(); ++i) {
+            int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
             IloNum val = cplex.getValue(sp.variables[i]);
             Variable_Type vt = OP_ptr->variables[orig_idx].getVarType();
             if (vt == Int || vt == Bin) {
@@ -444,12 +446,15 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             } else if (vt == Cont) {
                 s.x[orig_idx] = val;
             }
-        } catch (IloException& e) {
-            cout << "e" << endl;
-            cout << "Exception caught in ConDecomp_LaPSO_Connector::solveSubproblemCplex()" << endl;
+  
         }
     }
-    
+    catch (IloException &e){
+        cout << "e" << endl;
+        cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing MIP Solution" << endl;
+        s.lb = std::numeric_limits<double>::max();
+    }
+
     // end the cplex enviroment to free up memory
     cplex.end();
     // solve the subproblem as a LP and get the statistics
@@ -463,23 +468,33 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
     // get the best dual bound
     bool solve_relaxed_status = cplex_relaxed.solve();
-    // if optimal LP solution can't be found
-    if (cplex_relaxed.getCplexStatus() != IloCplex::Status::Optimal) {
-        cout << "Failed to find optimal LP Solution" << endl;
-        subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = false;
-        // get dual solution if lp solution is not available?
-        subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getBestObjValue();
-        ret_val = -1;
-    }
-    else{
-        subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = true;
-        // capture the lp solution quality
-        subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getObjValue();
-    }
+    
+     // try and gather statistics from cplex object. If there is an error, set the LB to inf so the solution can be dicarded
+    try{
+        // if optimal LP solution can't be found
+        if (cplex_relaxed.getCplexStatus() != IloCplex::Status::Optimal) {
+            cout << "Failed to find optimal LP Solution" << endl;
+            subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = false;
+            // get dual solution if lp solution is not available?
+            subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getBestObjValue();
+            ret_val = -1;
+        }
+        else{
+            subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = true;
+            // capture the lp solution quality
+            subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getObjValue();
+        }
 
-     //capture the lp runtime in cpu seconds
-    subproblem_statistics_ptr->lp_times[subproblem_idx] = cplex_relaxed.getTime();
-    solve_time_remaining -= cplex_relaxed.getTime();
+        //capture the lp runtime in cpu seconds
+        subproblem_statistics_ptr->lp_times[subproblem_idx] = cplex_relaxed.getTime();
+        solve_time_remaining -= cplex_relaxed.getTime();
+    }
+    catch (IloException &e){
+        cout << "e" << endl;
+        cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing LP Solution" << endl;
+        s.lb = std::numeric_limits<double>::max();
+    }
+    
     // end the LP relaxed environment to free up memory
     cplex_relaxed.end();
     // remove the obj_fn from the model object
@@ -592,19 +607,6 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     // to calculate the true lower bound, add in lamba*RHS constants
     addConstLagMult(s);
 
-    if (s.lb > 25148940.56){
-        // for (int i = 0; i < s.rc.size(); i++) {
-        //     if (abs(s.rc[i]) < 0.001){
-        //         cout << "rc[" << i << "]" << " = " << s.rc[i] << endl;
-        //         cout << "x[" << i << "]" << " = " << s.x[i] << endl;
-        //     }
-            
-        // }
-
-        cout << "x[207] = " << s.x[207] << endl;
-        cout << "x[208] = " << s.x[208] << endl;
-
-    }
     // if (debug_printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "
                   << " lb=" << s.lb << " ub=" << s.ub
