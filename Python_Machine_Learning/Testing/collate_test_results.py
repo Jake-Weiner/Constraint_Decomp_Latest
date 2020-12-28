@@ -4,9 +4,9 @@ import os
 def main():
 
     # folder of input files to collate
-    input_folder = "/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test2.mps/Subproblem"
+    input_folder = "/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test2.mps/Raw_Data/Subproblem"
     #output location
-    output_file_path = "/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test2.mps/Subproblem_collated.csv"
+    output_file_path = "/home/jake/PhD/Decomposition/Output/testing/subproblem_statistics/test2.mps/Raw_Data/Subproblem_collated.csv"
     # location of csv1
 
     with open(output_file_path, "w") as output_file_stream:

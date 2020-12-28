@@ -2,11 +2,9 @@ import statistics
 import csv
 import os
 
-#list of features which we want to get only average and stddev
-subproblem_ave_stddev = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv", "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv"]
+from pathlib import Path
 
 def calculateStats(data_list):
-
     min_val, max_val, ave, stddev = 0, 0, 0, 0
 
     data_list_float = [float(i) for i in data_list]
@@ -59,17 +57,35 @@ def writeAllStats(input_file, output_file):
 
 def main():
 
-    input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Normalised_Data/Subproblem_Statistics"
-    output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Features_Calculated/Subproblem_Statistics"
-    for filename in subproblem_ave_stddev:
-        writeAveStddev(input_folder + "/" + filename, output_folder + "/" + filename)
-    #every other file in subproblem statistics folder, we want the min, max, ave and stddev
-    for filename in os.listdir(input_folder):
-        if filename not in subproblem_ave_stddev:
-            writeAllStats(input_folder + "/" + filename, output_folder + "/" + filename)
+
+    # list of features which we want to get only average and stddev. Every other
+    # we also want to get min and max
+    subproblem_ave_stddev = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv",
+                             "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv"]
 
 
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+                      ["g200x740.mps", "h50x2450.mps", "h80x6320.mps", "h80x6320d.mps", "k16x240b.mps"],
+                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+                       "snp-10-052-052.mps"]]
 
+    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
+
+    for problem_idx, problem_type in enumerate(problem_types):
+        # create output folders if they don't already exists
+        for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
+            features_calculated_output_path = processed_results_folder + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Subproblem_Statistics"
+            # create output folders if necessary
+            Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
+            normalised_data_input_folder = processed_results_folder + "/" + problem_type + "/" + instance_name + "/Normalised_Data" + "/" + "Subproblem_Statistics"
+
+            for filename in subproblem_ave_stddev:
+                writeAveStddev(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
+
+            for filename in os.listdir(normalised_data_input_folder):
+                if filename not in subproblem_ave_stddev:
+                    writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
 if __name__ == "__main__":
 
     main()

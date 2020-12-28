@@ -16,7 +16,7 @@
             ,"--total_LR_time_lim=330"
             ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/germany50-UUM.mps/decompositions/germany_problem_decomp.csv"
             ,"--run_gather_statistics=true"
-            ,"--debug_printing=true"],
+            ,"--debug_printing=false"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

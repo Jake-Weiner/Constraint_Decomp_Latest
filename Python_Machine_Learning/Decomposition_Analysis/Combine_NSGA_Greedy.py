@@ -4,6 +4,14 @@ from pathlib import Path
 import shutil
 #for each problem type and test instance, combine the different decompositions and count how many different decompositions exist from NSGA and Greedy
 
+def empty_line_test(line):
+
+    ret_val = False
+    if line == "\n":
+        ret_val = True
+
+    return ret_val
+
 def main():
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
@@ -29,14 +37,20 @@ def main():
                     with open(greedy_decomp_file, "r") as input_file1:
                         decomp_count = 0
                         for row in input_file1:
-                            output_file.write(row)
-                            decomp_count += 1
+                            if not empty_line_test(row):
+                                output_file.write(row)
+                                decomp_count += 1
+                            else:
+                                print("empty greedy decomp found")
                         stats_output_fs.write("Greedy, " + str(decomp_count) + "\n")
                     with open(NSGA_decomp_file, "r") as input_file2:
                         decomp_count = 0
                         for row in input_file2:
-                            output_file.write(row)
-                            decomp_count += 1
+                            if not empty_line_test(row):
+                                output_file.write(row)
+                                decomp_count += 1
+                            else:
+                                print("empty NSGA decomp found")
                         stats_output_fs.write("NSGA, " + str(decomp_count) + "\n")
 
 
