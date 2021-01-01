@@ -1,14 +1,28 @@
 #ifndef __MIP_PROBLEM_PROBE__
 #define __MIP_PROBLEM_PROBE__
 
+
 #include "MIP_Problem.h"
 #include "Util.h"
+
+
 #include <vector>
 #include <tuple>
 #include <utility>
 
-class MIPProblemProbe{
+// forward declare decomposition statistics namespace with structs. Otherwise
+// circular dependency occurs
+namespace Decomposition_Statistics{
+    struct SubproblemConstraintStatistics;
+    struct SubproblemVariableStatistics;
+    struct RelaxedConstraintStatistics;
+}
 
+using Decomposition_Statistics::SubproblemConstraintStatistics;
+using Decomposition_Statistics::SubproblemVariableStatistics;
+using Decomposition_Statistics::RelaxedConstraintStatistics;
+
+class MIPProblemProbe{
     public:
         MIPProblemProbe(MIP_Problem* MP_ptr);
         // void populateInstanceStatistics(instance_statistics& is, MIP_Problem& MP);
@@ -18,7 +32,9 @@ class MIPProblemProbe{
         std::vector<double> getConstraintSumObjs(const std::vector<int>& constraint_idxs);
         std::vector<double> getConstraintSumAbsObjs(const std::vector<int>& constraint_idxs);
         std::vector<double> getConstraintRHSVals(const std::vector<int>& constraint_idxs);
-        
+        void getSubproblemConstraintStatistics(SubproblemConstraintStatistics& scs, const std::vector<int>& constraint_idxs);
+        void getSubproblemVariableStatistics(SubproblemVariableStatistics& svs, const std::vector<int>& variable_idxs);
+        void getRelaxedConstraintStatistics(RelaxedConstraintStatistics& rcs, const std::vector<int>& constraint_idxs);
         std::vector<int> getConstraintNonZeroCounts(const std::vector<int>& constraint_idxs);
         double getBlockSumObjs(const std::vector<int>& variable_idxs, const bool& abs);
         // get prop of var types from constraint indices provided
@@ -49,9 +65,7 @@ class MIPProblemProbe{
         std::pair<double,double> getRHSLHSExtremes();
         std::pair<double,double> getSumObjExtremes();
         std::pair<double,double> getSumAbsObjExtremes();
-     
-
-
+    
     private:
 
         int getNumberEqualityConstraintsRelaxed(const vector<double>& con_vec, MIP_Problem& MP);

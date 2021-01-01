@@ -23,15 +23,8 @@ public:
         RHS = 0.0;
     };
     ~Constraint(){};
-    void addVarIdx(const int& var_idx_to_add)
-    {
-        for (auto& var_idx : variable_indxs) {
-            if (var_idx == var_idx_to_add) {
-                return;
-            }
-        }
-        variable_indxs.push_back(var_idx_to_add);
-    };
+    void addVarIdx(const int& var_idx_to_add);
+   
     void addVarCoeff(const int& var_coeff_to_add)
     {
         variable_coeffs.push_back(var_coeff_to_add);
@@ -96,26 +89,8 @@ public:
         return variable_indxs.size();
     }
 
-    double getLargestRHSLHSRatio()
-    {
-        double largest_ratio = 0.00;
-        for (auto& var_coeff : variable_coeffs) {
-            if (std::abs(RHS / var_coeff) > largest_ratio) {
-                largest_ratio = std::abs(RHS / var_coeff);
-            }
-        }
-        return largest_ratio;
-    }
-
-    double getSumRHSLHSRatio()
-    {
-        double sum_RHS_ratio = 0.00;
-        for (auto& var_coeff : variable_coeffs) {
-            sum_RHS_ratio += std::abs(RHS / var_coeff);
-        }
-        return sum_RHS_ratio;
-    }
-
+    double getLargestRHSLHSRatio();
+    double getSumRHSLHSRatio();
 
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };

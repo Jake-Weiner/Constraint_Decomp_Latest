@@ -304,9 +304,22 @@ CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/ConDecomp_LaPSO_Connector.cpp -o CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.s
 
+CMakeFiles/main_test.dir/src/Constraint.cpp.o: CMakeFiles/main_test.dir/flags.make
+CMakeFiles/main_test.dir/src/Constraint.cpp.o: src/Constraint.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/main_test.dir/src/Constraint.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/Constraint.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Constraint.cpp
+
+CMakeFiles/main_test.dir/src/Constraint.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/Constraint.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Constraint.cpp > CMakeFiles/main_test.dir/src/Constraint.cpp.i
+
+CMakeFiles/main_test.dir/src/Constraint.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/Constraint.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Constraint.cpp -o CMakeFiles/main_test.dir/src/Constraint.cpp.s
+
 CMakeFiles/main_test.dir/src/DecompMIP.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/DecompMIP.cpp.o: src/DecompMIP.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/main_test.dir/src/DecompMIP.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/main_test.dir/src/DecompMIP.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/DecompMIP.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/DecompMIP.cpp
 
 CMakeFiles/main_test.dir/src/DecompMIP.cpp.i: cmake_force
@@ -319,7 +332,7 @@ CMakeFiles/main_test.dir/src/DecompMIP.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/Decomp.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/Decomp.cpp.o: src/Decomp.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/main_test.dir/src/Decomp.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/main_test.dir/src/Decomp.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/Decomp.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomp.cpp
 
 CMakeFiles/main_test.dir/src/Decomp.cpp.i: cmake_force
@@ -332,7 +345,7 @@ CMakeFiles/main_test.dir/src/Decomp.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o: src/MIP_to_Hypergraph.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_to_Hypergraph.cpp
 
 CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.i: cmake_force
@@ -345,7 +358,7 @@ CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/Hypergraph.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/Hypergraph.cpp.o: src/Hypergraph.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/main_test.dir/src/Hypergraph.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/main_test.dir/src/Hypergraph.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/Hypergraph.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Hypergraph.cpp
 
 CMakeFiles/main_test.dir/src/Hypergraph.cpp.i: cmake_force
@@ -358,7 +371,7 @@ CMakeFiles/main_test.dir/src/Hypergraph.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o: src/MIP_Fileparser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Fileparser.cpp
 
 CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.i: cmake_force
@@ -371,7 +384,7 @@ CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/HG_Edge.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/HG_Edge.cpp.o: src/HG_Edge.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/main_test.dir/src/HG_Edge.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/main_test.dir/src/HG_Edge.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/HG_Edge.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/HG_Edge.cpp
 
 CMakeFiles/main_test.dir/src/HG_Edge.cpp.i: cmake_force
@@ -384,7 +397,7 @@ CMakeFiles/main_test.dir/src/HG_Edge.cpp.s: cmake_force
 
 CMakeFiles/main_test.dir/src/HG_Node.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/HG_Node.cpp.o: src/HG_Node.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/main_test.dir/src/HG_Node.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/main_test.dir/src/HG_Node.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/HG_Node.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/HG_Node.cpp
 
 CMakeFiles/main_test.dir/src/HG_Node.cpp.i: cmake_force
@@ -416,6 +429,7 @@ main_test_OBJECTS = \
 "CMakeFiles/main_test.dir/src/MIP_Problem.cpp.o" \
 "CMakeFiles/main_test.dir/src/LaPSO.cpp.o" \
 "CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.o" \
+"CMakeFiles/main_test.dir/src/Constraint.cpp.o" \
 "CMakeFiles/main_test.dir/src/DecompMIP.cpp.o" \
 "CMakeFiles/main_test.dir/src/Decomp.cpp.o" \
 "CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o" \
@@ -446,6 +460,7 @@ main_test: CMakeFiles/main_test.dir/src/CpuTimer.cpp.o
 main_test: CMakeFiles/main_test.dir/src/MIP_Problem.cpp.o
 main_test: CMakeFiles/main_test.dir/src/LaPSO.cpp.o
 main_test: CMakeFiles/main_test.dir/src/ConDecomp_LaPSO_Connector.cpp.o
+main_test: CMakeFiles/main_test.dir/src/Constraint.cpp.o
 main_test: CMakeFiles/main_test.dir/src/DecompMIP.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Decomp.cpp.o
 main_test: CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o
@@ -460,7 +475,7 @@ main_test: /home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/lib/libboost_syst
 main_test: /home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/lib/libboost_serialization.so
 main_test: /home/jake/PhD/Coding_Libraries/tbb/tbb2019_20191006oss/lib/intel64/gcc4.8/libtbb.so.2
 main_test: CMakeFiles/main_test.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Linking CXX executable main_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Linking CXX executable main_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main_test.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -9,13 +9,15 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
-            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/supply_network_planning"
-            ,"--input_instance_name=snp-10-004-052.mps"
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/network_design"
+            ,"--input_instance_name=ta2-UUE.mps"
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
-            ,"--total_LR_time_lim=330"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp10_04/problem_decomps.csv"
+            ,"--total_LR_time_lim=10000"
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/ta2-UUE.mps/decompositions/Combined/combined_decomps.csv"
             ,"--run_gather_statistics=true"
+            ,"--subproblem_statistics_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/ta2-UUE.mps/Subproblem_Statistics"
+            ,"--LR_outputs_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/ta2-UUE.mps/LROutputs"
             ,"--debug_printing=false"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

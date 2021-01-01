@@ -1,13 +1,41 @@
 #ifndef __DECOMPOSITIONSTATISTICS__
 #define __DECOMPOSITIONSTATISTICS__
 
+
 #include <vector>
-#include "MIPProblemProbe.h"
+#include <tuple>
 #include "Hypergraph.h"
 
 using std::vector;
 
+class MIPProblemProbe;
+
 namespace Decomposition_Statistics {
+
+struct SubproblemConstraintStatistics{
+    double equality_prop;
+    double average_RHS_val;
+    double average_abs_RHS_val;
+    double average_largest_RHSLHS_ratio;
+    double largest_RHS_range;
+    double num_non_zeroes;
+};
+
+struct SubproblemVariableStatistics{
+    double obj_val_range;
+    double sum_block_obj_val;
+    double sum_abs_block_obj_val;
+};
+
+struct RelaxedConstraintStatistics{
+    std::tuple<vector<double>, vector<double>, vector<double>> relaxed_const_var_props;
+    double equality_const_prop;
+    vector<int> constraint_non_zeroes_counts;
+    vector<double> largest_RHSLHS_ratios;
+    vector<double> sum_obj_coeffs_of_constraints;
+    vector<double> sum_abs_obj_coeffs_of_constraints;
+    vector<double> RHS_values;
+};
 
 class Subproblems {
 

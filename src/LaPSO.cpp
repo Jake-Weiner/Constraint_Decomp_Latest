@@ -199,7 +199,7 @@ void Problem::setDualBoundsLesser(const std::vector<int>& idxs)
     for (auto& idx : idxs) {
         // printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
-        dualUB[idx] = 0;
+        dualUB[idx] = 0.00;
     }
 }
 void Problem::setDualBoundsGreater(const std::vector<int>& idxs)
@@ -207,7 +207,7 @@ void Problem::setDualBoundsGreater(const std::vector<int>& idxs)
    
     for (auto& idx : idxs) {
         // printf("constraint idx is %d", idx);
-        dualLB[idx] = 0;
+        dualLB[idx] = 0.00;
         dualUB[idx] = INF;
     }
 }
@@ -244,14 +244,14 @@ void Problem::solve(UserHooks& hooks)
         //check the dual values
         if (current_solution->dual[i] < dualLB[i]) {
             if (param.printLevel)
-                printf("ERROR: initial dual[%d] %.2f below LB %.2f\n",
+                printf("ERROR: initial dual[%d] %.8f below LB %.8f\n",
                     i, current_solution->dual[i], dualLB[i]);
             current_solution->dual[i] = dualLB[i];
             IIDI.lower_bound_errors.push_back({i,current_solution->dual[i]});
         }
         if (current_solution->dual[i] > dualUB[i]) {
             if (param.printLevel)
-                printf("ERROR: initial dual[%d] %.2f below UB %.2f\n",
+                printf("ERROR: initial dual[%d] %.16f below UB %.16f\n",
                     i, current_solution->dual[i], dualUB[i]);
             current_solution->dual[i] = dualUB[i];
             IIDI.upper_bound_errors.push_back({i,current_solution->dual[i]});

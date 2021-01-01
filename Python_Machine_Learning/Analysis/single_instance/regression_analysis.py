@@ -2,6 +2,7 @@
 from sklearn.datasets import load_boston
 import pandas as pd
 import numpy as np
+from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -29,6 +30,7 @@ def main():
                        "snp-10-052-052.mps"]]
 
     #read in dataset
+    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
     input_dataset_filepath = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Features_Collated/collated.csv"
     input_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/output/network_flow/cost266-UUE.mps/Features_Collated"
 
@@ -37,22 +39,25 @@ def main():
         Path(output_root_folder + "/" + problem_type + "/" + action_name).mkdir(
             parents=True, exist_ok=True)
 
+        #input data filepath
+
         problem_type_X = pd.DataFrame
         problem_type_Y = pd.DataFrame
 
         for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
-            # create bash scripts
+
+            input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
 
 
-    df = pd.read_csv(input_dataset_filepath)
-    # remove any rows with nan, inf or -inf vals
-    df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
-    # remove default index and Decomp index from dataframe to store features
-    X = df.drop(columns = [df.columns[0], 'Decomposition Index', 'LR Bound', 'LR Solve Time(s)'])
-    # print(X.columns)
-    # capture output columns
-    Y = df[['LR Bound', 'LR Solve Time(s)']]
-    # print(Y)
+        df = pd.read_csv(input_dataset_filepath)
+        # remove any rows with nan, inf or -inf vals
+        df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+        # remove default index and Decomp index from dataframe to store features
+        X = df.drop(columns = [df.columns[0], 'Decomposition Index', 'LR Bound', 'LR Solve Time(s)'])
+        # print(X.columns)
+        # capture output columns
+        Y = df[['LR Bound', 'LR Solve Time(s)']]
+        # print(Y)
 
     # Using Pearson Correlation
     plt.figure(figsize=(12, 10))

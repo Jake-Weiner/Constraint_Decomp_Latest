@@ -287,6 +287,9 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
                 cout << "s.dual[" << dual_idx << "] = " << s.dual[dual_idx] << endl;
                 cout << "-1 * var_coeff = " << (-1 * var_coeff) << endl;
             }
+            if (var_idx == 4631){
+                cout << "dual variable involved for var idx 4631 is " << dual_idx << endl; 
+            }
 
             s.rc[var_idx] += s.dual[dual_idx] * (-1 * var_coeff);
         }
@@ -294,7 +297,7 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 
     // correct any rounding errors that may arise from using dual values from LP solution
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.0000001){
+        if (abs(s.rc[i]) < 0.0000000001){
             s.rc[i] = 0.00;
         }
     }
@@ -306,9 +309,13 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 // solution
 // the solve time remaining is also updated for each subproblem solved
 // returns 0 for success, -1 for failure
-int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining)
+int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining, bool debug_print)
 {
     int ret_val = 0;
+
+    // if (debug_print){
+    //     cout << "number of variables in sp is " << sp.subproblemVarIdx_to_originalVarIdx.size() << endl;
+    // }
     //if subproblem size is 1 solve without cplex
     if (sp.subproblemVarIdx_to_originalVarIdx.size() == 1) {
         int original_var_idx = sp.subproblemVarIdx_to_originalVarIdx[0];
@@ -326,6 +333,20 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         } else{
             s.x[original_var_idx] = lower_bound;
         }
+
+        if (debug_print){
+            cout << "reduced cost in problem subproblem is " << var_reduced_cost << endl;
+            cout << "problem var value is  " << s.x[original_var_idx] << endl;
+            cout << "contribution to bound is " << s.x[original_var_idx] * var_reduced_cost << endl;
+        }
+
+        // if (s.x[original_var_idx] * var_reduced_cost < -100000000){
+        //     cout << "reduced cost in problem subproblem is " << var_reduced_cost << endl;
+        //     cout << "problem var value is  " << s.x[original_var_idx] << endl;
+        //     cout << "contribution to bound is " << s.x[original_var_idx] * var_reduced_cost << endl;
+        //     cout << "orig var idx is " << original_var_idx << endl;
+        // }
+
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
         // cout << "In single var sp, rc is "<< var_reduced_cost << " and x_" << original_var_idx << " = " << s.x[original_var_idx] << endl;
@@ -381,8 +402,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         }
     }
 
-    double mip_subproblem_solve_time = max(0.9 * sp.getSubproblemRunTime(),0.00001);
-    double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.00001);
+    double mip_subproblem_solve_time = max(0.9 * sp.getSubproblemRunTime(),0.1);
+    double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.1);
     int subproblem_idx = sp.getSubproblemIdx();
     // add the objective function to the model
     IloObjective obj_fn = IloMinimize(sp.model.getEnv(), obj_exp);
@@ -425,6 +446,14 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
                 cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
                 cout << "MIP subproblem value is " <<  cplex.getBestObjValue() << endl;
             }
+
+            // if (cplex.getObjValue() < -100000000){
+            //     cout << obj_exp << endl;
+            //     cout << sp.model << endl;
+            //     cout << "solve time is " << mip_subproblem_solve_time << endl;
+            // }
+            
+
             subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
             // capture the mip solution quality
             subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getObjValue();
@@ -454,6 +483,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing MIP Solution" << endl;
         s.lb = std::numeric_limits<double>::max();
         cout << obj_exp << endl;
+        cout << sp.model << endl;
         cout << "solve time is " << mip_subproblem_solve_time << endl;
         // end the cplex enviroment to free up memory
     }
@@ -462,9 +492,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     s.lb = std::numeric_limits<double>::max();
     }
 
-    
 
-  
     // solve the subproblem as a LP and get the statistics
     IloModel relax(*sp.envPtr);
     relax.add(sp.model);
@@ -478,8 +506,6 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
         // get the best dual bound
         bool solve_relaxed_status = cplex_relaxed.solve();
-    
-    
         // if optimal LP solution can't be found
         if (cplex_relaxed.getCplexStatus() != IloCplex::Status::Optimal) {
             cout << "Failed to find optimal LP Solution" << endl;
@@ -503,12 +529,10 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     catch (IloCplex::Exception &e){
         cout << e << endl;
         cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing LP Solution" << endl;
-        s.lb = std::numeric_limits<double>::max();
         cout << obj_exp << endl;
     }
     catch(...){
         cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing LP Solution" << endl;
-        s.lb = std::numeric_limits<double>::max();
     }
 
     // remove the obj_fn from the model object
@@ -586,7 +610,12 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
         cout << "total num var squared is " << cplex_subproblem_sum_var_squared << endl;
     }
     for (int sp_idx = 0; sp_idx< number_of_subproblems; ++sp_idx) 
-    {
+    {   
+        bool debug_print = false;
+        if (sp_idx == 1276){
+            debug_print = true;
+        }
+
         if (debug_printing){
             cout << "number of variables in subproblem to be solved is " << cplex_subproblems[sp_idx].num_subproblem_vars << endl;
         }
@@ -615,7 +644,12 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
             }
             cplex_subproblems[sp_idx].setSubproblemRunTime(allocated_subproblem_solve_time);
         }
-        int subproblem_status = solveSubproblemCplex(cplex_subproblems[sp_idx], s, solve_time_remaining);
+
+        if (sp_idx == 1275){
+            cout << "stop" << endl;
+        }
+
+        int subproblem_status = solveSubproblemCplex(cplex_subproblems[sp_idx], s, solve_time_remaining,debug_print);
         if (subproblem_status == -1) {
             subproblem_solve_error = 1;
         }

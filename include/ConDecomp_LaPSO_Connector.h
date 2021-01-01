@@ -136,7 +136,7 @@ private:
     int cplex_subproblem_sum_var_squared;
     void initSubproblems(const vector<Partition_Struct>& ps, const int& num_var);
     void initOriginalCosts();
-    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining);
+    int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining, bool debug_print);
     bool debug_printing;
     void populateDualIdxToOrigIdxMap(const vector<int>& con_relax_vector);
     MIP_Problem* OP_ptr;

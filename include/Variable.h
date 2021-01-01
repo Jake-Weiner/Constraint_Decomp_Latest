@@ -9,7 +9,7 @@ using namespace std;
 
 enum Variable_Type{Bin, Cont, Int};
 
-const double default_variable_upper_bound = 100000000.00;
+const double default_variable_upper_bound = 10000000000.00;
 
 class Variable{
     public:

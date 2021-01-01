@@ -119,19 +119,17 @@ def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path,
             csvreader = csv.reader(LR_Bound_input_fs, delimiter=',')
             for line_number, line_split in enumerate(csvreader):
                 if line_number == 0:
-                    writer.writerow(["Decomposition Index", "Gap (%)"])
+                    writer.writerow(["Decomposition Index", "Gap (%)", "LR Solve Time(s)"])
                 else:
                     gap_row = []
                     for col_idx, value in enumerate(line_split):
                         # first column is just decomposition index
-                        if col_idx == 0:
+                        if col_idx == 0 or col_idx == 2:
                             gap_row.append(value)
-                        else:
+                        elif col_idx == 1:
                             gap = ((best_known_sol - float(value)) / (best_known_sol)) * 100
                             gap_row.append(gap)
                     writer.writerow(gap_row)
-
-
 
 def main():
 
@@ -139,11 +137,15 @@ def main():
     relaxed_constraints_min_max_scaling_filenames = ["Largest_RHSLHS.csv", "Sum_obj.csv", "Sum_abs_obj.csv",
                                                      "RHS_vals.csv"]
 
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320.mps", "h80x6320d.mps", "k16x240b.mps"],
-                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                       "snp-10-052-052.mps"]]
+    problem_types = ["network_design", "fixed_cost_network_flow"]
+    #
+    # "supply_network_planning"]
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
+                      ["g200x740.mps", "h50x2450.mps",  "h80x6320d.mps", "k16x240b.mps"]]
+
+    # , "ta2-UUE.mps"
+                      # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+                      #  "snp-10-052-052.mps"]]
 
     raw_data_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs"
     processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
@@ -152,7 +154,7 @@ def main():
         # create output folders if they don't already exists
         for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
 
-            instance_statistics_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Instance_Statistics" + "/" + "Instance_Statistics.csv"
+            instance_statistics_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" "Normalised_Data" + "/" + "Instance_Statistics" + "/" + "Instance_Statistics.csv"
 
             # get instance values required to normalise relaxed constraint statistics
             Requirements = getRequiredNormVals(instance_statistics_filepath)
@@ -181,6 +183,9 @@ def main():
             best_known_results_path = processed_results_folder + "/" + "Best_Known_Solutions.csv"
             LR_input_path = raw_data_root_folder + "/" + problem_type + "/" + instance_name + "/LROutputs" + "/" + "LR_outputs.csv"
             LR_output_path = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs.csv"
+
+            #make output folder if not already created
+            Path(processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs").mkdir(parents=True, exist_ok=True)
             convertBoundsToGap(best_known_results_path, LR_input_path, LR_output_path, instance_name)
 
 if __name__ == "__main__":
