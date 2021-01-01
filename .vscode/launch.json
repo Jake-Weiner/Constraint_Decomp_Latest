@@ -9,12 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
-            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/network_design"
-            ,"--input_instance_name=germany50-UUM.mps"
+            "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/supply_network_planning"
+            ,"--input_instance_name=snp-10-004-052.mps"
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
             ,"--total_LR_time_lim=330"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/germany50-UUM.mps/decompositions/germany_problem_decomp.csv"
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp10_04/problem_decomps.csv"
             ,"--run_gather_statistics=true"
             ,"--debug_printing=false"],
             "stopAtEntry": true,
