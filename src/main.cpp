@@ -65,7 +65,6 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     // test partition if required
     bool test_hypergraph_partitioning = false;
 
-    capture_statistics = false;
     //generate instance statistics
     if (capture_statistics){
         //generate relaxed constraint statistics
