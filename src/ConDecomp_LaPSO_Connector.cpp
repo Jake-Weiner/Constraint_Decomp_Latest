@@ -127,6 +127,8 @@ void ConDecomp_LaPSO_Connector::populateDualIdxToOrigIdxMap(const vector<int>& c
 // total number of variables squared in each subproblem is also counted
 void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& partitions, const int& total_num_var)
 {
+
+    // to keep track of progress, print out every 10000 subproblem set up
     int subproblem_idx = 0;
     for (auto& partition : partitions) {
         if (subproblem_idx % 10000 == 0) {
@@ -134,7 +136,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
         }
 
         CPLEX_MIP_Subproblem sp;
-
         // // set the proportion of var in subproblem as proportion of total number of variables
         // sp.setSubproblemVarProp(static_cast<double>(partition.getNumNodes())  / static_cast<double>(total_num_var));
         sp.setSubproblemIdx(subproblem_idx);
@@ -145,11 +146,15 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
         IloNumVarArray subproblem_vars_cplex(*(sp.envPtr));
         IloRangeArray subproblem_constraints_cplex(*(sp.envPtr));
 
+        // add the number of variables squared in the subproblem to the total 
+        // for deciding on subproblem solve time limit
+        cplex_subproblem_sum_var_squared += pow(partition.getNumNodes(), 2);
         // add all variables in partition to subproblem model
         vector<Variable> var_in_partition;
         for (const auto& var_idx : partition.node_idxs) {
             var_in_partition.push_back(OP_ptr->getVariable(var_idx));
         }
+
 
         int subproblem_var_idx = 0;
         sp.subproblemVarIdx_to_originalVarIdx.reserve(var_in_partition.size());
@@ -188,8 +193,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             }
             cplex_subproblems.push_back(sp);
             ++subproblem_idx;
-            // tally sum of square of number of variables
-            cplex_subproblem_sum_var_squared += 1;
             continue;
         }
 
@@ -216,7 +219,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                         }
                     }
 
-                    
                     if (constraint.getBoundType() == Greater) {
                         IloRange r1(*(sp.envPtr), constraint.getRHS(), constraint_exp, INF);
                         subproblem_constraints_cplex.add(r1);
@@ -242,9 +244,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             sp.model = model;
             sp.variables = subproblem_vars_cplex;
             sp.num_subproblem_vars = subproblem_var_idx;
-            // tally sum of square of number of variables
-
-            cplex_subproblem_sum_var_squared += pow(subproblem_var_idx,2);
             if (debug_printing && subproblem_idx==1){
                 cout << "subproblem var idx is " << subproblem_var_idx << endl;
                 cout << "cplex_subproblem_sum_var_squared is " << cplex_subproblem_sum_var_squared << endl;
@@ -252,7 +251,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
             }
             cplex_subproblems.push_back(sp);
             ++subproblem_idx;
-            
         }
     }
     cout << "finished initialising subproblems " << endl;
@@ -285,19 +283,19 @@ Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
                 cout << "var idx is " << var_idx << endl;
                 cout << "s.rc[" << var_idx << "] = " << s.rc[var_idx] << endl;
                 cout << "s.dual[" << dual_idx << "] = " << s.dual[dual_idx] << endl;
-                cout << "-1 * var_coeff = " << (-1 * var_coeff) << endl;
+                cout << "-1 * var_coeff = " << (-1.00 * var_coeff) << endl;
             }
-            if (var_idx == 4631){
-                cout << "dual variable involved for var idx 4631 is " << dual_idx << endl; 
-            }
-
-            s.rc[var_idx] += s.dual[dual_idx] * (-1 * var_coeff);
+            
+            s.rc[var_idx] += s.dual[dual_idx] * (-1.00 * var_coeff);
         }
     }
 
     // correct any rounding errors that may arise from using dual values from LP solution
     for (int i = 0; i < s.rc.size(); i++) {
-        if (abs(s.rc[i]) < 0.0000000001){
+        if (abs(s.rc[i]) < 0.001 && abs(s.rc[i]) > 0.00000001){
+            cout << "0.00000001  < s.rc[" << i << "] < 0.001" << endl;
+        }
+        if (abs(s.rc[i]) < 0.00000001){
             s.rc[i] = 0.00;
         }
     }
@@ -612,30 +610,18 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
     for (int sp_idx = 0; sp_idx< number_of_subproblems; ++sp_idx) 
     {   
         bool debug_print = false;
-        if (sp_idx == 1276){
-            debug_print = true;
-        }
-
         if (debug_printing){
             cout << "number of variables in subproblem to be solved is " << cplex_subproblems[sp_idx].num_subproblem_vars << endl;
         }
         double allocated_subproblem_solve_time = 0.00;
         if (sp_idx < number_of_subproblems - 1){
             // assign a proportion of the total solve time proportional to the square of the number of variables in the subproblem
-            allocated_subproblem_solve_time = (static_cast<double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) / static_cast<double>(cplex_subproblem_sum_var_squared)) * total_solve_time_lim;
-            if (allocated_subproblem_solve_time < 0.00){
-                cout << "allocated subproblem solve time is less than 0" << endl;
-                cout << "number_subproblem_vars is" << static_cast<double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) << endl;
-                cout << "total number of vars squared is " << static_cast<double>(cplex_subproblem_sum_var_squared) << endl;
-            }
+            allocated_subproblem_solve_time = (static_cast<long double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) / static_cast<long double>(cplex_subproblem_sum_var_squared)) * total_solve_time_lim;
             cplex_subproblems[sp_idx].setSubproblemRunTime(allocated_subproblem_solve_time);
         }
         // for the last and largest subproblem, give all of the remaining solve time 
         else{
             allocated_subproblem_solve_time = solve_time_remaining;
-            if (allocated_subproblem_solve_time < 0.00){
-                cout << "allocated subproblem solve time is less than 0 and final subproblem is reached" << endl;
-            }
             if (debug_printing){
                 double original_subproblem_solve_time = (static_cast<double>(pow(cplex_subproblems[sp_idx].num_subproblem_vars,2)) / static_cast<double>(cplex_subproblem_sum_var_squared)) * total_solve_time_lim;
                 cout << "solving last subproblem, solve time allocated is " << allocated_subproblem_solve_time 
@@ -643,10 +629,6 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
                 << endl;
             }
             cplex_subproblems[sp_idx].setSubproblemRunTime(allocated_subproblem_solve_time);
-        }
-
-        if (sp_idx == 1275){
-            cout << "stop" << endl;
         }
 
         int subproblem_status = solveSubproblemCplex(cplex_subproblems[sp_idx], s, solve_time_remaining,debug_print);

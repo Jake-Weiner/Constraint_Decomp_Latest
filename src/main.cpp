@@ -64,6 +64,8 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     Writer w;
     // test partition if required
     bool test_hypergraph_partitioning = false;
+
+    capture_statistics = false;
     //generate instance statistics
     if (capture_statistics){
         //generate relaxed constraint statistics
@@ -472,6 +474,7 @@ int main(int argc, const char** argv)
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested.
         // get in the dual values for all constraints
         vector<initial_dual_value_pair> dual_values_from_LP;
+        // convert parsed MIP into cplex model to solve and obtain dual values
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
         bool solve_as_LP = true;
         // solve MIP as LP 
@@ -488,7 +491,7 @@ int main(int argc, const char** argv)
 
         // initial dual values are going to be used
         bool set_initial_dual_values = true;
-        // assign a decomposition index
+        // assign a starting decomposition index
         int decomposition_idx = 0;
         // read in con_vec from file
         std::ifstream input_fs(string(para.con_vec_filename));

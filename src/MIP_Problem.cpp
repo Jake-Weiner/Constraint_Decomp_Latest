@@ -158,7 +158,7 @@ double MIP_Problem::getStddevConstraintDensity()
 {
     // stddev is sqrt(1/n sum(x_i - x_mean)^2)
     double average_constraint_density_local = getAverageConstraintDensity();
-    double variance = 0;
+    double variance = 0.00;
     for (auto& constraint : constraints) {
         variance += pow(double(constraint.getNumVar()) - average_constraint_density_local, 2);
     }

@@ -202,7 +202,6 @@ std::tuple<double, double, double> MIPProblemProbe::getVariablePropsConstraint(c
 // for the input constraint indices, create a hashmap for
 int MIPProblemProbe::getVarCount(const std::vector<int>& constraint_idxs)
 {
-
     int var_count = 0;
     std::unordered_map<int, bool> variable_index_hashmap;
     // for every new variable, add to the hashmap to see if it's been seen previously or not
@@ -340,7 +339,6 @@ void MIPProblemProbe::getRelaxedConstraintStatistics(RelaxedConstraintStatistics
     rcs.relaxed_const_var_props = std::make_tuple(bin_props,int_props,cont_props);
     
 }
-
 
 double MIPProblemProbe::getBlockSumObjs(const std::vector<int>& variable_idxs, const bool& abs_flag)
 {

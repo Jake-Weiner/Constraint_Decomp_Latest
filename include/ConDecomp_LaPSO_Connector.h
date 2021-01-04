@@ -133,7 +133,7 @@ private:
     void addConstLagMult(ConDecomp_LaPSO_Connector_Solution& s);
     void updateParticleViol(ConDecomp_LaPSO_Connector_Solution& s);
     vector<CPLEX_MIP_Subproblem> cplex_subproblems;
-    int cplex_subproblem_sum_var_squared;
+    unsigned long long int cplex_subproblem_sum_var_squared;
     void initSubproblems(const vector<Partition_Struct>& ps, const int& num_var);
     void initOriginalCosts();
     int solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, Solution& s, double& solve_time_remaining, bool debug_print);

@@ -23,9 +23,9 @@ public:
         RHS = 0.0;
     };
     ~Constraint(){};
+
     void addVarIdx(const int& var_idx_to_add);
-   
-    void addVarCoeff(const int& var_coeff_to_add)
+    void addVarCoeff(const double& var_coeff_to_add)
     {
         variable_coeffs.push_back(var_coeff_to_add);
     }
@@ -50,7 +50,7 @@ public:
         return constraint_idx;
     }
 
-    void setRHS(double bound)
+    void setRHS(const double bound)
     {
         RHS = bound;
     }
