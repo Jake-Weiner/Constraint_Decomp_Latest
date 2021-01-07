@@ -394,7 +394,7 @@ void Problem::solve(UserHooks& hooks)
                 current_solution->dual = 0;
                 double minLB = current_solution->lb, maxLB = current_solution->lb;
                 hooks.reducedCost(*current_solution);
-                double maxdual = std::max(0.0, current_solution->rc.max()) - std::min(0.0, current_solution->rc.min());
+                double maxdual = std::max(0.00l, current_solution->rc.max()) - std::min(0.00l, current_solution->rc.min());
                 if (maxdual < 1e-9)
                     maxdual = 1;
 

@@ -64,7 +64,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     Writer w;
     // test partition if required
     bool test_hypergraph_partitioning = false;
-
+    capture_statistics = false;
     //generate instance statistics
     if (capture_statistics){
         //generate relaxed constraint statistics
@@ -96,6 +96,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     }
     // store the connector requirements
     ConnectorRequirements CR = {&MP, &ps, &con_relax_vector, debug_printing, total_LR_time_lim, ss_ptr};
+    // number of subproblems
     cout << "CR ss_ptr size is " << CR.ss_ptr->mip_obj_solutions.size() << endl;
     // initialise the LR Handler
     LRHandler LRH;
@@ -505,8 +506,8 @@ int main(int argc, const char** argv)
         // MIPProblem probe object used to get statistics from MIP problem
         MIPProblemProbe MPP(&MP);
         // capture and write out instance statistics
-        std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
-        w.writeInstanceStatistics(LOF, ins_ptr);
+        // std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
+        // w.writeInstanceStatistics(LOF, ins_ptr);
         // input file successfully opened
         if (input_fs) {
             string line_read;
@@ -515,6 +516,7 @@ int main(int argc, const char** argv)
                 vector<int> relaxed_constraints_int;
                 // split the line based on ,
                 boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+                
                 // first line contains the number of nodes
                 // last element will be empty because of ending final comma
                 for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {

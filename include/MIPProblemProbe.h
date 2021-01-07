@@ -65,6 +65,9 @@ class MIPProblemProbe{
         std::pair<double,double> getRHSLHSExtremes();
         std::pair<double,double> getSumObjExtremes();
         std::pair<double,double> getSumAbsObjExtremes();
+
+        // get constraints containing a specific variable index
+        vector<int> getConstraintsContainingVar(const int& var_idx);
     
     private:
 

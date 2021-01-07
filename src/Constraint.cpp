@@ -30,3 +30,13 @@ double Constraint::getSumRHSLHSRatio()
     return sum_RHS_ratio;
 }
 
+bool Constraint::containsVar(const int& var_idx_searched) const{
+
+    bool ret_val = false;
+    for (const auto& constraint_var_idx : variable_indxs){
+        if (var_idx_searched == constraint_var_idx){
+            ret_val = true;
+        }
+    }
+    return ret_val;
+}

@@ -513,3 +513,16 @@ int MIPProblemProbe::getNumMIPNonZero(){
     }
     return (max - min);
 }
+
+
+ vector<int> MIPProblemProbe::getConstraintsContainingVar(const int& var_idx){
+
+     vector<int> constraint_idxs;
+    for (auto& con : MP_ptr->constraints){
+        if (con.containsVar(var_idx)){
+            constraint_idxs.push_back(con.getConIdx());
+        }
+    }
+    return constraint_idxs;
+
+ }

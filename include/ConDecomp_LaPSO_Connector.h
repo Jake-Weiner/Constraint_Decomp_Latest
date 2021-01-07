@@ -45,8 +45,7 @@ class CPLEX_MIP_Subproblem {
 public:
         
     CPLEX_MIP_Subproblem(){};
-    int num_subproblem_vars;
-    
+
     unordered_map<int, int> subproblemVarIdx_to_originalVarIdx;
     unordered_map<int, int> originalVarIdx_to_subproblemVarIdx;
     IloEnv* envPtr;
@@ -69,13 +68,30 @@ public:
         return total_solve_time;
     }
 
+    int getNumVars() const{
+        return num_subproblem_vars;
+    }
+
+    void setNumVars(const int num_vars){
+        num_subproblem_vars = num_vars;
+    }
+
+    void setNumConstr(const int num_constr){
+        num_subproblem_constraints = num_constr;
+    }
+
+    int getNumConstr() const{
+        return num_subproblem_constraints;
+    }
     // < operator overloading for sorting purposes
     bool operator< (const CPLEX_MIP_Subproblem& other) const
     {
-        return (num_subproblem_vars < other.num_subproblem_vars);
+        return (num_subproblem_vars < other.getNumVars());
     }
 
 private:
+    int num_subproblem_vars;
+    int num_subproblem_constraints;
     int subproblem_idx;
     double total_solve_time;
 };

@@ -232,6 +232,74 @@ namespace LaPSO {
         }
     };
 
+    /** Floating point vector with some extra convenience methods */
+    class LngDblVec : public std::vector<long double> {
+    public:
+        LngDblVec(const std::vector<long double>& v)
+            : std::vector<long double>(v)
+        {
+        }
+
+        LngDblVec(size_t s = 0,long double v = 0)
+            : std::vector<long double>(s, v)
+        {
+        }
+        /// assign every value to v
+        long double operator=(const long double v)
+        {
+            std::fill(begin(), end(), v);
+            return v;
+        }
+        /// allow assignment of straight vectors
+        LngDblVec& operator=(const std::vector<long double>& v)
+        {
+            *static_cast<std::vector<long double>*>(this) = v;
+            return *this;
+        }
+        LngDblVec& operator=(const std::vector<int>& v)
+        {
+            this->resize(v.size());
+            std::vector<int>::const_iterator vi = v.begin();
+            for (iterator ti = begin(); ti != end() && vi != v.end(); ++ti, ++vi)
+                *ti = *vi;
+            return *this;
+        }
+        /// vector addition
+        LngDblVec& operator+=(const LngDblVec v)
+        {
+            const_iterator vi = v.begin();
+            for (iterator ti = begin(); ti != end() && vi != v.end(); ++ti, ++vi)
+                *ti += *vi;
+            return *this;
+        }
+        /// vector scalar multiplication
+        LngDblVec& operator*=(long double v)
+        {
+            for (iterator ti = begin(); ti != end(); ++ti)
+                *ti *= v;
+            return *this;
+        }
+
+
+        void negate()
+        {
+            for (iterator ti = begin(); ti != end(); ++ti)
+                *ti = -(*ti);
+        }
+        long double min() const
+        { ///< minimum value in vector
+            return *std::min_element(begin(), end());
+        }
+        long double max() const
+        { ///< maximum value in vector
+            return *std::max_element(begin(), end());
+        }
+        long double sum() const
+        { ///< sum of values in vector
+            return std::accumulate(begin(), end(), 0.0);
+        }
+    };
+
     typedef std::pair<int, int> IdxVal;
     /** SparseVec defines a sparse integer vector. Defined in terms of indices
             and the value to be taken at that index
@@ -266,7 +334,7 @@ namespace LaPSO {
         /// calculated as b-Ax for the relaxed constraints
         DblVec viol;
         /// Reduced cost vector (for current dual)
-        DblVec rc;
+        LngDblVec rc;
         bool isFeasible; ///< is primal solution feasible?
         double ub; ///< primal cost (upper bound if feasible)
         double lb; ///< lower bound
