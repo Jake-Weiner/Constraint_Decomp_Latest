@@ -33,7 +33,7 @@ def main():
                       #  "snp-10-052-052.mps"]]
     #read in dataset
 
-    problem_type_chosen_idx = 1
+    problem_type_chosen_idx = 0
     problem_type = problem_types[problem_type_chosen_idx]
 
     processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
@@ -76,6 +76,7 @@ def main():
     # convert features to np array
     X_np = X.to_numpy()
     Bound_np = Y['Gap (%)'].to_numpy()
+    print(Bound_np)
     reg = LinearRegression().fit(X_np, Bound_np)
     print("Regression model score is " + str(reg.score(X_np, Bound_np)))
     # use 10 fold cross validated

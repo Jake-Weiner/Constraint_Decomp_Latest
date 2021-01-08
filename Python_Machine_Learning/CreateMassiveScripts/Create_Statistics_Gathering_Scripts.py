@@ -7,7 +7,7 @@ import shutil
 def main():
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320.mps", "h80x6320d.mps", "k16x240b.mps"],
+                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                        "snp-10-052-052.mps"]]
 
@@ -20,8 +20,12 @@ def main():
     problem_type_placeholder = "ProblemType_XXXXX"
     job_batchnumber_placeholder = "XXXXX"
     jobname_placeholder = "$JOBNAME"
+    runtime_placeholder = "$RUNTIME"
+    memory_placeholder = "$MEMORY"
     runall_placeholder = "XXXXX"
 
+    problem_types_runtimes = ["72:00:00", "72:00:00", "168:00:00"]
+    problem_types_memory = ["8192", "8192", "16384"]
 
     for problem_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exist
@@ -52,6 +56,10 @@ def main():
                             job_output_fs.write(line.replace(job_batchnumber_placeholder, str(instance_idx)))
                         elif jobname_placeholder in line:
                             job_output_fs.write(line.replace(jobname_placeholder, instance_name + "_" + action_name))
+                        elif runtime_placeholder in line:
+                            job_output_fs.write(line.replace(runtime_placeholder, problem_types_runtimes[problem_idx]))
+                        elif memory_placeholder in line:
+                            job_output_fs.write(line.replace(memory_placeholder, problem_types_memory[problem_idx]))
                         else:
                             job_output_fs.write(line)
 

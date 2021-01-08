@@ -69,7 +69,7 @@ def main():
         df_list.append(df)
         # remove any rows with nan, inf or -inf vals
 
-    output_folder = processed_results_folder + "/" + problem_type
+    output_folder = processed_results_folder + "/" + "Machine_Learning_Outputs" + "/" + "Problem_Types" + "/" + problem_type
 
     df_combined = pd.concat(df_list, keys=instance_names[problem_type_chosen_idx])
     # remove any rows in which there are nan, inf or -inf values
@@ -98,7 +98,7 @@ def main():
     plt.plot(df_combined.iloc[pareto_score_idxs,2],df_combined.iloc[pareto_score_idxs,1], ls = "--", marker = ".", color = 'red', label = 'Pareto')
     # plt.scatter(df.iloc[pareto_score_idxs, 2], df.iloc[pareto_score_idxs, 1], s=20, marker="s", c='r', label='Pareto')
     plt.scatter(df_combined.iloc[non_pareto_score_idxs, 2], df_combined.iloc[non_pareto_score_idxs, 1], s=8, marker="o", c='b', label='Non Pareto')
-    plt.legend(loc='lower right');
+    plt.legend(loc='upper right');
     plt.xlabel(df_combined.columns[2])
     plt.ylabel(df_combined.columns[1])
     plt.savefig(output_folder + "/Bounds_vs_time_plot_pareto")

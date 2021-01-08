@@ -24,24 +24,24 @@ def main():
     #  "snp-10-052-052.mps"]]
     # read in dataset
 
-
-
-
     processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
 
     # create output folders if they don't already exist
     Path(processed_results_folder + "/" + "Machine_Learning_Outputs" + "/" + "All_Problem_Types").mkdir(
         parents=True, exist_ok=True)
 
-    df_list = []
+    df_global_list = []
     for problem_type_idx, problem_type in enumerate(problem_types):
+        df_problem_list = []
         for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
             input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
             df = pd.read_csv(input_data_filepath)
-            df_list.append(df)
+            df_problem_list.append(df)
             # remove any rows with nan, inf or -inf vals
+        df_problem_combined = pd.concat(df_problem_list, keys=instance_names[problem_type_idx])
+        df_global_list.append(df_problem_combined)
 
-    df_combined = pd.concat(df_list, keys=instance_names[problem_type_idx])
+    df_combined = pd.concat(df_global_list, keys=problem_types)
     # remove any rows in which there are nan, inf or -inf values
     df_combined = df_combined[~df_combined.isin([np.nan, np.inf, -np.inf]).any(1)]
     # remove any values where the gap is less and 0%, a result of potential rounding errors from CPLEX
@@ -67,6 +67,7 @@ def main():
 
     #project now contains X_np represented as first 2 dimensions in PCA
     projected = pca.fit_transform(X_np)
+    print(pca.components_)
     print(pca.explained_variance_ratio_)
 
     plt.scatter(projected[:, 0], projected[:, 1],
@@ -78,8 +79,6 @@ def main():
     cbar.set_label('Gap (%)', rotation = 270, labelpad = 20)
     output_folder = processed_results_folder + "/" + "Machine_Learning_Outputs" + "/" + "All_Problem_Types"
     plt.savefig(output_folder + "/PCA_Analysis")
-
-
 
 
 if __name__ == "__main__":

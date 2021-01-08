@@ -41,20 +41,24 @@ def main():
     Path(processed_results_folder + "/" + "Machine_Learning_Outputs" + "/" + "All_Problem_Types").mkdir(
         parents=True, exist_ok=True)
 
-    df_list = []
+    df_global_list = []
     for problem_type_idx, problem_type in enumerate(problem_types):
+        df_problem_list = []
         for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
             input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
             df = pd.read_csv(input_data_filepath)
-            df_list.append(df)
+            df_problem_list.append(df)
             # remove any rows with nan, inf or -inf vals
+        df_problem_combined = pd.concat(df_problem_list, keys=instance_names[problem_type_idx])
+        df_global_list.append(df_problem_combined)
 
-
-    df_combined = pd.concat(df_list, keys=instance_names[problem_type_idx])
+    df_combined = pd.concat(df_global_list, keys=problem_types)
     #remove any rows in which there are nan, inf or -inf values
     df_combined = df_combined[~df_combined.isin([np.nan, np.inf, -np.inf]).any(1)]
     #remove any values where the gap is less and 0%, a result of potential rounding errors from CPLEX
     df_combined = df_combined[df_combined['Gap (%)'] > 0]
+
+    print(df_combined.columns)
     #reset the indexes
     df_combined.reset_index(drop=True, inplace=True)
     # print(df_combined)
@@ -64,7 +68,6 @@ def main():
     # capture output columns
     Y = df_combined[['Gap (%)', 'LR Solve Time(s)']]
     # print(Y)
-
     # Using Pearson Correlation
     plt.figure(figsize=(12, 10))
     cor = df_combined.corr()
@@ -72,14 +75,16 @@ def main():
     cor_bound_target = abs(cor['Gap (%)'])
     # print(cor_bound_target)
     # Selecting highly correlated features
-    relevant_features_bound = cor_bound_target[cor_bound_target > 0.5]
+    relevant_features_bound = cor_bound_target[cor_bound_target > 0.4]
     print(relevant_features_bound)
     # convert features to np array
     X_np = X.to_numpy()
     Bound_np = Y['Gap (%)'].to_numpy()
+    #create the regression model
     reg = LinearRegression().fit(X_np, Bound_np)
-    print("Regression model score is " + str(reg.score(X_np, Bound_np)))
-    # use 10 fold cross validated
+    # print out the R^2 value = 1 - (sum(residual errors ^2)/sum((y - ymean) ^ 2))
+    print("Regression model R^2 value " + str(reg.score(X_np, Bound_np)))
+    # use 10 fold cross validated - The estimators score method is used, which in this case is the R^2 value
     cv_results = cross_validate(reg, X_np, Bound_np, cv=10)
     sorted(cv_results.keys())
     print("Crossfold validation scores are - ")
