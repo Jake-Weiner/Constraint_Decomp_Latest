@@ -20,7 +20,6 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     // List keeping track of nodes seen
 
     bool return_flag = true;
-
     vector<bool> node_idx_seen;
     node_idx_seen.resize(HG_nodes.size(), false);
     vector<bool> edge_idx_seen;
@@ -33,7 +32,6 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     int nodes_seen = 0;
     //perform BFS on Hypergraph - stop when all nodes have been considered
     while (nodes_seen != node_idx_seen.size()) {
-
         // pick first unseen node iff it has an edge attached
         int node_idx_selected;
         for (int i = 0; i < node_idx_seen.size(); i++) {

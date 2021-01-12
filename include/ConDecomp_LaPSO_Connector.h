@@ -119,7 +119,6 @@ struct ConnectorRequirements{
     std::shared_ptr<Subproblems> ss_ptr;
 };
 
-
 class ConDecomp_LaPSO_Connector : public LaPSO::UserHooks {
 public:
     ConDecomp_LaPSO_Connector(ConnectorRequirements& CR);
@@ -139,6 +138,9 @@ public:
         SparseVec& feas);
     Status heuristics(Solution& s);
     Status updateBest(Solution& s);
+    double getLPSolveTime() const{
+        return LP_solve_time;
+    }
     void setPrinting(bool p) { debug_printing = p; }
     void endCplexEnvs();
     int getOriginalConIdx(int dual_idx);
@@ -158,6 +160,7 @@ private:
     MIP_Problem* OP_ptr;
     DblVec original_costs;
     double total_solve_time_lim;
+    double LP_solve_time;
     std::unordered_map<int, int> dual_idx_to_orig_constraint_idx_map;
     std::unordered_map<int, int> orig_constraint_idx_to_dual_idx_map;
     std::shared_ptr<Subproblems> subproblem_statistics_ptr;

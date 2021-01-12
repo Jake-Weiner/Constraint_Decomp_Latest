@@ -52,7 +52,10 @@ void LRHandler::solve(){
 
 std::tuple<double,double> LRHandler::getLaPSOOutputs(){
 
-    return std::make_tuple(solver_ptr->best_solution->lb, solver_ptr->cpuTime());
+    cout << "LP solve time is " << CLC_ptr->getLPSolveTime() << endl;
+    cout << "Solver time is " << solver_ptr->cpuTime() << endl;
+    cout << "total LR time is " << solver_ptr->cpuTime() - CLC_ptr->getLPSolveTime() << endl;
+    return std::make_tuple(solver_ptr->best_solution->lb, solver_ptr->cpuTime() - CLC_ptr->getLPSolveTime());
 }
 
 LaPSO::LaPSORequirements generateLaPSORequirements(std::shared_ptr<ConDecomp_LaPSO_Connector>& CLC_ptr, MIP_Problem& MP

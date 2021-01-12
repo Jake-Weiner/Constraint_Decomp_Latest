@@ -319,7 +319,9 @@ namespace LaPSO {
     class Solution {
     public:
         /// standard constructor with given size of problem
-        Solution(size_t numVar, size_t numConstr) { resize(numVar, numConstr); }
+        Solution(size_t numVar, size_t numConstr) { 
+            resize(numVar, numConstr); 
+        }
         Solution() { resize(0, 0); }
         Solution(const Solution& other);
         // void swap(Solution& rhs);
@@ -328,6 +330,7 @@ namespace LaPSO {
         }
         /// resize particle to problem size
         void resize(size_t numVar, size_t numConstr);
+        
         DblVec dual; ///< lagrange multiplier for each relaxed constraint
         DblVec x; ///< primal solution for dual
         /// The viol vector contains the violation from the primal solution
@@ -335,6 +338,8 @@ namespace LaPSO {
         DblVec viol;
         /// Reduced cost vector (for current dual)
         LngDblVec rc;
+        
+        
         bool isFeasible; ///< is primal solution feasible?
         double ub; ///< primal cost (upper bound if feasible)
         double lb; ///< lower bound

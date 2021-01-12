@@ -10,14 +10,14 @@
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
             "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/supply_network_planning"
-            ,"--input_instance_name=snp-10-004-052.mps"
+            ,"--input_instance_name=snp-04-052-052.mps"
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
             ,"--total_LR_time_lim=330"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-10-004-052.mps/problem_decomps_2.csv"
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-04-052-052.mps/negative_decomps.csv"
             ,"--run_gather_statistics=true"
-            ,"--subproblem_statistics_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-10-004-052.mps/Subproblem_Statistics"
-            ,"--LR_outputs_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-10-004-052.mps/LROutputs"
+            ,"--subproblem_statistics_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-04-052-052.mps/Subproblem_Statistics"
+            ,"--LR_outputs_folder=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp-04-052-052.mps/LROutputs"
             ,"--debug_printing=false"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
