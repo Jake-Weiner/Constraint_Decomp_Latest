@@ -472,28 +472,28 @@ int main(int argc, const char** argv)
     if (PA.get_run_gather_statistics_flag() == true) {
         // using the same instance as in the LR testing should give the same dual value as the first relaxtion tested.
         // get in the dual values for all constraints
-        vector<initial_dual_value_pair> dual_values_from_LP;
-        // convert parsed MIP into cplex model to solve and obtain dual values
-        MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
-        bool solve_as_LP = true;
-        // solve MIP as LP 
-        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
-        for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
-            dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
-            // cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
-        }
+        // vector<initial_dual_value_pair> dual_values_from_LP;
+        // // convert parsed MIP into cplex model to solve and obtain dual values
+        // MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
+        // bool solve_as_LP = true;
+        // // solve MIP as LP 
+        // CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
+        // for (int con_idx = 0; con_idx < MP.getNumConstraints(); ++con_idx) {
+        //     dual_values_from_LP.push_back({con_idx, MIP_results.dual_vals[con_idx]});
+        //     // cout << "dual value for con " << con_idx << " = " << MIP_results.dual_vals[con_idx] << endl;
+        // }
 
-        // write out LP results for parsed file
-        Writer w;
-        string LP_Output_file = string(para.LP_outputs_folder) + "/LP_outputs.csv";
-        w.writeLPOutputs(LP_Output_file, MIP_results.obj_val, MIP_results.solve_time);
+        // // write out LP results for parsed file
+        // Writer w;
+        // string LP_Output_file = string(para.LP_outputs_folder) + "/LP_outputs.csv";
+        // w.writeLPOutputs(LP_Output_file, MIP_results.obj_val, MIP_results.solve_time);
 
-        // initial dual values are going to be used
-        bool set_initial_dual_values = true;
-        // assign a starting decomposition index
-        int decomposition_idx = 0;
-        // read in con_vec from file
-        std::ifstream input_fs(string(para.con_vec_filename));
+        // // initial dual values are going to be used
+        // bool set_initial_dual_values = true;
+        // // assign a starting decomposition index
+        // int decomposition_idx = 0;
+        // // read in con_vec from file
+        // std::ifstream input_fs(string(para.con_vec_filename));
 
         // assign output filenames
         LaPSOOutputFilenames LOF = {};
@@ -505,31 +505,31 @@ int main(int argc, const char** argv)
         // MIPProblem probe object used to get statistics from MIP problem
         MIPProblemProbe MPP(&MP);
         // capture and write out instance statistics
-        // std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
-        // w.writeInstanceStatistics(LOF, ins_ptr);
+        std::shared_ptr<Instance> ins_ptr = std::make_shared<Instance>(MPP);
+        w.writeInstanceStatistics(LOF, ins_ptr);
         // input file successfully opened
-        if (input_fs) {
-            string line_read;
-            while (getline(input_fs, line_read)) {
-                vector<string> relaxed_constraints_str;
-                vector<int> relaxed_constraints_int;
-                // split the line based on ,
-                boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
+        // if (input_fs) {
+        //     string line_read;
+        //     while (getline(input_fs, line_read)) {
+        //         vector<string> relaxed_constraints_str;
+        //         vector<int> relaxed_constraints_int;
+        //         // split the line based on ,
+        //         boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
                 
-                // first line contains the number of nodes
-                // last element will be empty because of ending final comma
-                for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
-                    relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
-                }
-                bool capture_statistics = true;
-                solveLapso(argc, argv, MP, MPP, HG, para, PA, relaxed_constraints_int, LOF
-                , decomposition_idx, dual_values_from_LP, set_initial_dual_values, capture_statistics);
-                ++decomposition_idx;
-            }
-        }
-        else {
-            cout << "constraint input file unable to be found/opened" << endl;
-        }
+        //         // first line contains the number of nodes
+        //         // last element will be empty because of ending final comma
+        //         for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
+        //             relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+        //         }
+        //         bool capture_statistics = true;
+        //         solveLapso(argc, argv, MP, MPP, HG, para, PA, relaxed_constraints_int, LOF
+        //         , decomposition_idx, dual_values_from_LP, set_initial_dual_values, capture_statistics);
+        //         ++decomposition_idx;
+        //     }
+        // }
+        // else {
+        //     cout << "constraint input file unable to be found/opened" << endl;
+        // }
         exit(EXIT_SUCCESS);
     }
 

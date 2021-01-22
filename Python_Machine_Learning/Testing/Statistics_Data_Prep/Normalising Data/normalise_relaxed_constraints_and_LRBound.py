@@ -131,6 +131,10 @@ def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path,
                             gap_row.append(gap)
                     writer.writerow(gap_row)
 
+
+
+
+
 def main():
 
     # list of features requiring normalisation
@@ -140,9 +144,10 @@ def main():
     problem_types = ["network_design", "fixed_cost_network_flow"]
     #
     # "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
                       ["g200x740.mps", "h50x2450.mps",  "h80x6320d.mps", "k16x240b.mps"]]
 
+    # , "ta2-UUE.mps"
                       # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                       #  "snp-10-052-052.mps"]]
 

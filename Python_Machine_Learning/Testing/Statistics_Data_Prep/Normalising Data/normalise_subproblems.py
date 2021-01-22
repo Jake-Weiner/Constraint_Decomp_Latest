@@ -12,9 +12,6 @@ from pathlib import Path
 # subproblem folder
 
 
-
-
-
 #normalise based on decomposition values which are calculated on the fly. Normalisation is done based on values of other subproblems
 def normaliseSubproblems(input_file, output_file):
     with open(output_file, "w") as output_fs:
@@ -60,15 +57,17 @@ def calculateMinMaxRow(data_list):
 
 def main():
 
+    #list of subproblem features which require normalisation
     subproblem_normalisation_filenames = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv",
                                           "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv", "Shapes.csv"]
 
     problem_types = ["network_design", "fixed_cost_network_flow"]
 
     # , "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"]]
 
+    # , "ta2-UUE.mps"
                       # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                       #  "snp-10-052-052.mps"]]
 

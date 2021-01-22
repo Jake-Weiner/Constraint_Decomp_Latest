@@ -11,7 +11,7 @@ from pathlib import Path
 #calculate the min,max,average and stddev of a list of numbers given
 def calculateStats(data_list):
 
-    min_val, max_val, ave, stddev = 0, 0, 0, 0
+    min_val, max_val, ave, stddev = 0.0, 0.0, 0.0, 0.0
 
     data_list_float = [float(i) for i in data_list]
     min_val = min(data_list_float)
@@ -48,32 +48,31 @@ def writeAllStats(input_file, output_file):
 def main():
 
 
-    problem_types = ["network_design", "fixed_cost_network_flow"]
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
 
-    # "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"]]
-                      # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                      #  "snp-10-052-052.mps"]]
-    # , "ta2-UUE.mps"
-    raw_data_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs"
-    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
+                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+                       "snp-10-052-052.mps"]]
+
+    processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
+    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Features_Calculated"
 
     for problem_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exists
         for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
-
-            features_calculated_output_path = processed_results_folder + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Relaxed_Constraint_Statistics"
+            features_calculated_output_path = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Relaxed_Constraint_Statistics"
             #create output folders if necessary
             Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
             normalised_data_input_folder =  processed_results_folder + "/" + problem_type + "/" + instance_name + "/Normalised_Data" + "/" + "Relaxed_Constraint_Statistics"
-
             # for each relaxed constraint file, calculate and output the features
             for filename in os.listdir(normalised_data_input_folder):
-                writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
+                if filename != "single_stats.csv":
+                    writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
 
             # single stats file doesn't require any manipulation, just copy the files across as these are already features
             copyfile(normalised_data_input_folder + "/" + "single_stats.csv", features_calculated_output_path + "/" + "single_stats.csv")
+            print("Finished " + instance_name)
 
 if __name__ == "__main__":
 
