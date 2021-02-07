@@ -61,22 +61,8 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
         // Block densities (no. non_zeroes / (no. cons * no. var)
         block_densities.push_back(
                 static_cast<double>(scs.num_non_zeroes) / static_cast<double>(number_of_variables_in_subproblem * number_of_constraints_in_subproblem));
-        
-        // // get block equality/inequality constraint props
-        // double equality_const_prop = MPP.getEqualityConstraintProp(ps.edge_idxs);
-        // equality_props.push_back(equality_const_prop);
-        // // averages of rhs coefficients in each block
-        // average_block_RHS_values.push_back(MPP.getAverageBlockRHS(ps.edge_idxs, false));
-        // average_block_absRHS_values.push_back(MPP.getAverageBlockRHS(ps.edge_idxs, true));
-        // // averages of abs(Largest RHS/LHS ratio) coefficients in each block
-        // average_block_Largest_RHSLHS_ratio.push_back(MPP.getAverageBlockLargestRHSLHSRatio(ps.edge_idxs));
-        // // averages of block shapes
-        // average_block_shape.push_back(static_cast<double>(number_of_variables_in_subproblem) / static_cast<double>(number_of_constraints_in_subproblem));
-        // // Block RHS ranges
-        // block_RHS_range.push_back(MPP.getBlockLargestRHSRange(ps.edge_idxs));
-        // // Block densities (no. non_zeroes / (no. cons * no. var)
-        // block_densities.push_back(
-        //         static_cast<double>(MPP.getBlockNonZeroes(ps.edge_idxs)) / static_cast<double>(number_of_variables_in_subproblem * number_of_constraints_in_subproblem));
+        non_zeroes_count.push_back(scs.num_non_zeroes);
+       
     }
 }
 

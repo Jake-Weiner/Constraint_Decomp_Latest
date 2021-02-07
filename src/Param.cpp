@@ -96,8 +96,6 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("random_lb_output");
     parser.setOption("con_vec_filename");
 
-    
-
     if (argc == -1) // abuse of function
         parser.processFile(*argv);
     else

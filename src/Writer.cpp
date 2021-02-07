@@ -243,6 +243,8 @@ void Writer::writeRawSubproblemStatistics(const LaPSOOutputFilenames& LOF, std::
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Cont_props.csv",ss_ptr->decomposition_idx, ss_ptr->cont_props);
     // block equality props
     genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/Equality_props.csv",ss_ptr->decomposition_idx, ss_ptr->equality_props);
+    // block non zeroes
+    genericRawSubproblemOutput(LOF.subproblem_statistics_folder + "/non_zeroes.csv",ss_ptr->decomposition_idx, ss_ptr->non_zeroes_count);
 }
 
 // write out raw data for subproblem statistics which might require scaling/normalisation

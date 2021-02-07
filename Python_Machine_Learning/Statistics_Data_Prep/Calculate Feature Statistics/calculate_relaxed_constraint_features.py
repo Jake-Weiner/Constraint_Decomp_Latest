@@ -18,7 +18,6 @@ def calculateStats(data_list):
     max_val = max(data_list_float)
     ave = statistics.mean(data_list_float)
     stddev = statistics.pstdev(data_list_float)
-
     return(min_val,max_val,ave,stddev)
 
 # calculate the features for all relaxed constraint statistics

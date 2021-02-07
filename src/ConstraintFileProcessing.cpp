@@ -38,16 +38,18 @@ void ConstraintFileProcessing::removeRedundantConstraints(const string& input_fi
             // get 
             vector<int> new_relaxed_constraints = rcrc.removeRedundantConstraints(relaxed_constraints_int, HG);
 
-            // if all constraints are redundant for the current decomposition
+            // if all constraints are redundant for the current decomposition then do not
             if (new_relaxed_constraints.empty()){
                 cout << "all constraints are redundant" << endl;
             }
-            // write out new deompositions to output file
-            if (output_fs) {
-                for (const auto& con_val : new_relaxed_constraints) {
-                    output_fs << con_val << ",";
+            else{
+                // write out new deompositions to output file
+                if (output_fs) {
+                    for (const auto& con_val : new_relaxed_constraints) {
+                        output_fs << con_val << ",";
+                    }
+                    output_fs << endl;
                 }
-                output_fs << endl;
             }
         }
     }
@@ -88,7 +90,6 @@ void ConstraintFileProcessing::removeDuplicateConstraints(const string& input_fi
             }
         }
     }
-
     else {
         cout << "redundant constraint input file unable to be found/opened" << endl;
     }

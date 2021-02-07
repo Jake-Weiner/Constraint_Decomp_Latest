@@ -17,6 +17,7 @@ def getRequiredNormVals(input_filename):
     max_sum_abs_obj_idx = 14
     min_sum_abs_obj_idx = 15
 
+
     non_zeroes, min_rhs, max_rhs, min_rhslhs, max_rhslhs, min_sum_obj, max_sum_obj, min_sum_abs_obj, max_sum_abs_obj = [0 for i in range(9)]
 
     with open(input_filename, "r") as input_fs:
@@ -38,7 +39,6 @@ def getRequiredNormVals(input_filename):
                              , max_sum_abs_obj = max_sum_abs_obj)
 
     return Requirements
-
 
 #MIP/LP convert to GAP Percentages
 #obj val normalise to 0,1?
@@ -80,19 +80,6 @@ def normaliseCount(count, input_file, output_file):
                             normalised_row.append(normalised_val)
                     writer.writerow(normalised_row)
 
-#calculate the min and max values of the list input
-def calculateMinMaxRow(data_list):
-
-    min = 999999999999999999999999999
-    max = -999999999999999999999999999
-
-    for data_point in data_list:
-        if float(data_point) < min:
-            min = float(data_point)
-        if float(data_point) > max:
-            max = float(data_point)
-
-    return (min,max)
 
 #conver the LR bounds to gap percentages based on best known solution
 def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path, instance_name):
@@ -110,7 +97,7 @@ def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path,
                 best_known_sol = float(line_split[instance_sol_col_idx])
 
         if best_known_sol_found == False:
-            print("Error: Unable to find best solution vaL for instance " + instance_name)
+            print("Error: Unable to find best solution val for instance " + instance_name)
             exit(-1)
 
     with open(LR_output_path, "w") as LR_gap_output_fs:
@@ -120,6 +107,7 @@ def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path,
             for line_number, line_split in enumerate(csvreader):
                 if line_number == 0:
                     writer.writerow(["Decomposition Index", "Gap (%)", "LR Solve Time(s)"])
+                    continue
                 else:
                     gap_row = []
                     for col_idx, value in enumerate(line_split):
@@ -138,8 +126,7 @@ def main():
                                                      "RHS_vals.csv"]
 
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    #
-    # ]
+
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps",  "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",

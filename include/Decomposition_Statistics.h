@@ -151,6 +151,8 @@ class Subproblems {
         vector<double> block_densities;
         double average_block_density;
         double stddev_block_density;
+
+        vector<double> non_zeroes_count;
 };
 
 class RelaxedConstraints {

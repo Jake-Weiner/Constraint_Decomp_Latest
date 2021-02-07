@@ -5,14 +5,10 @@ from pathlib import Path
 
 
 # open input file
-
-
 #list of features requiring normalisation
-
 # subproblem folder
-
-
 #normalise based on decomposition values which are calculated on the fly. Normalisation is done based on values of other subproblems
+# in addition, inf values occuring in Obj_range files are excluded
 def normaliseSubproblems(input_file, output_file):
     with open(output_file, "w") as output_fs:
         writer = csv.writer(output_fs, delimiter=',')
@@ -29,15 +25,17 @@ def normaliseSubproblems(input_file, output_file):
                         if col_idx == 0:
                             normalised_row.append(value)
                         else:
-                            normalised_val = 0
-                            # if min and max are equal, set normalised val to 0
-                            if min_max_tuple[0] == min_max_tuple[1]:
+                            #inf values should be 0 - they are only in obj_range.csv, if subproblem does not have appear in obj function (essentially, obj coeff of 0)
+                            if "inf" in value:
                                 normalised_val = 0
+                                normalised_row.append(normalised_val)
                             else:
-                                normalised_val = (float(value) - min_max_tuple[0]) / (min_max_tuple[1] - min_max_tuple[0])
-                            normalised_row.append(normalised_val)
-
-
+                                # if min and max are equal, set normalised val to 0
+                                if min_max_tuple[0] == min_max_tuple[1]:
+                                    normalised_val = 0
+                                else:
+                                    normalised_val = (float(value) - min_max_tuple[0]) / (min_max_tuple[1] - min_max_tuple[0])
+                                normalised_row.append(normalised_val)
                     writer.writerow(normalised_row)
 
 #calculate the min and max values of the list input
@@ -47,11 +45,11 @@ def calculateMinMaxRow(data_list):
     max = -999999999999999999999999999
 
     for data_point in data_list:
-        if float(data_point) < min:
-            min = float(data_point)
-        if float(data_point) > max:
-            max = float(data_point)
-
+        if "inf" not in data_point:
+            if float(data_point) < min:
+                min = float(data_point)
+            if float(data_point) > max:
+                max = float(data_point)
     return (min,max)
 
 
@@ -61,9 +59,12 @@ def main():
     subproblem_normalisation_filenames = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv",
                                           "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv", "Shapes.csv"]
 
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    # problem_types = ["supply_network_planning"]
 
     # , "supply_network_planning"]
+
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
@@ -83,11 +84,6 @@ def main():
                                      processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Subproblem_Statistics" + "/" + subproblem_filename)
 
             print("Finished Processing " + instance_name)
-
-
-
-
-
 
 if __name__ == "__main__":
 

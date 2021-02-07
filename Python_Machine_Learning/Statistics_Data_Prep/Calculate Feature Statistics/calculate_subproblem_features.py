@@ -6,7 +6,6 @@ from pathlib import Path
 
 def calculateStats(data_list):
     min_val, max_val, ave, stddev = 0.0, 0.0, 0.0, 0.0
-
     data_list_float = [float(i) for i in data_list]
     min_val = min(data_list_float)
     max_val = max(data_list_float)
@@ -62,12 +61,15 @@ def main():
     subproblem_ave_stddev = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv",
                              "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv", "Shapes.csv"]
 
-
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                        "snp-10-052-052.mps"]]
+    #
+    # problem_types = ["supply_network_planning"]
+    # instance_names = ["snp-10-004-052.mps",
+    #                    "snp-10-052-052.mps"]
 
     processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
     features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Features_Calculated"

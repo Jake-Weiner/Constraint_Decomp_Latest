@@ -1,4 +1,4 @@
-#This script
+#This script copies across all files which do not require any normalisation
 import os
 import sys
 from shutil import copyfile
