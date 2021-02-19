@@ -129,6 +129,9 @@ public:
         return run_LSP_testing_flag;
     }
 
+    bool get_run_no_relaxed_constr_testing_flag(){
+        return run_no_relaxed_constr_testing_flag;
+    }
 
     std::vector<double> get_nsga_props()
     {
@@ -172,9 +175,11 @@ private:
     bool run_statistic_testing_flag = false;
     bool run_remove_duplicate_constraints_flag = false;
     bool run_gather_statistics_flag = false;
+    
 
     // testing flags
     bool run_LSP_testing_flag = false;
+    bool run_no_relaxed_constr_testing_flag = false;
     // debug flags
     bool debug_printing_flag = false;
 

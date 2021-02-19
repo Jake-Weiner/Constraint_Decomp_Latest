@@ -116,6 +116,10 @@ def convertBoundsToGap(best_known_solutions_path, LR_input_path, LR_output_path,
                             gap_row.append(value)
                         elif col_idx == 1:
                             gap = ((best_known_sol - float(value)) / (best_known_sol)) * 100
+                            gap = max(gap, 0)
+                            if gap < 0:
+                                print(gap)
+
                             gap_row.append(gap)
                     writer.writerow(gap_row)
 
@@ -133,6 +137,7 @@ def main():
                        "snp-10-052-052.mps"]]
 
     raw_data_root_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Massive_Outputs"
+    raw_no_con_rel_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/No_Con_Relaxed"
     processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
 
     for problem_idx, problem_type in enumerate(problem_types):
@@ -164,14 +169,7 @@ def main():
             #non zero count scaling is done as a percentage of total non zeroes of the instance
             normaliseCount(Requirements.num_non_zeroes, input_raw_path + "/" + "Non_zero_counts.csv", output_normalised_path + "/" + "Non_zero_counts.csv")
 
-            # Convert LR bounds to gap percentages
-            best_known_results_path = processed_results_folder + "/" + "Best_Known_Solutions.csv"
-            LR_input_path = raw_data_root_folder + "/" + problem_type + "/" + instance_name + "/LROutputs" + "/" + "LR_outputs.csv"
-            LR_output_path = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs.csv"
 
-            #make output folder if not already created
-            Path(processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs").mkdir(parents=True, exist_ok=True)
-            convertBoundsToGap(best_known_results_path, LR_input_path, LR_output_path, instance_name)
 
             print("Finished " + instance_name)
 if __name__ == "__main__":

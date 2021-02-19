@@ -744,6 +744,33 @@ src/SolveGenericMIP.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/SolveGenericMIP.cpp.s
 .PHONY : src/SolveGenericMIP.cpp.s
 
+src/Testing.o: src/Testing.cpp.o
+
+.PHONY : src/Testing.o
+
+# target to build an object file
+src/Testing.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Testing.cpp.o
+.PHONY : src/Testing.cpp.o
+
+src/Testing.i: src/Testing.cpp.i
+
+.PHONY : src/Testing.i
+
+# target to preprocess a source file
+src/Testing.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Testing.cpp.i
+.PHONY : src/Testing.cpp.i
+
+src/Testing.s: src/Testing.cpp.s
+
+.PHONY : src/Testing.s
+
+# target to generate assembly for a file
+src/Testing.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Testing.cpp.s
+.PHONY : src/Testing.cpp.s
+
 src/Util.o: src/Util.cpp.o
 
 .PHONY : src/Util.o
@@ -930,6 +957,9 @@ help:
 	@echo "... src/SolveGenericMIP.o"
 	@echo "... src/SolveGenericMIP.i"
 	@echo "... src/SolveGenericMIP.s"
+	@echo "... src/Testing.o"
+	@echo "... src/Testing.i"
+	@echo "... src/Testing.s"
 	@echo "... src/Util.o"
 	@echo "... src/Util.i"
 	@echo "... src/Util.s"

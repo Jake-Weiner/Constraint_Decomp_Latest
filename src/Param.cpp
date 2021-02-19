@@ -48,6 +48,7 @@ void Param::parse(int argc, const char** argv)
     parser.setOption("run_LR_testing");
     parser.setOption("run_statistic_testing_flag");
     parser.setOption("run_LSP_testing_flag");
+    parser.setOption("run_no_relaxed_constr_testing_flag");
     
     // input files
     parser.setOption("decomps_to_remove_red_const_file");
@@ -227,6 +228,9 @@ void Param::parse(int argc, const char** argv)
         run_statistic_testing_flag = parser.getValue("run_statistic_testing_flag");
     if (parser.getValue("run_LSP_testing_flag"))
         run_LSP_testing_flag = parser.getValue("run_LSP_testing_flag");
+    if (parser.getValue("run_no_relaxed_constr_testing_flag"))
+        run_no_relaxed_constr_testing_flag = parser.getValue("run_no_relaxed_constr_testing_flag");
+    
 
     // input MIP parameters
     if (parser.getValue("MIP_num_var"))

@@ -704,9 +704,12 @@ Status ConDecomp_LaPSO_Connector::solveSubproblem(Solution& p_)
 
     // if (debug_printing == true) {
         std::cout << "Subproblem solve " << nsolves << "/" << maxsolves << ": "
-                  << " lb=" << s.lb << " ub=" << s.ub
-                  << "\trange of dual = " << s.dual.min() << " to " << s.dual.max() << std::endl
+                  << " lb=" << s.lb << " ub=" << s.ub ;
+        if (s.dual.size() > 0){
+            std::cout << "\trange of dual = " << s.dual.min() << " to " << s.dual.max() << std::endl
                   << "\trange of viol = " << s.viol.min() << " to " << s.viol.max() << std::endl;
+        }
+                  
         std::cout << std::endl;
     // }
 

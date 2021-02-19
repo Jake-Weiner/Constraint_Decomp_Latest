@@ -47,13 +47,14 @@ def main():
 
             print("Finished merging features for instance " + instance_name)
             #read in LR output file
-            LR_output_file = processed_results_external_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs.csv"
+            LR_output_file = processed_results_external_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs_normalised.csv"
             output_df = pd.read_csv(LR_output_file)
             print(output_df)
             df_final = pd.merge(df_merged_features, output_df, on=[key], how='outer')
             df_final.to_csv(features_collated_folder + "/collated.csv")
 
             print("Finished " + instance_name)
+
 
 if __name__ == "__main__":
     main()

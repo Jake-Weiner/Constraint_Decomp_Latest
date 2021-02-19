@@ -13,12 +13,15 @@ class BatchRequirements:
         self.batch_number_placeholder = batch_number_placeholder
 
 class JobRequirements:
-    def __init__(self, job_batchnumber_placeholder, batch_number, instance_placeholder, instance):
+    def __init__(self, job_batchnumber_placeholder, batch_number, run_time_placeholder, runtime,
+                 memory_placeholder, mjob_name_placeholder, job_name):
         self.job_batchnumber_placeholder = job_batchnumber_placeholder
         self.batch_number = batch_number
-        self.instance_placeholder = instance_placeholder
-        self.instance = instance
-
+        self.run_time_placeholder = run_time_placeholder
+        self.memory_placeholder = memory_placeholder
+        self.job_name = job_name
+        # instance + "_" + batch_number + "_Gather_Statistics"
+        self.job_name_placeholder = job_name_placeholder
 
 class RunAllRequirements:
     def __init__(self, runall_placeholder, number_of_jobs):
@@ -49,8 +52,8 @@ def copy_job_script(input_filepath, output_filepath, job_requirements):
                 new_line = line
                 if job_requirements.job_batchnumber_placeholder in line:
                     new_line = new_line.replace(job_requirements.job_batchnumber_placeholder, str(job_requirements.batch_number))
-                if job_requirements.instance_placeholder in line:
-                    new_line = new_line.replace(job_requirements.instance_placeholder, job_requirements.instance)
+                if job_requirements.job_name_placeholder in line:
+                    new_line = new_line.replace(job_requirements.job_name_placeholder, job_requirements.job_name)
                 output_fs.write(new_line)
 
 #change generic run all scipts by filling in generic placeholders with specific requirements

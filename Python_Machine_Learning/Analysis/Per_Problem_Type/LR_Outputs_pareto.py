@@ -42,20 +42,18 @@ def main():
 
     # #output location
 
-    problem_types = ["network_design", "fixed_cost_network_flow"]
-    # , "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"]]
-    #
-    #, "ta2-UUE.mps"
-    # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-    #  "snp-10-052-052.mps"]]
-    # read in dataset
+    problem_types = ["network_design", "fixed_cost_network_flow"
+    , "supply_network_planning"]
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
+    ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+     "snp-10-052-052.mps"]]
 
-    problem_type_chosen_idx = 1
+
+    problem_type_chosen_idx = 2
     problem_type = problem_types[problem_type_chosen_idx]
 
-    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results"
+    processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
 
     # create output folders if they don't already exist
     Path(
@@ -64,18 +62,18 @@ def main():
 
     df_list = []
     for instance_idx, instance_name in enumerate(instance_names[problem_type_chosen_idx]):
-        input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs.csv"
-        df = pd.read_csv(input_data_filepath)
-        df_list.append(df)
+        input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "LROutputs" + "/" + "LR_outputs_normalised.csv"
+        df_decomp = pd.read_csv(input_data_filepath)
+        df_list.append(df_decomp)
         # remove any rows with nan, inf or -inf vals
 
     output_folder = processed_results_folder + "/" + "Machine_Learning_Outputs" + "/" + "Problem_Types" + "/" + problem_type
 
     df_combined = pd.concat(df_list, keys=instance_names[problem_type_chosen_idx])
     # remove any rows in which there are nan, inf or -inf values
-    df_combined = df_combined[~df_combined.isin([np.nan, np.inf, -np.inf]).any(1)]
-    # remove any values where the gap is less and 0%, a result of potential rounding errors from CPLEX
-    df_combined = df_combined[df_combined['Gap (%)'] > 0]
+    # df_combined = df_combined[~df_combined.isin([np.nan, np.inf, -np.inf]).any(1)]
+    # # remove any values where the gap is less and 0%, a result of potential rounding errors from CPLEX
+    # df_combined = df_combined[df_combined['Gap (%)'] > 0]
     # reset the indexes
     df_combined.reset_index(drop=True, inplace=True)
     # this removes all negative inf, positive inf LR bounds
@@ -83,7 +81,7 @@ def main():
     print(df_combined.tail)
 
     df_combined.sort_values(by=['LR Solve Time(s)'], inplace=True)
-    Y = df_combined[['Gap (%)', 'LR Solve Time(s)']]
+    Y = df_combined[["Normalised Gap (%)", 'LR Solve Time(s)']]
     # convert features to np array
     Y_np = Y.to_numpy()
     pareto_score_idxs = list(identify_pareto(Y_np, 'Min', 'Min'))

@@ -19,7 +19,7 @@ EXE="$executable_path/main_test --input_root_folder=$input_files_path "\
 "--printLevel=3 "\
 "--input_instance_name=$instance_name "\
 "--run_remove_duplicate_constraints=true "\
-"--decomps_to_remove_duplicates_file=${decomp_folder}/BATCHNUMBER_redund_removed.csv "\
+"--decomps_to_remove_duplicates_file=${decomp_folder}/${instance_name}_BATCHNUMBER_redund_removed.csv "\
 "--duplicates_removed_output_file=${decomp_folder}/${instance_name}_BATCHNUMBER_redund_duplicates_removed.csv "\
 " > \"$log_files_path/${instance_name}_ranking_BATCHNUMBER_remove_duplicates_constraints.txt\" "
 

@@ -5,6 +5,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
 from sklearn import svm
 from sklearn.linear_model import SGDRegressor
@@ -33,9 +35,17 @@ def main():
 
     regression_models_pickle_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
     write_cfv_results = True
-    cfv_results_path = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_CFV/problem_types"
+    cfv_results_path = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_CFV"
     cfv_results = []
 
+    # prepare models
+    models = []
+    models.append(('OLM', LinearRegression()))
+    models.append(('SVM', svm.SVR()))
+    models.append(('SGD', SGDRegressor()))
+    models.append(('KNN', KNeighborsRegressor()))
+    models.append(('DT', tree.DecisionTreeRegressor()))
+    models.append(('MLP', MLPRegressor()))
 
     for problem_type_idx, problem_type in enumerate(problem_types):
         df_list = []
@@ -51,42 +61,56 @@ def main():
         df_combined.reset_index(drop=True, inplace=True)
 
         # remove default index and Decomp index from dataframe to store features
-        X = df_combined.drop(columns=[df.columns[0], 'Decomposition Index', 'Gap (%)', 'LR Solve Time(s)'])
+        X = df_combined.drop(columns=[df.columns[0], 'Decomposition Index', "Normalised Gap (%)", 'LR Solve Time(s)'])
         # print(X.columns)
         # capture output columns
-        Y = df_combined[['Gap (%)', 'LR Solve Time(s)']]
+        Y = df_combined[["Normalised Gap (%)", 'LR Solve Time(s)']]
 
 
         # convert features to np array
         X_np = X.to_numpy()
-        Bound_np = Y['Gap (%)'].to_numpy()
+        Bound_np = Y["Normalised Gap (%)"].to_numpy()
         # print(Bound_np)
-        regression_models_list = []
 
-        #read in regression models trained on each problem type individually
-        for problem_type_idx_2, problem_type_2 in enumerate(problem_types):
-            #read in models with pickle
-            with open(regression_models_pickle_output_folder + "/" + problem_type_2 + ".pkl" , 'rb') as pickle_input_fs:
-                regression_models_list.append(pickle.load(pickle_input_fs))
+        seed = 0
+        # evaluate each model in turn
+        boxplot_results = []
+        summary_results = []
+        names = []
+        scoring_method = 'neg_mean_squared_error'
 
-        #read in regression models trained on all problem types
-        # read in models with pickle
-        with open(regression_models_pickle_output_folder + "/" + "all_problem_types" + ".pkl", 'rb') as pickle_input_fs:
-            regression_models_list.append(pickle.load(pickle_input_fs))
-            # use 10 fold cross validated
+        for name, model in models:
+            kfold = KFold(n_splits=10, random_state=seed)
+            cv_results = cross_val_score(model, X_np, Bound_np, cv=kfold, scoring=scoring_method)
+            boxplot_results.append(cv_results)
+            summary_results.append([name, cv_results.mean(), cv_results.std()])
+            names.append(name)
+            msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
+            print(msg)
 
-        regression_model_trained_on = ["network_design", "fixed_cost_network_flow", "supply_network_planning",
-                                       "all_problems"]
-        # #testing each trained regression model list against all instances
-        for problem_type_regression_idx, regression_model_list in enumerate(regression_models_list):
+
+        with open(cfv_results_path + "/" + problem_type + "_summary", "a+") as results_output_fs:
+            for model_idx, model_result in enumerate(summary_results):
+                results_output_fs.write(names[model_idx] + "," + str(model_result[1]) + "," + str(model_result[2]) + "\n")
+
+        fig = plt.figure()
+        fig.suptitle('Algorithm Comparison')
+        ax = fig.add_subplot(111)
+        plt.boxplot(boxplot_results)
+        ax.set_xticklabels(names)
+        plt.show()
+        plt.savefig(cfv_results_path + "/" + problem_type + "_box_plot")
+
+        # for problem_type_regression_idx, regression_model_list in enumerate(regression_models_list):
         #     problem_cfv_results = []
-            for reg_idx, regression_model in enumerate(regression_model_list):
+        #     for reg_idx, regression_model in enumerate(regression_model_list):
             # print(regression_model.coef_)
-                cv_results = cross_val_score(regression_model, X_np, Bound_np, cv=10, scoring="neg_mean_squared_error")
-                print("for problem type " + problem_type + " and for model trained on " + regression_model_trained_on[problem_type_regression_idx] + " prediction is ")
-                print(regression_model.predict(X_np)[0])
-                print("actual bound is " + str(Bound_np[0]))
-                print(cv_results)
+
+                # cv_results = cross_val_score(regression_model, X_np, Bound_np, cv=10, scoring="neg_mean_squared_error")
+                # print("for problem type " + problem_type + " and for model trained on " + regression_model_trained_on[problem_type_regression_idx] + " prediction is ")
+                # print(regression_model.predict(X_np)[0])
+                # print("actual bound is " + str(Bound_np[0]))
+                # print(cv_results)
                 # sorted(cv_results.keys())
 
                 # print("Crossfold validation scores for model " + regression_model_names[reg_idx] + " -")
@@ -128,6 +152,23 @@ def main():
             # #         output_fs.write(val)
             #     output_fs.write("\n")
 
+
+  # regression_models_list = []
+
+        # #read in regression models trained on each problem type individually
+        # for problem_type_idx_2, problem_type_2 in enumerate(problem_types):
+        #     #read in models with pickle
+        #     with open(regression_models_pickle_output_folder + "/" + problem_type_2 + ".pkl" , 'rb') as pickle_input_fs:
+        #         regression_models_list.append(pickle.load(pickle_input_fs))
+        #
+        # #read in regression models trained on all problem types
+        # # read in models with pickle
+        # with open(regression_models_pickle_output_folder + "/" + "all_problem_types" + ".pkl", 'rb') as pickle_input_fs:
+        #     regression_models_list.append(pickle.load(pickle_input_fs))
+            # use 10 fold cross validated
+
+        # regression_model_trained_on = ["network_design", "fixed_cost_network_flow", "supply_network_planning",
+        #                                "all_problems"]
 
 
 #store the important features in a list

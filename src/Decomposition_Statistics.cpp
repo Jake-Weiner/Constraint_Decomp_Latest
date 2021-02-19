@@ -46,12 +46,11 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
     block_obj_val_ranges.push_back(svs.obj_val_range);
 
     if (number_of_constraints_in_subproblem != 0){
-        
         // structure used to contain subproblem constraint statistics
         SubproblemConstraintStatistics scs = {};
         // gather the neccesary statistics for constraints contained within the subproblem
         MPP.getSubproblemConstraintStatistics(scs,ps.edge_idxs);
-       
+        
         equality_props.push_back(scs.equality_prop);
         average_block_RHS_values.push_back(scs.average_RHS_val);
         average_block_absRHS_values.push_back(scs.average_abs_RHS_val);
