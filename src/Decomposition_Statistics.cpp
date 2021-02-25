@@ -50,7 +50,6 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
         SubproblemConstraintStatistics scs = {};
         // gather the neccesary statistics for constraints contained within the subproblem
         MPP.getSubproblemConstraintStatistics(scs,ps.edge_idxs);
-        
         equality_props.push_back(scs.equality_prop);
         average_block_RHS_values.push_back(scs.average_RHS_val);
         average_block_absRHS_values.push_back(scs.average_abs_RHS_val);
@@ -59,9 +58,8 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
         block_RHS_range.push_back(scs.largest_RHS_range);
         // Block densities (no. non_zeroes / (no. cons * no. var)
         block_densities.push_back(
-                static_cast<double>(scs.num_non_zeroes) / static_cast<double>(number_of_variables_in_subproblem * number_of_constraints_in_subproblem));
+                static_cast<double>(scs.num_non_zeroes) / (static_cast<double>(number_of_variables_in_subproblem) * static_cast<double>(number_of_constraints_in_subproblem)));
         non_zeroes_count.push_back(scs.num_non_zeroes);
-       
     }
 }
 

@@ -21,11 +21,11 @@ import pickle
 
 def main():
 
-    instance_names_training = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps"],
+    instance_names_training = [["cost266-UUE.mps", "dfn-bwin-DBE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps"
                        ]]
-    instance_names_training_flat_list= ["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps",
+    instance_names_training_flat_list= ["cost266-UUE.mps", "dfn-bwin-DBE.mps",
                       "g200x740.mps", "h50x2450.mps", "h80x6320d.mps",
                       "snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps"]
     
@@ -77,17 +77,17 @@ def main():
         X = df_combined.drop(columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)'])
         # print(X.columns)
         # capture output columns
-        Y = df_combined[['Normalised Gap (%)', 'LR Solve Time(s)']]
+        Y = 0.5 * df_combined['Normalised Gap (%)'] + 0.5 * df_combined['LR Solve Time(s)']
 
         # convert features to np array
         X_np = X.to_numpy()
-        Bound_np = Y['Normalised Gap (%)'].to_numpy()
+        Y_np = Y.to_numpy()
 
         # scoring_method = 'neg_mean_squared_error'
         #train each model on 75% of data
         # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
         for model_name, model in models:
-            reg_model = model.fit(X_np, Bound_np)
+            reg_model = model.fit(X_np, Y_np)
 
             # store models with pickle
             with open(regression_models_pickle_output_folder + "/" + model_name + "_" + problem_type + ".pkl",
@@ -113,18 +113,19 @@ def main():
     X = df_combined.drop(columns=[df.columns[0], 'Decomposition Index', "Normalised Gap (%)", 'LR Solve Time(s)'])
     # print(X.columns)
     # capture output columns
-    Y = df_combined[['Normalised Gap (%)', 'LR Solve Time(s)']]
+    # Y = df_combined[['Normalised Gap (%)', 'LR Solve Time(s)']]
+    Y = 0.5 * df_combined['Normalised Gap (%)'] + 0.5 * df_combined['LR Solve Time(s)']
 
     # convert features to np array
     X_np = X.to_numpy()
-    Bound_np = Y['Normalised Gap (%)'].to_numpy()
+    Y_np = Y.to_numpy()
 
     # scoring_method = 'neg_mean_squared_error'
     # train each model on 75% of data
     # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size=0.25, shuffle=True,
     #                                                     random_state=1)
     for model_name, model in models:
-        reg_model = model.fit(X_np, Bound_np)
+        reg_model = model.fit(X_np, Y_np)
 
         # store models with pickle
         with open(regression_models_pickle_output_folder + "/" + model_name + "_" + "all_problem_types" + ".pkl",

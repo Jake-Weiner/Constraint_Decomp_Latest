@@ -23,13 +23,15 @@ plt.style.use('ggplot')
 
 def main():
 
-    problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
-    instance_names_testing = [["ta2-UUE.mps"], [ "k16x240b.mps"], [ "snp-10-052-052.mps"]]
+    # problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
+    # instance_names_testing = [["germany50-UUM.mps"], [ "k16x240b.mps"], [ "snp-10-052-052.mps"]]
     # instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
     #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
     #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
     #                    "snp-10-052-052.mps"]]
 
+    problem_types = ["network_design", "fixed_cost_network_flow"]
+    instance_names_testing = [["germany50-UUM.mps"], [ "k16x240b.mps"]]
 
     processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 
@@ -38,6 +40,7 @@ def main():
 
     model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
 
+    heuristics_scores_root_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs"
 
     # prepare models
     models = ['OLM','SVM','SGD','KNN','DT','MLP']
@@ -52,6 +55,8 @@ def main():
 
     data_trained_on_list = ["network_design", "fixed_cost_network_flow",  "supply_network_planning", "all_problem_types"]
 
+    # heuristic_measures = ['RBA', 'Goodness', 'GCG1', 'GCG2']
+    heuristic_measures = ['Goodness']
 
     for problem_type_idx, problem_type in enumerate(problem_types):
         df_list = []
@@ -70,68 +75,84 @@ def main():
         X = df_combined.drop(columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)'])
         # print(X.columns)
         # capture output columns
-        Y = df_combined[['Normalised Gap (%)', 'LR Solve Time(s)']]
+        # Y = df_combined[['Normalised Gap (%)', 'LR Solve Time(s)']]
+        Y = 0.5 * df_combined['Normalised Gap (%)'] + 0.5 * df_combined['LR Solve Time(s)']
 
-        X_relaxed_con_prop = df_combined[['Relaxed Constraint Prop_Relaxed_Constraint_Statistics_single_stats']]
-        X_relaxed_con_prop_np = X_relaxed_con_prop.to_numpy()
         # convert features to np array
         X_np = X.to_numpy()
-        Bound_np = Y['Normalised Gap (%)'].to_numpy()
+        Y_np = Y[:-1].to_numpy()
         # print(Bound_np)
         # scoring_method = 'neg_mean_squared_error'
         # train each model on 75% of data
         # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size=0.25, shuffle=True,
         #                                                  random_state=1)
 
-        rmse_scores = []
-        Path(
-            model_prediction_output_folder + "/" + problem_type).mkdir(
-            parents=True, exist_ok=True)
-        print("for problem type " + problem_type)
-        for model_name in models:
-            for data_trained_on in data_trained_on_list:
-                with open(regression_models_pickle_input_folder + "/" + model_name + "_" + data_trained_on + ".pkl",
-                          'rb') as pickle_input_fs:
-                    model = pickle.load(pickle_input_fs)
-                    mse = mean_squared_error(Bound_np, model.predict(X_np))
-                    rmse_scores.append((math.sqrt(mse), model_name + "_trained_on_" + data_trained_on))
-                    # print("model %s has rmse - %f" % (model_name, math.sqrt(mse)))
-                    plt.figure()
-                    plt.ylabel("Prediction Gap")
-                    plt.xlabel("Actual Gap")
-                    #plot prediction vs actual gap
-                    plt.scatter(Bound_np, model.predict(X_np))
-                    plt.title('Prediction vs Actual for ' + problem_type + ' - ' + model_name)
-                    plt.tight_layout()
-                    plt.savefig(model_prediction_output_folder + "/" + problem_type + "/" + model_name + "_trained_on_" + data_trained_on + "_prediction")
-                print("Finished problem type {}, model {}, trained on {}".format(problem_type,model_name, data_trained_on))
+        # rmse_scores = []
+        # Path(
+        #     model_prediction_output_folder + "/" + problem_type).mkdir(
+        #     parents=True, exist_ok=True)
+        # print("for problem type " + problem_type)
+        # for model_name in models:
+        #     for data_trained_on in data_trained_on_list:
+        #         with open(regression_models_pickle_input_folder + "/" + model_name + "_" + data_trained_on + ".pkl",
+        #                   'rb') as pickle_input_fs:
+        #             model = pickle.load(pickle_input_fs)
+        #             mse = mean_squared_error(Y_np, model.predict(X_np))
+        #             rmse_scores.append((math.sqrt(mse), model_name + "_trained_on_" + data_trained_on))
+        #             # print("model %s has rmse - %f" % (model_name, math.sqrt(mse)))
+        #             plt.figure()
+        #             plt.ylabel("Prediction Valu")
+        #             plt.xlabel("Actual Val")
+        #             #plot prediction vs actual gap
+        #             plt.scatter(Y_np, model.predict(X_np))
+        #             plt.title('Prediction vs Actual for ' + problem_type + ' - ' + model_name)
+        #             plt.tight_layout()
+        #             plt.savefig(model_prediction_output_folder + "/" + problem_type + "/" + model_name + "_trained_on_" + data_trained_on + "_prediction")
+        #         print("Finished problem type {}, model {}, trained on {}".format(problem_type,model_name, data_trained_on))
+        #
+        # #NEED to create a new figure each time in order to plot the new data
+        # #
+        # rmse_scores.sort(key=lambda method: method[0])
+        # print(rmse_scores)
+        # plt.figure()
+        # plt.ylim(0, 1)
+        # x_pos = np.arange(len(rmse_scores))
+        # plt.bar(x_pos, [rmse_score_tuple[0] for rmse_score_tuple in rmse_scores] , color='blue')
+        # plt.xticks(x_pos, [textwrap.fill(rmse_score_tuple[1], 20) for rmse_score_tuple in rmse_scores],
+        #            rotation=90, fontsize=8, horizontalalignment="center")
+        # plt.ylabel('RMSE')
+        # plt.title('RMSE scores for ' + problem_type)
+        # plt.tight_layout()
+        #
+        # plt.savefig(model_prediction_output_folder + "/" + problem_type + "/" + "rmse_scores")
 
-        plt.figure()
-        plt.ylabel("Con Relaxed Prop")
-        plt.xlabel("Actual Gap")
-        # plot prediction vs actual gap
-        plt.scatter(Bound_np, X_relaxed_con_prop_np)
-        plt.title('Con Relax Prop vs Gap ' + problem_type + ' - ' + model_name)
-        plt.tight_layout()
-        plt.savefig(
-            model_prediction_output_folder + "/" + problem_type + "/" + "con_relax_vs_gap")
+        #generate heuristic scores
 
-        #NEED to create a new figure each time in order to plot the new data
+        # heuristics_scores = []
+        # RBA_scores = df_combined[['Relaxed Constraint Prop_Relaxed_Constraint_Statistics_single_stats']].to_numpy()
+        #
+        # heuristics_scores.append(RBA_scores)
 
-        rmse_scores.sort(key=lambda method: method[0])
-        print(rmse_scores)
-        plt.figure()
-        plt.ylim(0, 1)
-        x_pos = np.arange(len(rmse_scores))
-        plt.bar(x_pos, [rmse_score_tuple[0] for rmse_score_tuple in rmse_scores] , color='blue')
-        plt.xticks(x_pos, [textwrap.fill(rmse_score_tuple[1], 20) for rmse_score_tuple in rmse_scores],
-                   rotation=90, fontsize=8, horizontalalignment="center")
-        plt.ylabel('RMSE')
-        plt.title('RMSE scores for ' + problem_type)
-        plt.tight_layout()
 
-        plt.savefig(model_prediction_output_folder + "/" + problem_type + "/" + "rmse_scores")
+        for heuristic_index, heuristic_measure in enumerate(heuristic_measures):
 
+            heuristics_scores_input_path = heuristics_scores_root_folder + "/" + problem_type + "/" + instance_name + "/" + heuristic_measure + "_Scores.csv"
+            heuristics_scores = pd.read_csv(heuristics_scores_input_path)
+            heuristics_scores.drop(columns=heuristics_scores.columns[0], inplace=True)
+            heuristics_scores_np = heuristics_scores.to_numpy()
+            # X_relaxed_con_prop = df_combined[['Relaxed Constraint Prop_Relaxed_Constraint_Statistics_single_stats']]
+            # X_relaxed_con_prop_np = X_relaxed_con_prop.to_numpy()
+            # read in heuristic scores and plot each heuristic score against actual output
+            plt.figure()
+            plt.ylabel(heuristic_measure)
+            plt.xlabel("Balanced Output")
+            # plot prediction vs actual gap
+
+            plt.scatter(Y_np, heuristics_scores_np)
+            plt.title('{} vs Balanced Output'.format(heuristic_measure))
+            plt.tight_layout()
+            plt.savefig(
+                model_prediction_output_folder + "/" + problem_type + "/" + heuristic_measure +" vs_Balanced_Output")
 
 #store the important features in a list
 if __name__ == "__main__":

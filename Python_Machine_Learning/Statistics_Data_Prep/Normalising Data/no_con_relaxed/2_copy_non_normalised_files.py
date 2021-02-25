@@ -5,6 +5,7 @@ from shutil import copyfile
 from pathlib import Path
 import csv
 import linecache
+import re
 
 def combine_bin_int_stats(input_root_folder, output_root_folder):
 
@@ -28,8 +29,10 @@ def combine_bin_int_stats(input_root_folder, output_root_folder):
         # lines in the file are indexed from 1. Ignore the first row as these are just column header names
         current_row_number = 2
         while current_row_number < total_lines + 1:
+
             bin_line = linecache.getline(input_root_folder + "/" + "Bin_props.csv", current_row_number)
             bin_line_split = bin_line.split(",")
+            current_decomp_idx = bin_line_split[0]
             bin_props = [float(element) for element in bin_line_split[1:]]
             int_line = linecache.getline(input_root_folder + "/" + "Int_props.csv", current_row_number)
             int_line_split = int_line.split(",")
@@ -37,7 +40,7 @@ def combine_bin_int_stats(input_root_folder, output_root_folder):
 
             #zip function combines two different list
             int_bin_combined_props = [bin_prop + int_prop for int_prop, bin_prop in zip(bin_props, int_props)]
-            int_bin_line = [current_row_number - 2] + int_bin_combined_props
+            int_bin_line = [current_decomp_idx.strip("\n")] + int_bin_combined_props
             bin_int_csv_writer.writerow(int_bin_line)
             current_row_number += 1
 

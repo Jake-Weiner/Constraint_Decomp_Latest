@@ -71,25 +71,32 @@ def main():
     # instance_names = ["snp-10-004-052.mps",
     #                    "snp-10-052-052.mps"]
 
-    processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
-    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Features_Calculated"
 
-    for problem_idx, problem_type in enumerate(problem_types):
-        # create output folders if they don't already exists
-        for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
-            features_calculated_output_path = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Subproblem_Statistics"
-            # create output folders if necessary
-            Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
-            normalised_data_input_folder = processed_results_folder + "/" + problem_type + "/" + instance_name + "/Normalised_Data" + "/" + "Subproblem_Statistics"
 
-            for filename in subproblem_ave_stddev:
-                writeAveStddev(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
-                print("Finished " + filename)
-            for filename in os.listdir(normalised_data_input_folder):
-                if filename not in subproblem_ave_stddev:
-                    writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
+    processed_decomps_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
+    processed_no_con_rel_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/No_Con_Relaxed_Processed_Results"
+    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+    # # Decomp_Types = ["Decomps", "No_Con_Rel"]
+    Decomp_Types = ["No_Con_Rel"]
+    # # processed_results_folders = [processed_decomps_results_folder, processed_no_con_rel_results_folder]
+    processed_results_folders = [processed_no_con_rel_results_folder]
+    for decomp_type_idx, decomp_type in enumerate(Decomp_Types):
+        for problem_idx, problem_type in enumerate(problem_types):
+            # create output folders if they don't already exists
+            for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
+                features_calculated_output_path = features_calculated_output_folder + "/" + decomp_type + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Subproblem_Statistics"
+                # create output folders if necessary
+                Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
+                normalised_data_input_folder = processed_results_folders[decomp_type_idx] + "/" + problem_type + "/" + instance_name + "/Normalised_Data" + "/" + "Subproblem_Statistics"
+
+                for filename in subproblem_ave_stddev:
+                    writeAveStddev(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
                     print("Finished " + filename)
-            print("Finished " + instance_name)
+                for filename in os.listdir(normalised_data_input_folder):
+                    if filename not in subproblem_ave_stddev:
+                        writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
+                        print("Finished " + filename)
+                print("Finished " + instance_name)
 
 if __name__ == "__main__":
 
