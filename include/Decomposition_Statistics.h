@@ -196,11 +196,19 @@ class RelaxedConstraints {
         // double average_RHS;
         // double stddev_RHS;
 
-        vector<double> sum_LHS_values;
-        // double average_sum_LHS;
-        // double stddev_sum_LHS;
-   
 };
+
+
+struct RawInstanceConstrVals{
+    vector<int> non_zeroes;
+    vector<double> rhs_vals;
+    vector<double> constr_sum_obj;
+    vector<double> constr_sum_abs_obj;
+    vector<double> constr_largest_rhslhs_vals;
+    vector<double> constr_sum_rhslhs_vals;
+    vector<double> constr_sum_lhs_vals;
+};
+
 
 class Instance{
 
@@ -213,11 +221,22 @@ class Instance{
 
         void populateInstanceStatistics(MIPProblemProbe& MPP);
 
+        // processed values for normalisation
         void getObjExtremes(MIPProblemProbe& MPP);
         void getRHSExtremes(MIPProblemProbe& MPP);
         void getRHSLHSExtremes(MIPProblemProbe& MPP);
         void getSumObjExtremes(MIPProblemProbe& MPP);
         void getSumAbsObjExtremes(MIPProblemProbe& MPP);
+        
+    
+        void getObjTerms(MIPProblemProbe& MPP);
+        // get Constraint Raw values
+        void getConstRawValues(MIPProblemProbe& MPP);
+        // void getRHSTerms(MIPProblemProbe& MPP);
+        // void getConstNonZeroes(MIPProblemProbe& MPP);
+        // void getConstrSumObj(MIPProblemProbe& MPP);
+        // void getConstrSumAbsObj(MIPProblemProbe& MPP);
+        // void getConstrRHSLHS(MIPProblemProbe& MPP);
 
         int num_var;
         int num_const;
@@ -225,6 +244,7 @@ class Instance{
         int num_cont;
         int num_int;
         int num_non_zeroes;
+        int num_equality_constr;
         double max_obj;
         double min_obj;
         double max_rhs;
@@ -236,9 +256,12 @@ class Instance{
         double max_sum_abs_obj;
         double min_rhslhs;
         double max_rhslhs;
+        vector<double> obj_val_terms;
 
-
+        RawInstanceConstrVals ricv;
 };
+
+
 
 class LROutputs{
 

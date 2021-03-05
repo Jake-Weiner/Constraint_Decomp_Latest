@@ -10,7 +10,7 @@ void Constraint::addVarIdx(const int& var_idx_to_add){
    
 };
 
-double Constraint::getLargestRHSLHSRatio()
+double Constraint::getLargestRHSLHSRatio() const
 {
     double largest_ratio = 0.00;
     for (const auto& var_coeff : variable_coeffs) {
@@ -21,7 +21,7 @@ double Constraint::getLargestRHSLHSRatio()
     return largest_ratio;
 }
 
-double Constraint::getSumRHSLHSRatio()
+double Constraint::getSumRHSLHSRatio() const
 {
     double sum_RHS_ratio = 0.00;
     for (const auto& var_coeff : variable_coeffs) {

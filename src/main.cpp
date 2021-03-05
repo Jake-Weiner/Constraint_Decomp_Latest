@@ -292,7 +292,7 @@ int main(int argc, const char** argv)
     if (PA.get_run_greedy_decomp_flag()) {
         cout << "running greedy decomposition testing" << endl;
         GreedyDecompCreator GDC;
-        vector<double> rc_props = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 };
+        vector<double> rc_props = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
         std::ofstream outfile;
         outfile.open(para.greedy_decomp_output_file, std::ofstream::app);
         int desired_decomp_num_per_rcprop = para.greedy_decomp_size / rc_props.size();

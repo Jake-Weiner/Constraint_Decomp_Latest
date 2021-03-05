@@ -12,6 +12,7 @@ from sklearn import svm
 from sklearn.linear_model import SGDRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn import tree
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 import os
@@ -21,12 +22,12 @@ import pickle
 
 def main():
 
-    instance_names_training = [["cost266-UUE.mps", "dfn-bwin-DBE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps"],
+    instance_names_training = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "ta1-UUM.mps"],
+                      ["g200x740.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps"
                        ]]
     instance_names_training_flat_list= ["cost266-UUE.mps", "dfn-bwin-DBE.mps",
-                      "g200x740.mps", "h50x2450.mps", "h80x6320d.mps",
+                      "g200x740.mps",
                       "snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps"]
     
     instance_names_testing = []
@@ -56,7 +57,7 @@ def main():
     models.append(('SVM', svm.SVR()))
     models.append(('SGD', SGDRegressor()))
     models.append(('KNN', KNeighborsRegressor()))
-    models.append(('DT', tree.DecisionTreeRegressor()))
+    models.append(('RF', RandomForestRegressor()))
     models.append(('MLP', MLPRegressor()))
 
     #train DT model on each problem type

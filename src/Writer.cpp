@@ -280,7 +280,7 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
             << "," << "Min Obj Term" << "," << "Max Obj Term" << "," << "Min Rhs"
             << "," << "Max Rhs" << "," << "Max RHSLHS" << "," << "Min RHSLHS"
             << "," << "Max Sum Obj" << "," << "Min Sum Obj" << "," << "Max Sum Abs Obj"
-            << "," << "Min Sum Abs Obj"
+            << "," << "Min Sum Abs Obj" << "," << "No. Equality Constr"
             << endl;
         }
         else{
@@ -298,6 +298,7 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
         << "," << ins_ptr->max_obj << "," << ins_ptr->min_rhs << "," << ins_ptr->max_rhs
         << "," << ins_ptr->max_rhslhs << "," << ins_ptr->min_rhslhs << "," << ins_ptr->max_sum_obj
         << "," << ins_ptr->min_sum_obj << "," << ins_ptr->max_sum_abs_obj << "," << ins_ptr->min_sum_abs_obj
+        << "," << ins_ptr->num_equality_constr
         << endl;
     }
   
@@ -305,7 +306,17 @@ void Writer::writeInstanceStatistics(const LaPSOOutputFilenames& LOF, std::share
         cout << "unable to open Instance Statistics File: " << output_filename << endl;
     }
     outfile.close();
+
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Non_Zeroes.csv", ins_ptr->ricv.non_zeroes);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Obj_Terms.csv", ins_ptr->obj_val_terms);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/RHS_Vals.csv", ins_ptr->ricv.rhs_vals);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Constr_Sum_Obj.csv", ins_ptr->ricv.constr_sum_obj);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Constr_Sum_Abs_Obj.csv", ins_ptr->ricv.constr_sum_abs_obj);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Largest_RHSLHS.csv", ins_ptr->ricv.constr_largest_rhslhs_vals);
+    genericRawInstanceOutput(LOF.instance_statistics_folder + "/Sum_RHSLHS.csv", ins_ptr->ricv.constr_sum_rhslhs_vals);
+
     cout << "finished writing Instance Statistics" << endl;
+
 }
 
  void Writer::writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr){

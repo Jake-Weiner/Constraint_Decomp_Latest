@@ -92,8 +92,8 @@ public:
     // does the constraint contain this index
     bool containsVar(const int& var_idx) const;
 
-    double getLargestRHSLHSRatio();
-    double getSumRHSLHSRatio();
+    double getLargestRHSLHSRatio() const;
+    double getSumRHSLHSRatio() const;
 
 private: 
     vector<string> boundtypes_strings = { "Equal", "Less", "Greater" };

@@ -1,7 +1,4 @@
 # need to copy csv file
-
-
-
 from pathlib import Path
 import shutil
 

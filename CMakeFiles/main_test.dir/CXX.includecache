@@ -6,11 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomposition_Statistics.cpp
-Decomposition_Statistics.h
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomposition_Statistics.h
-MIPProblemProbe.h
-/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPProblemProbe.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Writer.cpp
+Writer.h
+/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Writer.h
+fstream
+-
+iostream
+-
 
 /home/jake/PhD/Edge_Disjoint/c++/boost_1_67_0/Build/include/boost/assert.hpp
 boost/config.hpp
@@ -1012,18 +1014,6 @@ include/HG_Edge.h
 iostream
 -
 
-include/MIPProblemProbe.h
-MIP_Problem.h
-include/MIP_Problem.h
-Util.h
-include/Util.h
-vector
--
-tuple
--
-utility
--
-
 include/MIP_Problem.h
 Constraint.h
 include/Constraint.h
@@ -1058,5 +1048,17 @@ vector
 iostream
 -
 limits
+-
+
+include/Writer.h
+vector
+-
+string
+-
+Util.h
+include/Util.h
+Decomposition_Statistics.h
+include/Decomposition_Statistics.h
+memory
 -
 

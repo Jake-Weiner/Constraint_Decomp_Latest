@@ -72,77 +72,101 @@ def writeAllStats(input_file, output_file):
 
 # def getDecompositionNonZeroes(rc_non_zero_counts_path, instance_non_zeroes):
 
-def writeQScores(subproblem_input_folder, Q_values_output_folder, instance_num_var, instance_num_constr):
-
-    density_path = subproblem_input_folder + "/" + "Densities.csv"
-    var_prop_path = subproblem_input_folder + "/" + "Var_props.csv"
-    constr_prop_path = subproblem_input_folder + "/" + "Const_props.csv"
-    D_non_zero_counts_sum_path = subproblem_input_folder + "/" + "Decomposition_Non_zero_counts.csv"
+def writeQScores(subproblem_non_zeroes_path, Q_values_output_folder):
 
     Path(Q_values_output_folder).mkdir(parents=True, exist_ok=True)
     with open(Q_values_output_folder + "/" + "Q_Scores.csv", "w") as Q_scores_outputs_fs:
-        with open(density_path, "r") as density_input_fs, open(var_prop_path, "r") as var_prop_fs, open(
-                constr_prop_path, "r") as constr_prop_fs, open(D_non_zero_counts_sum_path, "r") as D_non_zero_sum_fs:
-            density_csv_reader = csv.reader(density_input_fs, delimiter=",")
-            var_prop_csv_reader = csv.reader(var_prop_fs, delimiter=",")
-            constr_prop_csv_reader = csv.reader(constr_prop_fs, delimiter=",")
-            D_non_zero_csv_reader = csv.reader(D_non_zero_sum_fs, delimiter=",")
-            for line_number, (
-            density_line_split, var_prop_line_split, constr_prop_line_split, D_non_zero_line_split) in enumerate(
-                    zip(density_csv_reader, var_prop_csv_reader, constr_prop_csv_reader, D_non_zero_csv_reader)):
+        with open(subproblem_non_zeroes_path, "r") as non_zeroes_input_fs:
+            #calculate the total non_zeroes in the subproblems
+            non_zeroes_csv_reader = csv.reader(non_zeroes_input_fs, delimiter=",")
+            for line_number, line_split in enumerate(non_zeroes_csv_reader):
+
                 if line_number == 0:
                     Q_scores_outputs_fs.write("Decomposition Index, Q Scores" + "\n")
                 else:
+                    #calculate total number of non-zeroes in D
+                    D_non_zeroes = 0
+                    if line_number == 3:
+                        print(len(line_split[1:]))
+                        count = 0
+                        for sp_non_zero_count in line_split[1:]:
+                            if int(sp_non_zero_count) == 2:
+                                count += 1
+                            # print(sp_non_zero_count)
+                            D_non_zeroes += int(sp_non_zero_count)
+                        print(D_non_zeroes)
+                    #calculate Q score
+                        print(count)
                     Q = 0.0
-                    constr_index = 1
-                    D_non_zeroes = int(D_non_zero_line_split[1])
-                    decomp_index = int(D_non_zero_line_split[0])
-                    for index in range(1, len(density_line_split)):
-                        # print(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr))
-                        # print(density_line_split[index])
-                        # keep incrementing constr_index to find next subproblem with at least 1 constraint as some subproblems contain no constraints and therefore no density measurements
-                        if float(constr_prop_line_split[constr_index]) == 0:
-                            while float(constr_prop_line_split[constr_index]) == 0:
-                                constr_index += 1
-                        # if abs((float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr)) -
-                        #        int(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr) + 0.1)) > 0.2:
-                        #     print(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(
-                        #         constr_prop_line_split[index]) * float(instance_num_var) * float(
-                        #         instance_num_constr))
-                        #     print(float(density_line_split[index]))
-                        # print(int(float(density_line_split[index]) * float(
-                        #     var_prop_line_split[constr_index]) * float(
-                        #     constr_prop_line_split[constr_index]) * float(instance_num_var) * float(
-                        #     instance_num_constr) + 0.1))
-                        subproblem_non_zeroes = int(float(density_line_split[index]) * float(
-                            var_prop_line_split[constr_index]) * float(
-                            constr_prop_line_split[constr_index]) * float(instance_num_var) * float(
-                            instance_num_constr) + 0.1)
-                        # if subproblem_non_zeroes < 0:
-                        #     print("Density is {}".format(float(density_line_split[index])))
-                        #     print("Var prop is {}".format(float(
-                        #     var_prop_line_split[constr_index])))
-                        #     print("Constr prop is {}".format(float(
-                        #     constr_prop_line_split[constr_index])))
-                        #     print("Instance Num Var is {}".format(float(instance_num_var)))
-                        #     print("Instance Num Constr is {}".format(float(
-                        #     instance_num_constr)))
-                        #     print("Number of var * number of constr = {}".format(float(
-                        #     var_prop_line_split[constr_index]) * float(
-                        #     constr_prop_line_split[constr_index]) * float(
-                        #     instance_num_var) * float(
-                        #     instance_num_constr)))
-                        #     print("Number of subproblem non zeroes is {}".format(subproblem_non_zeroes))
 
-                        Q += (subproblem_non_zeroes / D_non_zeroes) * (1 - (subproblem_non_zeroes / D_non_zeroes))
-                        # print(float(var_prop_line_split[index]) * instance_num_var)
-                        # print(float(constr_prop_line_split[index]) * instance_num_constr)
-                        # print(var_prop_line_split[index])
-                        # print(constr_prop_line_split[index])
-                        constr_index += 1
-                        # if index > 100:
-                        #     exit(0)
-                    Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
+                    # for sp_non_zero_count in line_split[1:]:
+                    #     Q += (int(sp_non_zero_count) / D_non_zeroes) * (1 - (int(sp_non_zero_count) / D_non_zeroes))
+                    # decomp_index = int(line_split[0])
+                    #write out Q score
+                    # Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
+
+        # with open(density_path, "r") as density_input_fs, open(var_prop_path, "r") as var_prop_fs, open(
+        #         constr_prop_path, "r") as constr_prop_fs, open(D_non_zero_counts_sum_path, "r") as D_non_zero_sum_fs:
+        #     density_csv_reader = csv.reader(density_input_fs, delimiter=",")
+        #     var_prop_csv_reader = csv.reader(var_prop_fs, delimiter=",")
+        #     constr_prop_csv_reader = csv.reader(constr_prop_fs, delimiter=",")
+        #     D_non_zero_csv_reader = csv.reader(D_non_zero_sum_fs, delimiter=",")
+        #     for line_number, (
+        #     density_line_split, var_prop_line_split, constr_prop_line_split, D_non_zero_line_split) in enumerate(
+        #             zip(density_csv_reader, var_prop_csv_reader, constr_prop_csv_reader, D_non_zero_csv_reader)):
+        #         if line_number == 0:
+        #             Q_scores_outputs_fs.write("Decomposition Index, Q Scores" + "\n")
+        #         else:
+        #             Q = 0.0
+        #             constr_index = 1
+        #             D_non_zeroes = int(D_non_zero_line_split[1])
+        #             decomp_index = int(D_non_zero_line_split[0])
+        #             for index in range(1, len(density_line_split)):
+        #                 # print(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr))
+        #                 # print(density_line_split[index])
+        #                 # keep incrementing constr_index to find next subproblem with at least 1 constraint as some subproblems contain no constraints and therefore no density measurements
+        #                 # if float(constr_prop_line_split[constr_index]) == 0:
+        #                 #     while float(constr_prop_line_split[constr_index]) == 0:
+        #                 #         constr_index += 1
+        #                 # if abs((float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr)) -
+        #                 #        int(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(constr_prop_line_split[index]) * float(instance_num_var) * float(instance_num_constr) + 0.1)) > 0.2:
+        #                 #     print(float(density_line_split[index]) * float(var_prop_line_split[index]) * float(
+        #                 #         constr_prop_line_split[index]) * float(instance_num_var) * float(
+        #                 #         instance_num_constr))
+        #                 #     print(float(density_line_split[index]))
+        #                 # print(int(float(density_line_split[index]) * float(
+        #                 #     var_prop_line_split[constr_index]) * float(
+        #                 #     constr_prop_line_split[constr_index]) * float(instance_num_var) * float(
+        #                 #     instance_num_constr) + 0.1))
+        #                 subproblem_non_zeroes = int(float(density_line_split[index]) * float(
+        #                     var_prop_line_split[constr_index]) * float(
+        #                     constr_prop_line_split[constr_index]) * float(instance_num_var) * float(
+        #                     instance_num_constr) + 0.1)
+        #                 # if subproblem_non_zeroes < 0:
+        #                 #     print("Density is {}".format(float(density_line_split[index])))
+        #                 #     print("Var prop is {}".format(float(
+        #                 #     var_prop_line_split[constr_index])))
+        #                 #     print("Constr prop is {}".format(float(
+        #                 #     constr_prop_line_split[constr_index])))
+        #                 #     print("Instance Num Var is {}".format(float(instance_num_var)))
+        #                 #     print("Instance Num Constr is {}".format(float(
+        #                 #     instance_num_constr)))
+        #                 #     print("Number of var * number of constr = {}".format(float(
+        #                 #     var_prop_line_split[constr_index]) * float(
+        #                 #     constr_prop_line_split[constr_index]) * float(
+        #                 #     instance_num_var) * float(
+        #                 #     instance_num_constr)))
+        #                 #     print("Number of subproblem non zeroes is {}".format(subproblem_non_zeroes))
+        #
+        #                 Q += (subproblem_non_zeroes / D_non_zeroes) * (1 - (subproblem_non_zeroes / D_non_zeroes))
+        #                 # print(float(var_prop_line_split[index]) * instance_num_var)
+        #                 # print(float(constr_prop_line_split[index]) * instance_num_constr)
+        #                 # print(var_prop_line_split[index])
+        #                 # print(constr_prop_line_split[index])
+        #                 constr_index += 1
+        #                 # if index > 100:
+        #                 #     exit(0)
+        #             Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
 
 def writePScores(relaxed_constraint_prop_path, P_values_output_folder):
     lambda_val = 5
@@ -174,18 +198,16 @@ def writeGoodnessScores(Q_P_scores_input_folder, Goodness_score_output_folder):
 
 
 def main():
-    problem_types = ["network_design", "fixed_cost_network_flow"]
-
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"]]
-                      # ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                      #  "snp-10-052-052.mps"]]
-
-    # problem_types = ["supply_network_planning"]
+    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
     #
-    # instance_names = [
+    # instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
     #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
     #                    "snp-10-052-052.mps"]]
+
+    problem_types = ["fixed_cost_network_flow"]
+
+    instance_names = [["g200x740.mps"]]
 
     # Calculate Non zeroes Count in each
     # Sum up all non zero counts
@@ -193,45 +215,44 @@ def main():
     # processed_no_con_rel_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/No_Con_Relaxed_Processed_Results"
     # features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
     # Decomp_Types = ["Decomps", "No_Con_Rel"]
-    Decomp_Types = ["No_Con_Rel"]
+
     # processed_results_folders = [processed_decomps_results_folder, processed_no_con_rel_results_folder]
     separator = ","
-    for decomp_type_idx, decomp_type in enumerate(Decomp_Types):
-        for problem_idx, problem_type in enumerate(problem_types):
-            # create output folders if they don't already exists
-            for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
 
-                instance_characteristics_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/Instance_Statistics" + "/" + "Instance_Statistics.csv"
-                instance_non_zeroes = getInstanceNonZeroes(instance_characteristics_path)
-                instance_num_var, instance_num_constr = getInstanceNumVarsConstr(instance_characteristics_path)
-                #
-                # #create Non Zero Counts
-                # with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics" + "/" + "Decomposition_Non_zero_counts.csv", "w") as D_nonzero_counts_sum_output_fs:
-                #     with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Relaxed_Constraint_Statistics" + "/" + "Non_zero_counts.csv", "r") as rc_nonzero_counts_input_fs:
-                #         csvreader = csv.reader(rc_nonzero_counts_input_fs, delimiter=",")
-                #         for line_number, line_split in enumerate(csvreader):
-                #             if line_number == 0:
-                #                 D_nonzero_counts_sum_output_fs.write(separator.join(line_split) + "\n")
-                #             else:
-                #                 rc_sum = 0
-                #                 for rc_non_zero in line_split[1:]:
-                #                     rc_sum += int(rc_non_zero)
-                #                 new_list = [line_split[0], str(instance_non_zeroes - rc_sum)]
-                #                 D_nonzero_counts_sum_output_fs.write(separator.join(new_list) + "\n")
+    for problem_idx, problem_type in enumerate(problem_types):
+        # create output folders if they don't already exists
+        for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
 
-                # CALCULATE Q SCORES
-                subproblem_input_folder = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics"
-                Q_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-                # writeQScores(subproblem_input_folder, Q_values_output_folder, instance_num_var, instance_num_constr)
+            instance_characteristics_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/Instance_Statistics" + "/" + "Instance_Statistics.csv"
+            # instance_non_zeroes = getInstanceNonZeroes(instance_characteristics_path)
+            # instance_num_var, instance_num_constr = getInstanceNumVarsConstr(instance_characteristics_path)
 
-                # CALCULATE P SCORES
+            # #create Non Zero Counts
+            # with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics" + "/" + "Decomposition_Non_zero_counts.csv", "w") as D_nonzero_counts_sum_output_fs:
+            #     with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Relaxed_Constraint_Statistics" + "/" + "Non_zero_counts.csv", "r") as rc_nonzero_counts_input_fs:
+            #         csvreader = csv.reader(rc_nonzero_counts_input_fs, delimiter=",")
+            #         for line_number, line_split in enumerate(csvreader):
+            #             if line_number == 0:
+            #                 D_nonzero_counts_sum_output_fs.write(separator.join(line_split) + "\n")
+            #             else:
+            #                 rc_sum = 0
+            #                 for rc_non_zero in line_split[1:]:
+            #                     rc_sum += int(rc_non_zero)
+            #                 new_list = [line_split[0], str(instance_non_zeroes - rc_sum)]
+            #                 D_nonzero_counts_sum_output_fs.write(separator.join(new_list) + "\n")
 
-                relaxed_constraint_prop_path = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results" + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Relaxed_Constraint_Statistics" + "/" + "single_stats.csv"
-                P_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-                writePScores(relaxed_constraint_prop_path, P_values_output_folder)
+            # CALCULATE Q SCORES
+            subproblem_non_zeroes_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics" + "/" + "non_zeroes.csv"
+            Q_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
+            writeQScores(subproblem_non_zeroes_path, Q_values_output_folder)
 
-                Goodness_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-                writeGoodnessScores(Q_values_output_folder, Goodness_values_output_folder)
+            # CALCULATE P SCORES
+            relaxed_constraint_prop_path = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results" + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Relaxed_Constraint_Statistics" + "/" + "single_stats.csv"
+            P_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
+            writePScores(relaxed_constraint_prop_path, P_values_output_folder)
+
+            Goodness_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
+            writeGoodnessScores(Q_values_output_folder, Goodness_values_output_folder)
 
 
 

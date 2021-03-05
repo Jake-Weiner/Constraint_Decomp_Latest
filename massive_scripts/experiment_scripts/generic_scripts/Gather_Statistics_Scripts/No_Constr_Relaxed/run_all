@@ -1,3 +1,0 @@
-#!/bin/bash
-
-for i in {0..XXXXX}; do sbatch "./job${i}_script"; done

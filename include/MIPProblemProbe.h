@@ -16,11 +16,16 @@ namespace Decomposition_Statistics{
     struct SubproblemConstraintStatistics;
     struct SubproblemVariableStatistics;
     struct RelaxedConstraintStatistics;
+    struct RawInstanceConstrVals;
 }
+
+
+
 
 using Decomposition_Statistics::SubproblemConstraintStatistics;
 using Decomposition_Statistics::SubproblemVariableStatistics;
 using Decomposition_Statistics::RelaxedConstraintStatistics;
+using Decomposition_Statistics::RawInstanceConstrVals;
 
 class MIPProblemProbe{
     public:
@@ -66,6 +71,12 @@ class MIPProblemProbe{
         std::pair<double,double> getSumObjExtremes();
         std::pair<double,double> getSumAbsObjExtremes();
 
+        void getInstanceConstraintRawValues(RawInstanceConstrVals& ricv);
+
+        // populates the given vector with the coefficients of the obj function
+        void getInstanceObjTerms(vector<double>& obj_terms);
+        // returns number of equality type constraints 
+        int getInstanceEquality();
         // get constraints containing a specific variable index
         vector<int> getConstraintsContainingVar(const int& var_idx);
     

@@ -67,6 +67,7 @@ class Writer{
         void writeRelaxedConstraintSingleValues(const LaPSOOutputFilenames& LOF,  std::shared_ptr<RelaxedConstraints> rcs_ptr);
         void writeLROutputs(const LaPSOOutputFilenames& LOF, std::shared_ptr<LROutputs> lro_ptr);
         void writeLPOutputs(const string& output_filename, double bound, double time);
+    
     private:
 
         // generic raw subproblem statistics output
@@ -95,7 +96,30 @@ class Writer{
                 outfile << endl;
             }
         }
+        template<class T1>
+        void genericRawInstanceOutput(const string& output_filename, vector<T1> raw_data){
+            std::cout << "writing Raw Instance Statistics to " << output_filename << endl; 
+            // file doesn't exist
+            if (!fileExists(output_filename)){
+                std::ofstream outfile;
+                outfile.open(output_filename);
+                if (outfile){
+                    outfile << "Raw Data" << std::endl;
+                }
+                outfile.close();
+            }
 
+            // Then populate file with statistics
+            std::ofstream outfile;
+            outfile.open(output_filename, std::ofstream::app);
+            if (outfile) {
+                for (const auto& val : raw_data){
+                    outfile << val << endl;
+                }
+            }
+        }
+
+        
        
 };
 

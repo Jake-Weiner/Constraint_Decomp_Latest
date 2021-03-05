@@ -1,0 +1,9 @@
+#!/bin/bash
+
+local_copy="/home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts/generic_scripts/Decomp_Creation_Scripts/No_Constraints_Relaxed/no_con_relaxed_con_vec.csv"
+problem_type="network_design"
+
+for INSTANCE_NAME in cost266-UUE.mps dfn-bwin-DBE.mps germany50-UUM.mps ta1-UUM.mps ta2-UUE.mps
+do
+	scp $local_copy jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/$problem_type/$INSTANCE_NAME/decompositions/
+done

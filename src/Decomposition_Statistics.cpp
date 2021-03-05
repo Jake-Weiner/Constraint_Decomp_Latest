@@ -139,4 +139,8 @@ void Instance::getSumAbsObjExtremes(MIPProblemProbe& MPP){
     num_cont = MPP.getNumMIPCont();
     num_int = MPP.getNumMIPInt();
     num_non_zeroes = MPP.getNumMIPNonZero();
+    num_equality_constr = MPP.getInstanceEquality();
+    MPP.getInstanceConstraintRawValues(ricv);
+    MPP.getInstanceObjTerms(obj_val_terms);
+
 }

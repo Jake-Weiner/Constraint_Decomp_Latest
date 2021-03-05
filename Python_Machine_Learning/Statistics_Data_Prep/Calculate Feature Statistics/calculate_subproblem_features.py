@@ -4,6 +4,7 @@ import os
 
 from pathlib import Path
 
+
 def calculateStats(data_list):
     min_val, max_val, ave, stddev = 0.0, 0.0, 0.0, 0.0
     data_list_float = [float(i) for i in data_list]

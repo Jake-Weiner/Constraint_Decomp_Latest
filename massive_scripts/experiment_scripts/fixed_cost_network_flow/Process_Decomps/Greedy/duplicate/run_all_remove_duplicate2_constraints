@@ -1,4 +1,0 @@
-#!/bin/bash
-
-for i in {0..3}; do sbatch "./remove_duplicate2_constraints_job_script_${i}"; done
-

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+local_copy="/home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts/generic_scripts/Decomp_Creation_Scripts/No_Constraints_Relaxed/no_con_relaxed_con_vec.csv"
+problem_type="fixed_cost_network_flow"
+
+for INSTANCE_NAME in g200x740.mps h50x2450.mps h80x6320d.mps k16x240b.mps
+do
+	scp -r $local_copy jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/$problem_type/$INSTANCE_NAME/decompositions/
+done
+
+
