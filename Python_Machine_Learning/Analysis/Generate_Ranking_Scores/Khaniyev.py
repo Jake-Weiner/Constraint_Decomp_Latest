@@ -86,24 +86,15 @@ def writeQScores(subproblem_non_zeroes_path, Q_values_output_folder):
                 else:
                     #calculate total number of non-zeroes in D
                     D_non_zeroes = 0
-                    if line_number == 3:
-                        print(len(line_split[1:]))
-                        count = 0
-                        for sp_non_zero_count in line_split[1:]:
-                            if int(sp_non_zero_count) == 2:
-                                count += 1
-                            # print(sp_non_zero_count)
-                            D_non_zeroes += int(sp_non_zero_count)
-                        print(D_non_zeroes)
+                    for sp_non_zero_count in line_split[1:]:
+                        D_non_zeroes += int(sp_non_zero_count)
                     #calculate Q score
-                        print(count)
                     Q = 0.0
-
-                    # for sp_non_zero_count in line_split[1:]:
-                    #     Q += (int(sp_non_zero_count) / D_non_zeroes) * (1 - (int(sp_non_zero_count) / D_non_zeroes))
-                    # decomp_index = int(line_split[0])
-                    #write out Q score
-                    # Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
+                    for sp_non_zero_count in line_split[1:]:
+                        Q += (int(sp_non_zero_count) / D_non_zeroes) * (1 - (int(sp_non_zero_count) / D_non_zeroes))
+                    decomp_index = int(line_split[0])
+                    # write out Q score
+                    Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
 
         # with open(density_path, "r") as density_input_fs, open(var_prop_path, "r") as var_prop_fs, open(
         #         constr_prop_path, "r") as constr_prop_fs, open(D_non_zero_counts_sum_path, "r") as D_non_zero_sum_fs:
@@ -168,6 +159,7 @@ def writeQScores(subproblem_non_zeroes_path, Q_values_output_folder):
         #                 #     exit(0)
         #             Q_scores_outputs_fs.write(str(decomp_index) + "," + str(Q) + "\n")
 
+# Pvalue is e^(-lambda * (relaxed_const_prop))
 def writePScores(relaxed_constraint_prop_path, P_values_output_folder):
     lambda_val = 5
     Path(P_values_output_folder).mkdir(parents=True, exist_ok=True)
@@ -190,7 +182,7 @@ def writeGoodnessScores(Q_P_scores_input_folder, Goodness_score_output_folder):
             P_Scores_csvreader = csv.reader(P_scores_input_fs, delimiter=",")
             for line_number, (Q_line_split, P_line_split) in enumerate(zip(Q_Scores_csvreader, P_Scores_csvreader)):
                 if line_number == 0:
-                    Goodness_scores_output_fs.write("Decomposition Index, Goodness Scores" + "\n")
+                    Goodness_scores_output_fs.write("Decomposition Index,Goodness Scores" + "\n")
                 else:
                     Goodness_score = float(Q_line_split[1]) * float(P_line_split[1])
                     decomp_index = Q_line_split[0]
@@ -198,62 +190,42 @@ def writeGoodnessScores(Q_P_scores_input_folder, Goodness_score_output_folder):
 
 
 def main():
-    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    #
-    # instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
+
+    # instance_names_testing_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
     #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
     #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
     #                    "snp-10-052-052.mps"]]
 
-    problem_types = ["fixed_cost_network_flow"]
 
-    instance_names = [["g200x740.mps"]]
-
+    instance_names_testing = [["germany50-UUM.mps"], ["k16x240b.mps"],["snp-10-052-052.mps"]]
+    number_of_batches = 10
     # Calculate Non zeroes Count in each
     # Sum up all non zero counts
-    raw_decomps_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Massive_Outputs"
-    # processed_no_con_rel_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/No_Con_Relaxed_Processed_Results"
-    # features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-    # Decomp_Types = ["Decomps", "No_Con_Rel"]
+    raw_decomps_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Massive_Outputs/Ranking"
+    external_processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Ranking"
+    features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Features_Calculated"
 
-    # processed_results_folders = [processed_decomps_results_folder, processed_no_con_rel_results_folder]
-    separator = ","
 
     for problem_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exists
-        for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
+        for instance_idx, instance_name in enumerate(instance_names_testing[problem_idx]):
+            for batch_number in range(number_of_batches):
 
-            instance_characteristics_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/Instance_Statistics" + "/" + "Instance_Statistics.csv"
-            # instance_non_zeroes = getInstanceNonZeroes(instance_characteristics_path)
-            # instance_num_var, instance_num_constr = getInstanceNumVarsConstr(instance_characteristics_path)
+                #Ranking output fiolder
+                ranking_scores_output_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) + "/" + "Ranking_Method_Scores"
+                Path(ranking_scores_output_folder).mkdir(parents=True, exist_ok=True)
+                # CALCULATE Q SCORES
+                subproblem_non_zeroes_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) + "/" + "Subproblem_Statistics" + "/" + "non_zeroes.csv"
+                writeQScores(subproblem_non_zeroes_path, ranking_scores_output_folder)
+                # CALCULATE P SCORES
+                relaxed_constraint_prop_path = external_processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) + "/" + "Normalised_Data" + "/" + "Relaxed_Constraint_Statistics" + "/" + "single_stats.csv"
+                writePScores(relaxed_constraint_prop_path, ranking_scores_output_folder)
+    
 
-            # #create Non Zero Counts
-            # with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics" + "/" + "Decomposition_Non_zero_counts.csv", "w") as D_nonzero_counts_sum_output_fs:
-            #     with open(raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Relaxed_Constraint_Statistics" + "/" + "Non_zero_counts.csv", "r") as rc_nonzero_counts_input_fs:
-            #         csvreader = csv.reader(rc_nonzero_counts_input_fs, delimiter=",")
-            #         for line_number, line_split in enumerate(csvreader):
-            #             if line_number == 0:
-            #                 D_nonzero_counts_sum_output_fs.write(separator.join(line_split) + "\n")
-            #             else:
-            #                 rc_sum = 0
-            #                 for rc_non_zero in line_split[1:]:
-            #                     rc_sum += int(rc_non_zero)
-            #                 new_list = [line_split[0], str(instance_non_zeroes - rc_sum)]
-            #                 D_nonzero_counts_sum_output_fs.write(separator.join(new_list) + "\n")
+                writeGoodnessScores(ranking_scores_output_folder, ranking_scores_output_folder)
 
-            # CALCULATE Q SCORES
-            subproblem_non_zeroes_path = raw_decomps_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Subproblem_Statistics" + "/" + "non_zeroes.csv"
-            Q_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-            writeQScores(subproblem_non_zeroes_path, Q_values_output_folder)
-
-            # CALCULATE P SCORES
-            relaxed_constraint_prop_path = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results" + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Relaxed_Constraint_Statistics" + "/" + "single_stats.csv"
-            P_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-            writePScores(relaxed_constraint_prop_path, P_values_output_folder)
-
-            Goodness_values_output_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Heuristic_Outputs" + "/" + problem_type + "/" + instance_name
-            writeGoodnessScores(Q_values_output_folder, Goodness_values_output_folder)
-
+                print("Finished {}".format(instance_name))
 
 
 if __name__ == "__main__":

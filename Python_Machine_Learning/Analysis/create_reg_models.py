@@ -19,9 +19,7 @@ import os
 import statistics
 import pickle
 
-
 def main():
-
     instance_names_training = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "ta1-UUM.mps"],
                       ["g200x740.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps"

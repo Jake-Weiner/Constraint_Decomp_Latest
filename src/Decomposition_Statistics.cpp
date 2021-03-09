@@ -64,7 +64,7 @@ void Subproblems::generateBlockStatistics(const Partition_Struct& ps, MIPProblem
 }
 
 
-// go through and replace averages wioth the raw data
+// go through and replace averages with the raw data
 void RelaxedConstraints::generate_statistics(MIPProblemProbe& MPP, const vector<int>& relaxed_constraint_indices){
 
     // proportion of relaxed constraints out of total constraints

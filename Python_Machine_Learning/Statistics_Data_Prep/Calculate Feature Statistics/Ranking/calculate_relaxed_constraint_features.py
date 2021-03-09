@@ -46,32 +46,28 @@ def main():
 
 
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
-                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                       "snp-10-052-052.mps"]]
-
-    external_processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
-    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+    instance_names_testing = [["germany50-UUM.mps"], ["k16x240b.mps"], ["snp-10-052-052.mps"]]
+    external_processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results/Ranking"
+    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Features_Calculated"
 
     # processed_results_folders = [external_processed_results_folder, processed_no_con_rel_results_folder]
-
+    number_of_batches = 10
     for problem_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exists
-        for instance_idx, instance_name in enumerate(instance_names[problem_idx]):
-            features_calculated_output_path = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/Features_Calculated" + "/" + "Relaxed_Constraint_Statistics"
-            #create output folders if necessary
-            Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
-            normalised_data_input_folder =  external_processed_results_folder + "/" + problem_type + "/" + instance_name + "/Normalised_Data" + "/" + "Relaxed_Constraint_Statistics"
-            # for each relaxed constraint file, calculate and output the features
-            for filename in os.listdir(normalised_data_input_folder):
-                if filename != "single_stats.csv":
-                    writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
-
-            # single stats file doesn't require any manipulation, just copy the files across as these are already features
-            copyfile(normalised_data_input_folder + "/" + "single_stats.csv", features_calculated_output_path + "/" + "single_stats.csv")
-            print("Finished " + instance_name)
+        for instance_idx, instance_name in enumerate(instance_names_testing[problem_idx]):
+            for batch_number in range(number_of_batches):
+                features_calculated_output_path = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) +  "/Features_Calculated" + "/" + "Relaxed_Constraint_Statistics"
+                #create output folders if necessary
+                Path(features_calculated_output_path).mkdir(parents=True, exist_ok=True)
+                normalised_data_input_folder =  external_processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) +  "/Normalised_Data" + "/" + "Relaxed_Constraint_Statistics"
+                # for each relaxed constraint file, calculate and output the features
+                for filename in os.listdir(normalised_data_input_folder):
+                    if filename != "single_stats.csv":
+                        writeAllStats(normalised_data_input_folder + "/" + filename, features_calculated_output_path + "/" + filename)
+    
+                # single stats file doesn't require any manipulation, just copy the files across as these are already features
+                copyfile(normalised_data_input_folder + "/" + "single_stats.csv", features_calculated_output_path + "/" + "single_stats.csv")
+                print("Finished " + instance_name)
 
 if __name__ == "__main__":
 
