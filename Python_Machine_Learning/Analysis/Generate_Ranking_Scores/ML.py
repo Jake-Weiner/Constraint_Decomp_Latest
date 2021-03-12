@@ -24,6 +24,7 @@ plt.style.use('ggplot')
 def main():
 
     problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
+    data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
     instance_names_testing = [["germany50-UUM.mps"], [ "k16x240b.mps"], [ "snp-10-052-052.mps"]]
 
     features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Features_Calculated"
@@ -50,7 +51,6 @@ def main():
                     parents=True, exist_ok=True)
                 print("for problem type " + problem_type)
                 # data_trained_on_list = [problem_type, "all_problem_types"]
-                data_trained_on_list = problem_types
                 for model_name in models:
                     for data_trained_on in data_trained_on_list:
                         with open(regression_models_pickle_input_folder + "/" + model_name + "_" + data_trained_on + ".pkl",

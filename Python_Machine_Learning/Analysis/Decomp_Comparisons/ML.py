@@ -27,17 +27,17 @@ def main():
     problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
     instance_names_testing = [["germany50-UUM.mps"], [ "k16x240b.mps"], [ "snp-10-052-052.mps"]]
 
-    features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Features_Calculated"
+    features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 
     regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
     model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated/Ranking"
+    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
     # prepare models
     ML_names = ['OLM','SVM','SGD','KNN','RF','MLP']
     heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
-    number_of_batches = 10
-    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Features_Calculated"
-    batch_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Ranking/Batch_Results"
+
+    features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+    batch_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Batch_Results"
 
     # read in scores file
     data_trained_on_list = ["network_design", "fixed_cost_network_flow",  "supply_network_planning", "all_problem_types"]
@@ -58,35 +58,26 @@ def main():
                             batch_outputs_fs.write(
                                 problem_type + "\n")
                             batch_outputs_fs.write(
-                                "Ranking Method,Mean-Mean Decomp Score,Mean-Decomp Score Stddev" + "\n")
+                                "Ranking Method,Mean Decomp Score,Decomp Score Stddev" + "\n")
 
                     with open(batch_output_folder + "/" + "batch_results.csv", "a+") as batch_outputs_fs:
-                        batch_means = []
-                        batch_stddevs = []
-                        for batch_number in range(number_of_batches):
-                            features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                                batch_number) + "/" + "Features_Collated"
-                            input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                                batch_number) + "/" + "Features_Collated" + "/" + "collated.csv"
-                            # read in collated data, which contains the decomp value
-                            df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
-                            scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                                batch_number) + "/" + "Ranking_Method_Scores"
+                        features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
+                        input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
+                        # read in collated data, which contains the decomp value
+                        df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
+                        scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
 
-                            ml_scores_df = pd.read_csv(scores_folder + "/" + ML_name + "_" + data_trained_on + ".csv")
-                            # get the decomp indexes of the best n decompisitions as predicted by the ML model
-                            smallest_ml_values_decomp_indexes = ml_scores_df.nsmallest(10, 'ML predicted val')['Decomposition Index']
-                            decomp_scores = []
-                            #for each decomp index of the best 10 predicted decomps, get the actual decomp scores
-                            for decomp_idx in smallest_ml_values_decomp_indexes:
-                                decomp_scores.append(
-                                    df_collated[df_collated['Decomposition Index'] == decomp_idx]["Decomp Score"].values[0])
-                            #calculate both mean and stddev of best predicted decomps
-                            batch_means.append(statistics.mean(decomp_scores))
-                            batch_stddevs.append(statistics.pstdev(decomp_scores))
-
-                        batch_outputs_fs.write("{}_{},{},{} \n".format(ML_name, data_trained_on, statistics.mean(batch_means),
-                                                                              statistics.pstdev(batch_stddevs)))
+                        ml_scores_df = pd.read_csv(scores_folder + "/" + ML_name + "_" + data_trained_on + ".csv")
+                        # get the decomp indexes of the best n decompisitions as predicted by the ML model
+                        smallest_ml_values_decomp_indexes = ml_scores_df.nsmallest(10, 'ML predicted val')['Decomposition Index']
+                        decomp_scores = []
+                        #for each decomp index of the best 10 predicted decomps, get the actual decomp scores
+                        for decomp_idx in smallest_ml_values_decomp_indexes:
+                            decomp_scores.append(
+                                df_collated[df_collated['Decomposition Index'] == decomp_idx]["Decomp Score"].values[0])
+                        #calculate both mean and stddev of best predicted decomps
+                        batch_outputs_fs.write("{}_{},{},{} \n".format(ML_name, data_trained_on, statistics.mean(decomp_scores),
+                                                                              statistics.pstdev(decomp_scores)))
                     print("Finished {}".format(instance_name))
                 print("Finished {}".format(data_trained_on))
             print("Finished {}".format(problem_type))
@@ -108,42 +99,35 @@ def main():
                             "Ranking Method,Mean-Mean Decomp Score,Mean-Decomp Score Stddev" + "\n")
 
                 with open(batch_output_folder + "/" + "batch_results.csv", "a+") as batch_outputs_fs:
-                    batch_means = []
-                    batch_stddevs = []
-                    for batch_number in range(number_of_batches):
-                        features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                            batch_number) + "/" + "Features_Collated"
-                        input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                            batch_number) + "/" + "Features_Collated" + "/" + "collated.csv"
-                        # read in collated data, which contains the decomp value
-                        df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
-                        scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(
-                            batch_number) + "/" + "Ranking_Method_Scores"
 
-                        heuristic_scores_df = pd.read_csv(
-                            scores_folder + "/" + heuristic_name + "_Scores" + ".csv")
-                        # get the decomp indexes of the best n decompisitions as predicted by the ML model
-                        best_heur_values_decomp_indexes = pd.DataFrame()
-                        if heuristic_name == 'RBA':
-                            best_heur_values_decomp_indexes = heuristic_scores_df.nsmallest(10, heuristic_name + " Scores")[
+
+                    features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
+                    input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
+                    # read in collated data, which contains the decomp value
+                    df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
+                    scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
+
+                    heuristic_scores_df = pd.read_csv(
+                        scores_folder + "/" + heuristic_name + "_Scores" + ".csv")
+                    # get the decomp indexes of the best n decompisitions as predicted by the ML model
+                    best_heur_values_decomp_indexes = pd.DataFrame()
+                    if heuristic_name == 'RBA':
+                        best_heur_values_decomp_indexes = heuristic_scores_df.nsmallest(10, heuristic_name + " Scores")[
+                        'Decomposition Index']
+                    else:
+                        best_heur_values_decomp_indexes = heuristic_scores_df.nlargest(10, heuristic_name + " Scores")[
                             'Decomposition Index']
-                        else:
-                            best_heur_values_decomp_indexes = heuristic_scores_df.nlargest(10, heuristic_name + " Scores")[
-                                'Decomposition Index']
-                        decomp_scores = []
+                    decomp_scores = []
 
-                        # for each decomp index of the best 10 predicted decomps, get the actual decomp scores
-                        for decomp_idx in best_heur_values_decomp_indexes:
-                            decomp_scores.append(
-                                df_collated[df_collated['Decomposition Index'] == decomp_idx][
-                                    "Decomp Score"].values[0])
-                        # calculate both mean and stddev of best predicted decomps
-                        batch_means.append(statistics.mean(decomp_scores))
-                        batch_stddevs.append(statistics.pstdev(decomp_scores))
-
+                    # for each decomp index of the best 10 predicted decomps, get the actual decomp scores
+                    for decomp_idx in best_heur_values_decomp_indexes:
+                        decomp_scores.append(
+                            df_collated[df_collated['Decomposition Index'] == decomp_idx][
+                                "Decomp Score"].values[0])
+                    # calculate both mean and stddev of best predicted decomps
                     batch_outputs_fs.write(
-                        "{},{},{} \n".format(heuristic_name, statistics.mean(batch_means),
-                                                statistics.pstdev(batch_stddevs)))
+                        "{},{},{} \n".format(heuristic_name, statistics.mean(decomp_scores),
+                                                statistics.pstdev(decomp_scores)))
                 print("Finished {}".format(instance_name))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(ML_name))

@@ -56,10 +56,6 @@ def main():
                 df_final["Decomp Score"] =  0.5 * df_final['Normalised Gap (%)'] + 0.5 * df_final['LR Solve Time(s)']
                 df_final.to_csv(features_collated_folder + "/collated.csv")
                 print(df_final.isna().sum().sum())
-                # df1 = df_final[df_final.isna().any(axis=1)]
-                # print(df1[df1.isna()])
-                # df_final.fillna(0,inplace=True)
-                # print(df_final.isna().sum().sum())
                 print("Finished " + instance_name)
 
 
