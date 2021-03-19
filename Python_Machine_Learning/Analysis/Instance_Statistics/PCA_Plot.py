@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 def main():
     # read in dataset
-    processed_results_root_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
+    processed_results_root_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
     output_folder = processed_results_root_folder + "/" + "Instance_Features"
     output_path = output_folder + "/" + "Instance_Features.csv"
     df = pd.read_csv(output_path)
@@ -51,16 +51,13 @@ def main():
 
     # Plot
     fig, ax = plt.subplots()
+    ax.set_xlabel("Prinicipal Component 1 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[0]))
+    ax.set_ylabel("Prinicipal Component 2 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[1]))
     ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
     for name, group in groups:
         ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=6, label=name)
     ax.legend()
     plt.xlim([-2, 2])
-    # plt.scatter(projected[:, 0], projected[:, 1],
-    #             c=Y.map(colors), label=Y.map(colors), edgecolor='none', alpha=0.7)
-    # plt.xlabel('component 1')
-    # plt.ylabel('component 2')
-    # plt.legend()
     plt.savefig(output_folder + "/PCA_Analysis")
 
 

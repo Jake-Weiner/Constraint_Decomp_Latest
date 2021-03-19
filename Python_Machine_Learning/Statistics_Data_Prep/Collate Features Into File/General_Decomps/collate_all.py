@@ -6,8 +6,8 @@ from pathlib import Path
 #this script collates all features into the same row to be used for processing
 def main():
 
-    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    problem_types = ["network_design", "fixed_cost_network_flow"]
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    # problem_types = ["network_design", "fixed_cost_network_flow"]
     # instance_names = [["germany50-UUM.mps"], ["k16x240b.mps"], ["snp-10-052-052.mps"]]
 
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],

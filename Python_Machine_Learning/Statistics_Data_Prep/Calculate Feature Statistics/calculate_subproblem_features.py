@@ -62,8 +62,8 @@ def main():
     subproblem_ave_stddev = ["Sum_obj.csv", "Sum_abs_obj.csv", "Obj_range.csv", "average_RHS.csv",
                              "average_abs_RHS.csv", "Largest_RHSLHS.csv", "RHS_range.csv", "Shapes.csv"]
 
-    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    problem_types = ["network_design", "fixed_cost_network_flow"]
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    # problem_types = ["network_design", "fixed_cost_network_flow"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",

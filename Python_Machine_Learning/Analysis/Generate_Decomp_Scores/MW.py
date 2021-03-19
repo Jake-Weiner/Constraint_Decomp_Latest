@@ -28,9 +28,7 @@ def getInstanceNumVarsConstr(instance_characteristics_path):
                 num_constr = int(line_split[num_constr_idx])
     return num_vars, num_constr
 
-
 def writeMWScores(relaxed_constraint_prop_path, var_props_path, constr_props_path, instance_characteristic_path, MW_output_path):
-
     decomp_col_index = 0
     rc_prop_col_index = 1
     var_prop_col_index = 1
@@ -52,7 +50,7 @@ def writeMWScores(relaxed_constraint_prop_path, var_props_path, constr_props_pat
                     rc_prop_decomp_num = int(rc_prop_line_split[decomp_col_index])
                     var_props_decomp_num = int(var_props_line_split[decomp_col_index])
                     constr_props_decomp_num = int(var_props_line_split[decomp_col_index])
-                    if not( rc_prop_decomp_num == var_props_decomp_num == constr_props_decomp_num):
+                    if not(rc_prop_decomp_num == var_props_decomp_num == constr_props_decomp_num):
                         print("Decomp index does not match in {}".format(relaxed_constraint_prop_path))
                         exit(-1)
                     else:
@@ -66,21 +64,18 @@ def writeMWScores(relaxed_constraint_prop_path, var_props_path, constr_props_pat
 def main():
 
     problem_types = ["network_design", "fixed_cost_network_flow",  "supply_network_planning"]
+    instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
+                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+                       "snp-10-052-052.mps"]]
 
-    # instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-    #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
-    #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-    #                    "snp-10-052-052.mps"]]
-
-    instance_names_testing = [["germany50-UUM.mps"], ["k16x240b.mps"], ["snp-10-052-052.mps"]]
-
+    # instance_names_testing = [["germany50-UUM.mps"], ["k16x240b.mps"], ["snp-10-052-052.mps"]]
     # Calculate Non zeroes Count in each
     # Sum up all non zero counts
-
     features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-    external_raw_general_decomp_outputs_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Massive_Outputs"
-    external_processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
-    external_processed_general_decomps_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
+    external_raw_general_decomp_outputs_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs"
+    external_processed_results_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
+    external_processed_general_decomps_results_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
 
     for problem_type_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exist
