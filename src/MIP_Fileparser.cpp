@@ -99,14 +99,13 @@ void MIP_Fileparser::parserMps(string filename)
                     // second marker reached with INTEND flagged, finished integer variable section
                     // read in the the next line after the first marker
                     continue;
-                }
-                else if (marker(line_split) == true && intEndCheck(line_split) == true) {
+                } else if (marker(line_split) == true && intEndCheck(line_split) == true) {
                     int_var = false;
                     // cout << "int section finished" << endl;
                     // read in the next line after the second marker
                     continue;
                 }
-                
+
                 string variable_name = line_split[0];
                 // check if variable name has been seen - create new variable if not
                 if (MII.varNameExists(variable_name) == false) {
@@ -258,7 +257,6 @@ bool marker(const vector<string>& line_split)
             // }
             // cout << endl;
             return true;
-
         }
     }
     return false;
@@ -292,7 +290,6 @@ bool checkForVariable(const vector<string>& line_split)
     }
     return false;
 }
-
 
 bool objFnCheck(const string& word, const string& objFnSymbol)
 {
@@ -337,7 +334,7 @@ string extractObjSymbol(vector<string>& line_split)
     return line_split[1];
 }
 
-void MIP_Fileparser::createConstraint(const vector<string>& line_split,unsigned int& current_constraint_number)
+void MIP_Fileparser::createConstraint(const vector<string>& line_split, unsigned int& current_constraint_number)
 {
     string constraint_name = line_split[1];
     MII.addConstraintName(constraint_name, current_constraint_number);
@@ -364,9 +361,9 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
             int edge_constraint_idx = MII.getConstraintIdx(constraint_name);
             try {
                 double var_coeff = stod(line_split[i + 1]);
-                if (var_coeff == 0.00){
-                    for (const auto& str : line_split )
-                    cout << str << " " << endl;
+                if (var_coeff == 0.00) {
+                    for (const auto& str : line_split)
+                        cout << str << " " << endl;
                 }
                 int var_idx = MII.getVariableIdx(variable_name);
                 pair<int, double> con_term = { var_idx, var_coeff };
@@ -378,7 +375,6 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
                 cout << "line_split[i+1] = " << line_split[i + 1] << endl;
                 exit(EXIT_FAILURE);
             }
-            
         }
 
         // if (line_split[i].compare("OBJ") ==0 ){
@@ -392,7 +388,7 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
             int obj_var_idx = MII.getVariableIdx(variable_name);
             try {
                 double obj_var_coeff = stod(line_split[i + 1]);
-                pair<int, double> objective_term = {obj_var_idx, obj_var_coeff};
+                pair<int, double> objective_term = { obj_var_idx, obj_var_coeff };
                 MP.addObjTerm(objective_term);
             } catch (...) {
                 cout << "error with parsing objective term " << line_split[i + 1] << endl;
@@ -411,7 +407,7 @@ void MIP_Fileparser::extractRHSInfo(const vector<string>& line_split)
             string constraint_name = line_split[i];
 
             int constraint_idx = MII.getConstraintIdx(constraint_name);
-            
+
             try {
                 double bound = stod(line_split[i + 1]);
                 MP.constraints[constraint_idx].setRHS(bound);
@@ -442,8 +438,8 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
     } else if (line_split[0].find("MI") != std::string::npos) {
         bt = FreeNegative;
     }
-    for (int i = 1; i < line_split.size(); i++) {
-        // does line contain constraint information
+    // search through line for the variable name. The position afterwards contains the bound value
+    for (int i = 1; i < line_split.size(); ++i) { 
         if (MII.varNameExists(line_split[i])) {
             string var_name = line_split[i];
             int var_idx = MII.getVariableIdx(var_name);
@@ -451,43 +447,42 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
                 MP.variables[var_idx].setUB(1);
                 MP.variables[var_idx].setLB(0);
                 MP.variables[var_idx].setVarType(Bin);
+            } else if (bt == Free) {
+                // set lower bound. By default upper bound is already max
+                if (MP.variables[var_idx].getVarType() == Int) {
+                    MP.variables[var_idx].setMinLB();
+                }
             } else {
                 try {
-                   double bound = stod(line_split[i + 1]);
+                    double bound = stod(line_split[i + 1]);
                     if (bt == Upper) {
-                    MP.variables[var_idx].setUB(bound);
-                    // cout << "Upper Bound Set" << endl;
-                } else if (bt == Lower) {
-                    MP.variables[var_idx].setLB(bound);
-                    // cout << "Lower Bound Set" << endl;
-                } else if (bt == Fix) {
-                    MP.variables[var_idx].setUB(bound);
-                    MP.variables[var_idx].setLB(bound);
-                } else if (bt == Free) {
-                    // set lower bound. By default upper bound is already max
-                    if (MP.variables[var_idx].getVarType() == Int) {
-                        MP.variables[var_idx].setMinLB();
+                        MP.variables[var_idx].setUB(bound);
+
+                        // cout << "Upper Bound Set" << endl;
+                    } else if (bt == Lower) {
+                        MP.variables[var_idx].setLB(bound);
+                        // cout << "Lower Bound Set" << endl;
+                    } else if (bt == Fix) {
+                        MP.variables[var_idx].setUB(bound);
+                        MP.variables[var_idx].setLB(bound);
+                    } else if (bt == FreeNegative) {
+                        if (MP.variables[var_idx].getVarType() == Int) {
+                            MP.variables[var_idx].setMinLB();
+                            MP.variables[var_idx].setUB(0);
+                        } else if (MP.variables[var_idx].getVarType() == Cont) {
+                            MP.variables[var_idx].setMinLB();
+                            MP.variables[var_idx].setUB(0.00);
+                        }
                     }
-                } else if (bt == FreeNegative) {
-                    if (MP.variables[var_idx].getVarType() == Int) {
-                        MP.variables[var_idx].setMinLB();
-                        MP.variables[var_idx].setUB(0);
-                    } else if (MP.variables[var_idx].getVarType() == Cont) {
-                        MP.variables[var_idx].setMinLB();
-                        MP.variables[var_idx].setUB(0.00);
-                    }
-                }
                 } catch (...) {
                     cout << "error reading in the bound value at position line_split[i+1" << endl;
                     cout << "line_split[i+1] = " << line_split[i + 1] << endl;
                     exit(EXIT_FAILURE);
-                } 
+                }
             }
         }
     }
 }
-
-
 
 void MIP_Fileparser::printConstraints()
 {

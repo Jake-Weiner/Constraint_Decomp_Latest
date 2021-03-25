@@ -23,7 +23,7 @@ instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM
                           ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                            "snp-10-052-052.mps"]]
 
-ML_models = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP']
+ML_models = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP', 'Stacking']
 heuristic_methods = ["GCG1", "Goodness", "MW", "RBA"]
 
 model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
@@ -233,14 +233,12 @@ def calculateSameAllProblemAggregates(same_all_switch):
                 identifier = "all_problem_types"
             elif same_all_switch == "SAME":
                 identifier = problem_type
-
             with open(model_comparisons_path, "r") as model_comparison_input_fs:
                 model_comparisons_csv_reader = csv.reader(model_comparison_input_fs, delimiter=",")
                 for line_number, line_split in enumerate(model_comparisons_csv_reader):
                     if line_number != 0:
                         ranking_method = line_split[0]
-                        # if "all_problem_types" in ranking_method:
-                        #only examine
+                        # look at either same results or all results in batch file results
                         if identifier in ranking_method or ranking_method in heuristic_methods:
                             original_decomp_score = float(line_split[1])
                             # new_decomp_score = (original_decomp_score - best_decomp_score_min) / (best_decomp_score_max - best_decomp_score_min)
@@ -291,7 +289,7 @@ def calculateAllInstanceAggregates():
     return
 
 def main():
-    same_all_switch = "SAME"
+    same_all_switch = "ALL"
     calculateSameAllProblemAggregates(same_all_switch)
     calculateProblemTypeTrainingAggregates()
 

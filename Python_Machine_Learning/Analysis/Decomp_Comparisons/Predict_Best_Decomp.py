@@ -37,7 +37,7 @@ regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Ma
 model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
 processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 # prepare models
-ML_names = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP']
+ML_names = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP', 'Stacking', 'Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
 
 features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
@@ -126,7 +126,7 @@ def getBestMLDecomps():
                     # read in collated data, which contains the decomp value
                     df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
                     scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
-                    #there are 4 different trained algorithms - same problem, all problems, each other problem
+                    #there are 4 different trained algorithms - same problem, all problems, different problem
                     for data_trained_on in data_trained_on_list:
                         ml_scores_df = pd.DataFrame()
                         # use model trained on same problem data
@@ -140,7 +140,7 @@ def getBestMLDecomps():
                         else:
                             ml_scores_df = pd.read_csv(
                                 scores_folder + "/" + ML_name + "_" + data_trained_on + ".csv")
-                            # get the decomp indexes of the best n decompisitions as predicted by the ML model
+                            # get the decomp indexes of the best n decompositions as predicted by the ML model
                         smallest_ml_values_decomp_indexes = ml_scores_df.nsmallest(8, 'ML predicted val')[
                             'Decomposition Index']
                         decomp_scores = []
@@ -148,7 +148,7 @@ def getBestMLDecomps():
                         for decomp_idx in smallest_ml_values_decomp_indexes:
                             decomp_scores.append(
                                 df_collated[df_collated['Decomposition Index'] == decomp_idx]["Decomp Score"].values[0])
-                        # calculate both mean and stddev of best predicted decomps
+                        # calculate best decomp score amongst the top 8 predicted decomps
                         best_decomp_score = min(decomp_scores)
                         batch_outputs_fs.write(
                             "{}_{},{}\n".format(ML_name, data_trained_on, best_decomp_score))

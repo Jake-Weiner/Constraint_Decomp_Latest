@@ -6,8 +6,12 @@ import shutil
 def main():
 
 
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"], ["g200x740.mps","h50x2450.mps","h80x6320d.mps","k16x240b.mps"], ["snp-02-004-104.mps","snp-04-052-052.mps","snp-06-004-052.mps","snp-10-004-052.mps","snp-10-052-052.mps"]]
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "random_MIPLIB"]
+    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+                      ["g200x740.mps","h50x2450.mps","h80x6320d.mps","k16x240b.mps"],
+                      ["snp-02-004-104.mps","snp-04-052-052.mps","snp-06-004-052.mps","snp-10-004-052.mps","snp-10-052-052.mps"],
+                      ["blp-ic98.mps","neos-2328163-agri.mps","30n20b8.mps","wachplan.mps","fast0507.mps","seymour.mps","10teams.mps","air03.mps","sct2.mps","air05.mps"]]
+
 
     script_root_folder =  "/home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts"
     Decomp_types = ["NSGA", "Greedy"]

@@ -2,21 +2,15 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import matplotlib.pyplot as plt
-from sklearn.model_selection import cross_validate
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
 from sklearn import svm
 from sklearn.linear_model import SGDRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn import tree
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
-from sklearn.model_selection import train_test_split
-import os
-import statistics
+from sklearn.ensemble import StackingRegressor
+from sklearn.ensemble import VotingRegressor
+
 import pickle
 
 #global vars
@@ -39,9 +33,37 @@ processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learnin
 
 regression_models_pickle_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
 
+def get_stacking():
+# define the base models
+    level0 = []
+    level0.append(('OLM', LinearRegression()))
+    level0.append(('SVM', svm.SVR()))
+    level0.append(('SGD', SGDRegressor()))
+    level0.append(('KNN', KNeighborsRegressor()))
+    level0.append(('RF', RandomForestRegressor()))
+    level0.append(('MLP', MLPRegressor()))
+    # define meta learner model
+    level1 = LinearRegression()
+    # define the stacking ensemble
+    model = StackingRegressor(estimators=level0, final_estimator=level1, cv=5)
+    return model
+
+# get a voting ensemble of models
+def get_voting():
+    # define the base models
+    models = []
+    models.append(('OLM', LinearRegression()))
+    models.append(('SVM', svm.SVR()))
+    models.append(('SGD', SGDRegressor()))
+    models.append(('KNN', KNeighborsRegressor()))
+    models.append(('RF', RandomForestRegressor()))
+    models.append(('MLP', MLPRegressor()))
+    # define the voting ensemble
+    ensemble = VotingRegressor(estimators=models)
+    return ensemble
+
 # train on all instances for each problem type
 def train_problem_all_instance(models):
-
     for problem_type_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exist
         df_problem_type_list = []
@@ -100,7 +122,7 @@ def train_all_excl_test(models):
                     regression_models_pickle_output_folder + "/" + model_name + "_" + "all_problem_types" + "_" + inner_instance_name + ".pkl",
                     'wb') as pickle_output_fs:
                 pickle.dump(reg_model, pickle_output_fs)
-            print("Finished model {} for problem type {}".format(model_name, problem_type))
+            print("Finished model {} for problem type {}".format(model_name, "all_problem_types"))
 
 
 def train_problem_excl_test(models):
@@ -166,20 +188,52 @@ def main():
     cfv_results = []
 
     models = []
-    models.append(('OLM', LinearRegression()))
-    models.append(('SVM', svm.SVR()))
-    models.append(('SGD', SGDRegressor()))
-    models.append(('KNN', KNeighborsRegressor()))
-    models.append(('RF', RandomForestRegressor()))
-    models.append(('MLP', MLPRegressor()))
-
+    # models.append(('OLM', LinearRegression()))
+    # models.append(('SVM', svm.SVR()))
+    # models.append(('SGD', SGDRegressor()))
+    # models.append(('KNN', KNeighborsRegressor()))
+    # models.append(('RF', RandomForestRegressor()))
+    # models.append(('MLP', MLPRegressor()))
+    # models.append(('Stacking', get_stacking()))
+    models.append(('Voting', get_voting()))
     Path(regression_models_pickle_output_folder).mkdir(parents=True, exist_ok=True)
     train_problem_excl_test(models)
     train_all_excl_test(models)
     train_problem_all_instance(models)
 
 
+# get a stacking ensemble of models
 
+
+# get a list of models to evaluate
+# def get_models():
+# 	models = dict()
+# 	models['knn'] = KNeighborsRegressor()
+# 	models['cart'] = DecisionTreeRegressor()
+# 	models['svm'] = SVR()
+# 	models['stacking'] = get_stacking()
+# 	return models
+# 
+# # evaluate a given model using cross-validation
+# def evaluate_model(model, X, y):
+# 	cv = RepeatedKFold(n_splits=10, n_repeats=3, random_state=1)
+# 	scores = cross_val_score(model, X, y, scoring='neg_mean_absolute_error', cv=cv, n_jobs=-1, error_score='raise')
+# 	return scores
+
+# define dataset
+# X, y = get_dataset()
+# # get the models to evaluate
+# models = get_models()
+# # evaluate the models and store results
+# results, names = list(), list()
+# for name, model in models.items():
+# 	scores = evaluate_model(model, X, y)
+# 	results.append(scores)
+# 	names.append(name)
+# 	print('>%s %.3f (%.3f)' % (name, mean(scores), std(scores)))
+# # plot model performance for comparison
+# pyplot.boxplot(results, labels=names, showmeans=True)
+# pyplot.show()
 
 
 

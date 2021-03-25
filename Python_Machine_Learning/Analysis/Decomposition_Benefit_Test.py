@@ -33,53 +33,7 @@ instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM
 
 features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 
-def getBestHeuristicDecomps():
 
-    # get the best decomposition scores based on predicted Heuristic outputs
-    for heuristic_name in heuristic_names:
-        for problem_type_idx, problem_type in enumerate(problem_types):
-            for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
-                best_decomp_score_folder = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name
-                Path(best_decomp_score_folder).mkdir(parents=True, exist_ok=True)
-                # test if output file exists
-                my_file = Path(best_decomp_score_folder + "/" + "batch_results.csv")
-                # write headers if file does not exist
-                if not my_file.is_file():
-                    with open(best_decomp_score_folder + "/" + "batch_results.csv", "w") as batch_outputs_fs:
-                        batch_outputs_fs.write(
-                            "Ranking Method,Best Decomp Score" + "\n")
-
-                with open(best_decomp_score_folder + "/" + "batch_results.csv", "a+") as batch_outputs_fs:
-                    features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
-                    input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
-                    # read in collated data, which contains the decomp value
-                    df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
-                    scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
-
-                    heuristic_scores_df = pd.read_csv(
-                        scores_folder + "/" + heuristic_name + "_Scores" + ".csv")
-                    # get the decomp indexes of the best n decompisitions as predicted by the ML model
-                    best_heur_values_decomp_indexes = pd.DataFrame()
-                    if heuristic_name == 'RBA' or heuristic_name == "GCG1":
-                        best_heur_values_decomp_indexes = heuristic_scores_df.nsmallest(8, heuristic_name + " Scores")[
-                        'Decomposition Index']
-                    else:
-                        best_heur_values_decomp_indexes = heuristic_scores_df.nlargest(8, heuristic_name + " Scores")[
-                            'Decomposition Index']
-                    decomp_scores = []
-
-                    # for each decomp index of the best 10 predicted decomps, get the actual decomp scores
-                    for decomp_idx in best_heur_values_decomp_indexes:
-                        decomp_scores.append(
-                            df_collated[df_collated['Decomposition Index'] == decomp_idx][
-                                "Decomp Score"].values[0])
-                    # calculate both mean and stddev of best predicted decomps
-                    best_score = min(decomp_scores)
-                    batch_outputs_fs.write(
-                        "{},{} \n".format(heuristic_name, best_score))
-                print("Finished {}".format(instance_name))
-            print("Finished {}".format(problem_type))
-        print("Finished {}".format(heuristic_name))
 
 #fix ml training problem
 # getBestMLSameProblem

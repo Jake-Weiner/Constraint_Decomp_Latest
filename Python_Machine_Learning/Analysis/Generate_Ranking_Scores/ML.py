@@ -33,7 +33,7 @@ def main():
     model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
     processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated/Ranking"
     # prepare models
-    models = ['OLM','SVM','SGD','KNN','RF','MLP']
+    models = ['OLM','SVM','SGD','KNN','RF','MLP', 'Stacking', 'Voting']
 
     number_of_batches = 10
 
