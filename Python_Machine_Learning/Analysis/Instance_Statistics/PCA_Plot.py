@@ -7,14 +7,31 @@ import math
 import sys
 import pandas as pd
 from sklearn.decomposition import PCA, IncrementalPCA
-
-
 import matplotlib.pyplot as plt
+
+# # use LaTeX fonts in the plot
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='serif')
+
+
+# plt.rcParams.update({
+#     "text.usetex": True,
+#     "font.family": "sans-serif",
+#     "font.sans-serif": ["Helvetica"]})
+# # for Palatino and other serif fonts use:
+# plt.rcParams.update({
+#     "text.usetex": True,
+#     "font.family": "serif",
+#     "font.serif": ["Palatino"],
+# })
+#
+plt.style.use('seaborn')
+
 
 def main():
     # read in dataset
     processed_results_root_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
-    output_folder = processed_results_root_folder + "/" + "Instance_Features"
+    output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs"
     output_path = output_folder + "/" + "Instance_Features.csv"
     df = pd.read_csv(output_path)
     # remove any rows with nan, inf or -inf vals
@@ -34,7 +51,7 @@ def main():
     # convert features to np array
     X_np = X.to_numpy()
 
-
+    print(X.columns)
 
     pca = PCA(2)  # project from 64 to 2 dimensions
     # for component, score in enumerate(pca):
@@ -46,21 +63,23 @@ def main():
     projected = pca.fit_transform(X_np)
     print(pca.explained_variance_ratio_)
     df_new = pd.DataFrame({"PCA 1" : projected[:, 0], "PCA 2" : projected[:,1], "Problem Type": Y})
-    print(df_new)
-    groups = df_new.groupby("Problem Type")
-
-    # Plot
-    fig, ax = plt.subplots()
-    ax.set_xlabel("Prinicipal Component 1 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[0]))
-    ax.set_ylabel("Prinicipal Component 2 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[1]))
-    ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
-    for name, group in groups:
-        ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=6, label=name)
-    ax.legend()
-    plt.xlim([-2, 2])
-    plt.savefig(output_folder + "/PCA_Analysis")
-
-
+    print(np.square(pca.components_)[1])
+    # print(df_new)
+    # groups = df_new.groupby("Problem Type")
+    #
+    # # Plot
+    # fig, ax = plt.subplots()
+    # ax.set_xlabel("Principal Component 1 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[0]))
+    # ax.set_ylabel("Principal Component 2 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[1]))
+    # ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
+    # for name, group in groups:
+    #     ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=6, label=name)
+    # ax.legend()
+    # plt.xlim([-2, 2])
+    # # plt.savefig(output_folder + "/PCA_Analysis.pdf")
+    #
+    # # Save and remove excess whitespace
+    # plt.savefig(output_folder + "/PCA_Analysis.pdf", format='pdf', bbox_inches='tight')
 
 
 if __name__ == "__main__":

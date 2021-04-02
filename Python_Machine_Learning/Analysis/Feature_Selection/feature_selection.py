@@ -7,10 +7,14 @@ from sklearn.feature_selection import SelectFromModel
 import pickle
 plt.style.use('ggplot')
 from sklearn.inspection import permutation_importance
-
+from collections import defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import spearmanr
+from scipy.cluster import hierarchy
 
 #global vars
-models = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP']
+# models = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP']
 problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
 instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
@@ -58,34 +62,53 @@ def getFeaturesTarget(df_all_problems_combined, test_instance_name):
 def featureSelectionAllProblems():
 
     df_all_problems_combined = getCombinedDF()
-    # for each instance, the model has been trained on data from all instances except for the target instance
-    for test_instance_idx, test_instance_name in enumerate(instance_names_training_flat_list):
-        features_np, target_np = getFeaturesTarget(df_all_problems_combined, test_instance_name)
-        for model_name in models:
-            saved_model_name = model_name + "_" + "all_problem_types" + "_" + test_instance_name
-            with open(regression_models_pickle_input_folder + "/" + saved_model_name + ".pkl",
-                      'rb') as pickle_input_fs:
-                model = pickle.load(pickle_input_fs)
+    X = df_all_problems_combined.drop(
+        columns=[df_all_problems_combined.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
+                 'Decomp Score', 'Instance Name'])
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
+    corr = spearmanr(X).correlation
+    corr_linkage = hierarchy.ward(corr)
+    dendro = hierarchy.dendrogram(
+        corr_linkage, labels=X.columns.tolist(), ax=ax1, leaf_rotation=90
+    )
+    dendro_idx = np.arange(0, len(dendro['ivl']))
 
-                # print("For problem type {}, model {}".format(problem_type, model_name))
-                # selector = SelectFromModel(estimator=model, prefit=True)
-                # print(selector.get_support())
-                # # define dataset
-                #training set
-                # perform permutation importance
-                results = permutation_importance(model, features_np, target_np, scoring='neg_mean_squared_error')
-                # get importance
-                importance = results.importances_mean
-                # summarize feature importance
-                for i, v in enumerate(importance):
-                    print('Feature: %0d, Score: %.5f' % (i, v))
-                # plot feature importance
-                # plt.bar([x for x in range(len(importance))], importance)
-                # plt.show()
-                # selector.estimator_.coef
-                # print(selector.estimator_.coef_)
-                # print(selector.threshold_)
-                # print(selector.get_support())
+    ax2.imshow(corr[dendro['leaves'], :][:, dendro['leaves']])
+    ax2.set_xticks(dendro_idx)
+    ax2.set_yticks(dendro_idx)
+    ax2.set_xticklabels(dendro['ivl'], rotation='vertical')
+    ax2.set_yticklabels(dendro['ivl'])
+    fig.tight_layout()
+    plt.savefig("/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/Feature_Analysis/dendro")
+    exit(0)
+    # for each instance, the model has been trained on data from all instances except for the target instance
+    # for test_instance_idx, test_instance_name in enumerate(instance_names_training_flat_list):
+    #     features_np, target_np = getFeaturesTarget(df_all_problems_combined, test_instance_name)
+    #     model_name = 'Voting'
+    #     saved_model_name = model_name + "_" + "all_problem_types" + "_" + test_instance_name
+    #     with open(regression_models_pickle_input_folder + "/" + saved_model_name + ".pkl",
+    #               'rb') as pickle_input_fs:
+    #         model = pickle.load(pickle_input_fs)
+    #
+    #         # print("For problem type {}, model {}".format(problem_type, model_name))
+    #         # selector = SelectFromModel(estimator=model, prefit=True)
+    #         # print(selector.get_support())
+    #         # # define dataset
+    #         #training set
+    #         # perform permutation importance
+    #         results = permutation_importance(model, features_np, target_np, scoring='neg_mean_squared_error')
+    #         # get importance
+    #         importance = results.importances_mean
+    #         # summarize feature importance
+    #         for i, v in enumerate(importance):
+    #             print('Feature: %0d, Score: %.5f' % (i, v))
+            # plot feature importance
+            # plt.bar([x for x in range(len(importance))], importance)
+            # plt.show()
+            # selector.estimator_.coef
+            # print(selector.estimator_.coef_)
+            # print(selector.threshold_)
+            # print(selector.get_support())
 
     return
 

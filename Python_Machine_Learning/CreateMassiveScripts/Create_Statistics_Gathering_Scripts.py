@@ -5,11 +5,14 @@ import shutil
 
 
 def main():
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "random_MIPLIB"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                       "snp-10-052-052.mps"]]
+                       "snp-10-052-052.mps"],
+                      ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps",
+                       "neos-4387871-tavua.mps", "neos-3656078-kumeu.mps", "neos-4338804-snowy.mps", "air05.mps",
+                       "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
     output_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts"
     action_name = "Gather_Statistics"
@@ -24,8 +27,8 @@ def main():
     memory_placeholder = "$MEMORY"
     runall_placeholder = "XXXXX"
 
-    problem_types_runtimes = ["72:00:00", "72:00:00", "168:00:00"]
-    problem_types_memory = ["8192", "8192", "16384"]
+    problem_types_runtimes = ["72:00:00", "72:00:00", "168:00:00", "72:00:00"]
+    problem_types_memory = ["8192", "8192", "16384", "8192"]
 
     for problem_idx, problem_type in enumerate(problem_types):
         # create output folders if they don't already exist

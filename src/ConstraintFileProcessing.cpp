@@ -1,6 +1,6 @@
 #include "ConstraintFileProcessing.h"
-#include "Util.h"
 #include "RelaxedConstraintRedundancyChecker.h"
+#include "Util.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -35,14 +35,13 @@ void ConstraintFileProcessing::removeRedundantConstraints(const string& input_fi
                 relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
             }
             // new decomp with redundant constraints removed
-            // get 
+            // get
             vector<int> new_relaxed_constraints = rcrc.removeRedundantConstraints(relaxed_constraints_int, HG);
 
             // if all constraints are redundant for the current decomposition then do not
-            if (new_relaxed_constraints.empty()){
+            if (new_relaxed_constraints.empty()) {
                 cout << "all constraints are redundant" << endl;
-            }
-            else{
+            } else {
                 // write out new deompositions to output file
                 if (output_fs) {
                     for (const auto& con_val : new_relaxed_constraints) {
@@ -72,38 +71,55 @@ void ConstraintFileProcessing::removeDuplicateConstraints(const string& input_fi
     cout << "Input file is " << input_file << endl;
     cout << "Output file is " << output_file << endl;
     // input file successfully opened
+    bool no_constr_relaxed_seen = false;
     if (input_fs) {
         string line_read;
         while (getline(input_fs, line_read)) {
+            bool no_constr_relaxed = false;
             vector<string> relaxed_constraints_str;
             vector<int> relaxed_constraints_int;
             // split the line based on ,
             boost::split(relaxed_constraints_str, line_read, boost::is_any_of(","), boost::token_compress_on);
-            // first line contains the number of nodes
-            // last element will be empty because of ending final comma
+
             for (int i = 0; i < relaxed_constraints_str.size() - 1; ++i) {
-                relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+                try {
+                    relaxed_constraints_int.push_back(stoi(relaxed_constraints_str[i]));
+                } catch (const std::invalid_argument& ia) {
+                    // if the decomposition has NO CONSTRAINTS RELAXED
+                    if (relaxed_constraints_str[i] == "") {
+                        no_constr_relaxed = true;
+                        no_constr_relaxed_seen = true;
+                        break;
+                    } else {
+                        cout << "invalid relaxed constraint number parsed in input con vec - " << relaxed_constraints_str[i] << endl;
+                        exit(EXIT_FAILURE);
+                    }
+                }
             }
-            // decomp has not been seen before
-            if (decomp_map.find(relaxed_constraints_int) == decomp_map.end()) {
-                decomp_map[relaxed_constraints_int] = true;
+            if (!no_constr_relaxed) {
+                // decomp has not been seen before
+                if (decomp_map.find(relaxed_constraints_int) == decomp_map.end()) {
+                    decomp_map[relaxed_constraints_int] = true;
+                }
             }
         }
-    }
-    else {
+    } else {
         cout << "redundant constraint input file unable to be found/opened" << endl;
     }
 
     // write unique decompositions to output file
     if (output_fs) {
+        // if a decomposition with no constraints relaxed was seen, then write out this decomposition as well
+        if (no_constr_relaxed_seen){
+            output_fs << "," << endl;
+        }
         for (const auto& element : decomp_map) {
             for (const auto& con_idx : element.first) {
                 output_fs << con_idx << ",";
             }
             output_fs << endl;
         }
-    }
-    else{
+    } else {
         cout << "unique decomposition output file unable to be found/opened" << endl;
     }
 }

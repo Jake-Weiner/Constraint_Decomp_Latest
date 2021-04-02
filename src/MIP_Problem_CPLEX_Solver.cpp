@@ -127,6 +127,11 @@ CPLEX_Return_struct MIP_Problem_CPLEX_Solver::solve(bool randomSeed, bool LP)
             cout << "error found when testing whether var idx " << var_idx << " is basic " << endl;
             cout << "number of variables is " << MP.getNumVariables() << endl;
         }
+        catch(IloAlgorithm::NotExtractedException e){
+            cout << "error message " << e.getMessage() << endl;
+            cout << "error found when testing whether var idx " << var_idx << " is basic " << endl;
+            cout << "number of variables is " << MP.getNumVariables() << endl;
+        }
     }
     cout << "collected basic variables status" << endl;
     }

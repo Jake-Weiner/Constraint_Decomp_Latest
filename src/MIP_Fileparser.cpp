@@ -439,7 +439,7 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
         bt = FreeNegative;
     }
     // search through line for the variable name. The position afterwards contains the bound value
-    for (int i = 1; i < line_split.size(); ++i) { 
+    for (int i = 1; i < line_split.size(); ++i) {
         if (MII.varNameExists(line_split[i])) {
             string var_name = line_split[i];
             int var_idx = MII.getVariableIdx(var_name);
@@ -451,6 +451,14 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
                 // set lower bound. By default upper bound is already max
                 if (MP.variables[var_idx].getVarType() == Int) {
                     MP.variables[var_idx].setMinLB();
+                }
+            } else if (bt == FreeNegative) {
+                if (MP.variables[var_idx].getVarType() == Int) {
+                    MP.variables[var_idx].setMinLB();
+                    MP.variables[var_idx].setUB(0);
+                } else if (MP.variables[var_idx].getVarType() == Cont) {
+                    MP.variables[var_idx].setMinLB();
+                    MP.variables[var_idx].setUB(0.00);
                 }
             } else {
                 try {
@@ -465,14 +473,6 @@ void MIP_Fileparser::extractBoundsInfo(const vector<string>& line_split)
                     } else if (bt == Fix) {
                         MP.variables[var_idx].setUB(bound);
                         MP.variables[var_idx].setLB(bound);
-                    } else if (bt == FreeNegative) {
-                        if (MP.variables[var_idx].getVarType() == Int) {
-                            MP.variables[var_idx].setMinLB();
-                            MP.variables[var_idx].setUB(0);
-                        } else if (MP.variables[var_idx].getVarType() == Cont) {
-                            MP.variables[var_idx].setMinLB();
-                            MP.variables[var_idx].setUB(0.00);
-                        }
                     }
                 } catch (...) {
                     cout << "error reading in the bound value at position line_split[i+1" << endl;
