@@ -48,6 +48,7 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed, bool LP){
     // cplex.solve() status indicates if a feasible solution was found
     if (solve_status == false) {
         best_bound_val = cplex.getBestObjValue();
+        cout << cplex.getBestObjValue() << endl;
         env.end();
         std::cerr << "CPLEX failed to find a feasible solution in SolveGenericMIP.cpp" << endl;
     }

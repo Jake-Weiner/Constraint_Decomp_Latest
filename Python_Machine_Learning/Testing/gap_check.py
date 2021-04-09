@@ -11,7 +11,7 @@ def main():
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                        "snp-10-052-052.mps"]]
 
-    processed_results_folder = processed_results_local_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+    processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
     for problem_type_idx, problem_type in enumerate(problem_types):
         df_list = []
         for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):

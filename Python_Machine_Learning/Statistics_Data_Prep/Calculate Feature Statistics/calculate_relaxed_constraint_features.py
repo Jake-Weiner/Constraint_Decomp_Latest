@@ -45,13 +45,17 @@ def writeAllStats(input_file, output_file):
 def main():
 
 
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    # problem_types = ["network_design", "fixed_cost_network_flow"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
-                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                       "snp-10-052-052.mps"]]
+    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    # # problem_types = ["network_design", "fixed_cost_network_flow"]
+    # instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
+    #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+    #                    "snp-10-052-052.mps"]]
 
+    problem_types = ["random_MIPLIB"]
+    instance_names = [
+        ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
+         "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
 
     # instance_names = [["germany50-UUM.mps"], ["k16x240b.mps"], ["snp-10-052-052.mps"]]

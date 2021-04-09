@@ -45,18 +45,23 @@ def combine_bin_int_stats(input_root_folder, output_root_folder):
 def main():
 
 
-    problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-    instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                      ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
-                      ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                       "snp-10-052-052.mps"]]
+    # problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
+    # instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
+    #                   ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
+    #                   ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
+    #                    "snp-10-052-052.mps"]]
+
+
+    problem_types = ["random_MIPLIB"]
+    instance_names = [["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps", "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
+
 
     subproblem_filenames = ["Bin_props.csv", "Const_props.csv", "Cont_props.csv", "Densities.csv", "Equality_props.csv",
                             "Int_props.csv", "Var_props.csv"]
     relaxed_constraint_filenames = ["single_stats.csv", "Bin_props.csv", "Int_props.csv", "Cont_props.csv"]
 
-    raw_data_root_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Massive_Outputs"
-    processed_results_folder = "/media/jake/Jakes_Harddrive/PhD/Decomposition/Machine_Learning/Processed_Results"
+    raw_data_root_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs"
+    processed_results_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
 
     statistics_types_folders = ["Relaxed_Constraint_Statistics", "Subproblem_Statistics"]
 

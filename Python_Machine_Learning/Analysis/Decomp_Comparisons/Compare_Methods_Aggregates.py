@@ -145,19 +145,21 @@ def calculateProblemTypeTrainingAggregates():
                         key = ""
                         #model is trained on same problem data
                         if problem_type in ranking_method:
-                            key = ML_model_name + "_" + "SAME"
-                            if not ML_model_name in same_data_type_trained_on_dict:
-                                same_data_type_trained_on_dict[ML_model_name] = []
-                            same_data_type_trained_on_dict[ML_model_name].append(original_decomp_score)
+                            key = ML_model_name + "_" + problem_type
+                            if not key in same_data_type_trained_on_dict:
+                                same_data_type_trained_on_dict[key] = []
+                            same_data_type_trained_on_dict[key].append(original_decomp_score)
                         #model is trained on all problem types
                         # elif "all_problem_types" in ranking_method:
                         #     key = ML_model_name + "_" + "ALL"
                         #model is trianed on different problem types and is not a heuristic measure
-                        elif ranking_method not in heuristic_methods and "all_problem_types" not in ranking_method:
-                            key = ML_model_name + "_" + "DIFFERENT"
-                            if not ML_model_name in different_data_type_trained_on_dict:
-                                different_data_type_trained_on_dict[ML_model_name] = []
-                            different_data_type_trained_on_dict[ML_model_name].append(original_decomp_score)
+                        elif ranking_method not in heuristic_methods and "all_problem_types" not in ranking_method and problem_type not in ranking_method:
+                            different_problem_type = "_".join(ranking_method.split("_")[1:])
+                            print(different_problem_type)
+                            key = ML_model_name + "_" + different_problem_type
+                            if not key in different_data_type_trained_on_dict:
+                                different_data_type_trained_on_dict[key] = []
+                            different_data_type_trained_on_dict[key].append(original_decomp_score)
                             # if ranking method has not been seen, create the key and then append the score
                         # if not key in problem_ranking_method_dict:
                         #     problem_ranking_method_dict[key] = []
@@ -166,11 +168,20 @@ def calculateProblemTypeTrainingAggregates():
                         #
                         # problem_ranking_method_dict[key].append(original_decomp_score)
                         # problem_specific_ranking_method_dict[key].append(original_decomp_score)
-        same_problem_type_means = [statistics.mean(same_data_type_trained_on_dict[ML_model_name]) for ML_model_name in ML_models]
-        different_problem_type_means = [statistics.mean(different_data_type_trained_on_dict[ML_model_name]) for
-                                   ML_model_name in ML_models]
+        same_problem_type_means = [statistics.mean(same_data_type_trained_on_dict[ML_model_name + "_" + problem_type]) for ML_model_name in ML_models]
+        #get different problem types
+        different_problem_types = problem_types.copy()
+        different_problem_types.remove(problem_type)
+        print(different_problem_types)
+        different_problem_type_means_one = [statistics.mean(different_data_type_trained_on_dict[ML_model_name + "_" + different_problem_types[0]]) for ML_model_name in ML_models]
 
-        data = {"ML Model" : ML_models, "SAME" + " " + problem_type : same_problem_type_means, "DIFFERENT" + " " + problem_type: different_problem_type_means}
+        different_problem_type_means_two = [
+            statistics.mean(different_data_type_trained_on_dict[ML_model_name + "_" + different_problem_types[1]]) for
+            ML_model_name in ML_models]
+
+
+        data = {"ML Model" : ML_models, "SAME" + " " + problem_type : same_problem_type_means, "DIFFERENT" + " " + different_problem_types[0]: different_problem_type_means_one
+                , "DIFFERENT" + " " + different_problem_types[1]: different_problem_type_means_two}
         # df_problem_type = pd.DataFrame(same_problem_type_means,different_problem_type_means, columns=["SAME", "DIFFERENT"])
         df_problem_type = pd.DataFrame(data)
         df_problem_type.name = problem_type
@@ -181,6 +192,7 @@ def calculateProblemTypeTrainingAggregates():
     #reduce applies the lambda function,. which is pd.merge, to all of the list elements - df_problem_list
     df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=['ML Model'],
                                                                        how='outer'), df_problem_list)
+
 
     df_merged_features.to_csv(model_comparisons_outputs_root_folder + "/" + "different_training_types.csv")
     # #remove left_right tages from mergre
@@ -289,7 +301,14 @@ def calculateSameAllProblemAggregates(same_all_switch):
 
     df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=['ML Method'],
                                                                            how='outer'), problem_aggregate_df_list)
-
+    # rename GCG1 to GCG OS
+    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['GCG1'], 'GCG OS')
+    # rename SGD to OLS + L2
+    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['SGD'], 'OLS + L2')
+    # rename SVM to SVR
+    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['SVM'], 'SVR')
+    # rename ML Method column to Ranking Method
+    df_merged_features.rename(columns={"ML Method" : "Ranking Method"}, inplace=True)
     df_merged_features.to_csv(model_comparisons_outputs_root_folder + "/" + same_all_switch + "_problem_aggregates.csv")
 
     return
@@ -298,9 +317,9 @@ def calculateAllInstanceAggregates():
     return
 
 def main():
-    # same_all_switch = "ALL"
-    # calculateSameAllProblemAggregates(same_all_switch)
-    calculateProblemTypeTrainingAggregates()
+    same_all_switch = "SAME"
+    calculateSameAllProblemAggregates(same_all_switch)
+    # calculateProblemTypeTrainingAggregates()
 
 #store the important features in a list
 if __name__ == "__main__":

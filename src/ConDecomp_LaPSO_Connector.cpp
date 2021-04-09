@@ -246,6 +246,10 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                 }
                 model.add(subproblem_constraints_cplex);
             }
+            // IloModel model2 = IloModel(*sp.envPtr);
+            // model2.add(subproblem_constraints_cplex);
+            // model2.add(IloConversion(*sp.envPtr, subproblem_vars_cplex, ILOFLOAT));
+            // cout << model2 << endl;
             sp.model = model;
             sp.variables = subproblem_vars_cplex;
             if (debug_printing && subproblem_idx==1){
@@ -333,61 +337,9 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             cout << "contribution to bound is " << s.x[original_var_idx] * var_reduced_cost << endl;
         }
 
-        // if (s.x[original_var_idx] * var_reduced_cost > 10000000000){
-        //     cout << "s.x[" << original_var_idx << "] = " << s.x[original_var_idx]
-        //     << " var_reduced_cost = " << var_reduced_cost << " lb contribution is " << s.x[original_var_idx] * var_reduced_cost << endl;
-        // }
-
-        // if (s.x[original_var_idx] * var_reduced_cost < -10000000){
-        //     cout << "reduced cost in problem subproblem is " << var_reduced_cost << endl;
-        //     cout << "problem var value is  " << s.x[original_var_idx] << endl;
-        //     cout << "contribution to bound is " << s.x[original_var_idx] * var_reduced_cost << endl;
-        //     cout << "orig var idx is " << original_var_idx << endl;
-
-        //     // get the dual val associated with the variable. I think it might be 0 but has a rounding error.
-        //     // for each dual variable, update the associated costs for each variable involved
-        //     for (int dual_idx = 0; dual_idx < s.dual.size(); ++dual_idx){
-        //         // get original constraint idx from dual index
-        //         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
-        //         Constraint con = OP_ptr->constraints[original_constraint_idx];
-        //         // con terms are pair<var_idx, var_coeff>
-        //         for (auto& con_term : con.getConTerms()) {
-        //             int var_idx = con_term.first;
-        //             double var_coeff = con_term.second;
-        //             if (var_idx == original_var_idx){
-        //                 cout << "dual idx: " << dual_idx << " = " << s.dual[dual_idx] << " Original_Constraint_Idx = " << original_constraint_idx << " with var_coeff = " << var_coeff << " and original cost = " << original_costs[original_var_idx] << " for x_" << original_var_idx << endl;
-
-        //             }
-                
-        //         }
-        //     }
-        // }
 
         // update lower bound
         s.lb += (s.x[original_var_idx] * var_reduced_cost);
-        // cout << "In single var sp, rc is "<< var_reduced_cost << " and x_" << original_var_idx << " = " << s.x[original_var_idx] << endl;
-        //     cout << "original costs for x_" << original_var_idx << " was " << original_costs[original_var_idx] << endl;
-        //     cout << "dual val for associated with ";
-
-        //     // get the dual val associated with the variable. I think it might be 0 but has a rounding error.
-        //     // for each dual variable, update the associated costs for each variable involved
-        //     for (int dual_idx = 0; dual_idx < s.dual.size(); ++dual_idx){
-        //         // get original constraint idx from dual index
-        //         int original_constraint_idx = dual_idx_to_orig_constraint_idx_map[dual_idx];
-        //         Constraint con = OP_ptr->constraints[original_constraint_idx];
-            
-        //         // con terms are pair<var_idx, var_coeff>
-        //         for (auto& con_term : con.getConTerms()) {
-        //             int var_idx = con_term.first;
-        //             double var_coeff = con_term.second;
-        //             if (var_idx == original_var_idx){
-        //                 cout << "dual idx: " << dual_idx << " = " << s.dual[dual_idx] << " for x_" << original_var_idx << endl;
-        //             }
-                
-        //         }
-        //     }
-        // }
-
         // capture the solution statistics
         int subproblem_idx = sp.getSubproblemIdx();
         subproblem_statistics_ptr->mip_times[subproblem_idx] = 0.00;
@@ -420,7 +372,9 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     // 90% of the allocate subproblem solve time is dedicated to solving the MIP
     // 10% is dedicated to solving the LP
     double mip_subproblem_solve_time = max(0.9 * sp.getSubproblemRunTime(),0.1);
-    double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.1);
+    // double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.1);
+    // 1 minute max to solving the LP of subproblem
+    double lp_subproblem_solve_time = 5;
     // flag to see if CPLEX at least finishes processing the root node
     bool root_node_finished = true;
     int subproblem_idx = sp.getSubproblemIdx();
@@ -454,10 +408,16 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
                 cplex.setParam(IloCplex::TiLim, 60);
                 cplex.setParam(IloCplex::NodeLim,1);
                 cplex.solve();
+        
+                cout << "cplex solve status is " << cplex.getCplexStatus() << endl;
+                cout << "cplex primal status " << cplex.isPrimalFeasible() << endl;
+                cout << "cplex dual status is " << cplex.isDualFeasible() << endl;
                 // if after this cplex is still not able to solve the root node,
                 // use the LP solution
                 if (cplex.getNnodes() == 0){
                     root_node_finished = false;
+                    cout << "root node still not finished after an additional 60s" << endl;
+                    cplex.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/MIP_problem.mps");
                 }
                 // otherwise take the objective from the root node
                 else{
@@ -468,16 +428,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             else{
                 s.lb += cplex.getBestObjValue();
             }
-            // if (cplex.getBestObjValue() < -10000000000){
-            //     cout << "Failed MIP producing bounds value of " << cplex.getBestObjValue() << endl;
-            //     cout << obj_exp << endl;
-            //     cout << sp.model << endl;
-            //     cout << "solve time is " << mip_subproblem_solve_time << endl;
-            //     cout << "cplex status is " << cplex.getCplexStatus() << endl;
-            //     cout << "cplex substatus is " << cplex.getCplexSubStatus() << endl;
-            //     cout << "cplex node number is " << cplex.getIncumbentNode() << endl;
-            //     cout << "cplex number of nodes processed is " << cplex.getNnodes() << endl;
-            // }
+            cout << "testing it problem reaches here" << endl;
             // flag subproblem as having non optimal solution
             subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = false;
             if (root_node_finished){
@@ -496,12 +447,6 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
                 cout << "MIP subproblem value is " <<  cplex.getObjValue() << endl;
                 cout << "MIP subproblem value is " <<  cplex.getBestObjValue() << endl;
             }
-
-            // if (cplex.getObjValue() < -100000000){
-            //     cout << obj_exp << endl;
-            //     cout << sp.model << endl;
-            //     cout << "solve time is " << mip_subproblem_solve_time << endl;
-            // }
             subproblem_statistics_ptr->subproblem_optimality_success[subproblem_idx] = true;
             // capture the mip solution quality
             subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex.getObjValue();
@@ -511,17 +456,19 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         //capture the mip runtime in cpu seconds
         subproblem_statistics_ptr->mip_times[subproblem_idx] = cplex.getTime();
         
-            // capture the variable values from the subproblem solutions
-        for (int i = 0; i < sp.variables.getSize(); ++i) {
-            int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
-            IloNum val = cplex.getValue(sp.variables[i]);
-            Variable_Type vt = OP_ptr->variables[orig_idx].getVarType();
-            if (vt == Int || vt == Bin) {
-                // in case of rounding errors, add in slight perturbation and then convert to int to round down
-                int x_val = (int)(val + 0.1);
-                s.x[orig_idx] = x_val;
-            } else if (vt == Cont) {
-                s.x[orig_idx] = val;
+        //capture the variable values from the subproblem solutions if a solution has been found
+        if (cplex.isPrimalFeasible() == IloTrue){
+            for (int i = 0; i < sp.variables.getSize(); ++i) {
+                int orig_idx = sp.subproblemVarIdx_to_originalVarIdx[i];
+                IloNum val = cplex.getValue(sp.variables[i]);
+                Variable_Type vt = OP_ptr->variables[orig_idx].getVarType();
+                if (vt == Int || vt == Bin) {
+                    // in case of rounding errors, add in slight perturbation and then convert to int to round down
+                    int x_val = (int)(val + 0.1);
+                    s.x[orig_idx] = x_val;
+                } else if (vt == Cont) {
+                    s.x[orig_idx] = val;
+                }
             }
         }
         cplex.end();
@@ -531,8 +478,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         cout << e << endl;
         cout << "Exception caught in ConDecomp_LaPSO_Connector when accessing MIP Solution" << endl;
         s.lb = std::numeric_limits<double>::max();
-        cout << obj_exp << endl;
-        cout << sp.model << endl;
+        //cout << obj_exp << endl;
+        //cout << sp.model << endl;
         cout << "solve time is " << mip_subproblem_solve_time << endl;
         ret_val = -1;
         // end the cplex enviroment to free up memory
@@ -540,14 +487,33 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     // solve the subproblem as a LP and get the statistics
     IloModel relax(*sp.envPtr);
     relax.add(sp.model);
-    relax.add(IloConversion(*sp.envPtr, sp.variables, ILOFLOAT)); 
+    relax.add(IloConversion(*sp.envPtr, sp.variables, ILOFLOAT));
+    // cout << sp.variables;
+    // cout << sp.model;
 
+    // IloModel relax = sp.model;
+    // relax.add(sp.model);
+
+    //  // create the obj function for the subproblem
+    // for (int i = 0; i < sp.variables.getSize(); i++) {
+    //     //original index -- get coeff
+    //     sp.model.add(IloConversion(*sp.envPtr, sp.variables[i], ILOFLOAT)); 
+    //     // obj_exp += (coeff * sp.variables[i]);
+    //     // if (debug_printing){
+    //     //    cout << coeff << "x_" << original_var_idx << " ";
+    //     // }
+    // }
+    // cout << sp.model;
+    // relax.add(IloConversion(*sp.envPtr, sp.variables, ILOFLOAT)); 
+    // sp.model.getClone();
      // try and gather statistics from cplex object. If there is an error, set the LB to inf so the solution can be dicarded
     try{
         IloCplex cplex_relaxed(relax);
+       // cout << cplex_relaxed.getModel() << endl;
         cplex_relaxed.setParam(IloCplex::Threads, 1); // solve using 1 thread only
         cplex_relaxed.setParam(IloCplex::TiLim, lp_subproblem_solve_time);
         cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
+        cout << "cplex allocated solve time is " << lp_subproblem_solve_time << endl;
         // get the best dual bound
         bool solve_relaxed_status = cplex_relaxed.solve();
         // if optimal LP solution can't be found
@@ -556,8 +522,18 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             subproblem_statistics_ptr->subproblem_lp_found[subproblem_idx] = false;
             // get dual solution if lp solution is not available?
             subproblem_statistics_ptr->lp_obj_solutions[subproblem_idx] = cplex_relaxed.getBestObjValue();
+            // if the root node from MIP could not be solved, us the lp value from the dual simplex method for the subproblem
             if (root_node_finished == false){
-                s.lb += cplex_relaxed.getBestObjValue();
+                // s.lb += cplex_relaxed.getBestObjValue();
+                // s.lb += cplex_relaxed.getObjValue();
+                cplex_relaxed.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/LP_problem.mps");
+                exit(0);
+                cout << "cplex_relaxed best obj val is " << cplex_relaxed.getBestObjValue() << endl;
+                cout << "cplex_relaxed obj val is " << cplex_relaxed.getObjValue() << endl;
+                cout << "cplex solve status is " << cplex_relaxed.getCplexStatus() << endl;
+                cout << "cplex primal status " << cplex_relaxed.isPrimalFeasible() << endl;
+                cout << "cplex dual status is " << cplex_relaxed.isDualFeasible() << endl;
+                // cout << relax << endl;
                 subproblem_statistics_ptr->mip_obj_solutions[subproblem_idx] = cplex_relaxed.getBestObjValue();
             }
             if (check_subproblem){
