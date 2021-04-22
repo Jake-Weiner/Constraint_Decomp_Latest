@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# this script will iterate through every folder and change the permissions of all files to be executable
+find . -type f -exec chmod 755 {} \;

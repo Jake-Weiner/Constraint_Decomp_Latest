@@ -7,7 +7,7 @@ mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/input_fil
 
 scp -r /home/jake/PhD/Decomposition/Input/dataset/fixed_cost_network_flow jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/input_files
 scp -r /home/jake/PhD/Decomposition/Input/dataset/supply_network_planning jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/input_files
-
+scp -r /home/jake/PhD/Decomposition/Input/dataset/random_MIPLIB jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/input_files
 ----- Transfer input data to m3
 
 mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/{NSGA_Decompositions,Greedy_Decompositions}
@@ -20,13 +20,45 @@ mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/{N
 # for each instance name make output folders
 
 ------------------------------------------NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
-mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/network_design/{cost266-UUE.mps,dfn-bwin-DBE.mps,germany50-UUM.mps,ta1-UUM.mps,ta2-UUE.mps}/{decompositions/{NSGA,Greedy,Combined},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/network_design/{cost266-UUE.mps,dfn-bwin-DBE.mps,germany50-UUM.mps,ta1-UUM.mps,ta2-UUE.mps}/{decompositions/{NSGA,Greedy,Combined,Ranking},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
 
 ------------------------------------------SUPPLY NETWORK PLANNING OUTPUT FOLDERS---------------------------------------------------------------------
-mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/supply_network_planning/{snp-02-004-104.mps,snp-04-052-052.mps,snp-06-004-052.mps,snp-10-004-052.mps,snp-10-052-052.mps}/{decompositions/{NSGA,Greedy,Combined},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/supply_network_planning/{snp-02-004-104.mps,snp-04-052-052.mps,snp-06-004-052.mps,snp-10-004-052.mps,snp-10-052-052.mps}/{decompositions/{NSGA,Greedy,Combined,Ranking},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
 
 ------------------------------------------FIXED COST NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
-mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/fixed_cost_network_flow/{g200x740.mps,h50x2450.mps,h80x6320.mps,h80x6320d.mps,k16x240b.mps}/{decompositions/{NSGA,Greedy,Combined},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/fixed_cost_network_flow/{g200x740.mps,h50x2450.mps,h80x6320.mps,h80x6320d.mps,k16x240b.mps}/{decompositions/{NSGA,Greedy,Combined,Ranking},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
+
+------------------------------------------RANDOM MIPLIB OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/{blp-ic98.mps,dws008-01.mps,30n20b8.mps,air03.mps,traininstance2.mps,neos-4387871-tavua.mps,neos-3656078-kumeu.mps,neos-4338804-snowy.mps,air05.mps,neos-4954672-berkel.mps,splice1k1.mps}/{decompositions/{NSGA,Greedy,Combined},LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics,Instance_Statistics,LP_Bound}
+
+
+# RANKING OUTPUT FOLDERS
+
+------------------------------------------NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/Ranking/network_design/{cost266-UUE.mps,dfn-bwin-DBE.mps,germany50-UUM.mps,ta1-UUM.mps,ta2-UUE.mps}/{0,1,2,3,4,5,6,7,8,9}/{LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+------------------------------------------SUPPLY NETWORK PLANNING OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/Ranking/supply_network_planning/{snp-02-004-104.mps,snp-04-052-052.mps,snp-06-004-052.mps,snp-10-004-052.mps,snp-10-052-052.mps}/{0,1,2,3,4,5,6,7,8,9}/{LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+------------------------------------------FIXED COST NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/Ranking/fixed_cost_network_flow/{g200x740.mps,h50x2450.mps,h80x6320.mps,h80x6320d.mps,k16x240b.mps}/{0,1,2,3,4,5,6,7,8,9}/{LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+# No Constr Relaxed Output Folders
+
+------------------------------------------NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/network_design/{cost266-UUE.mps,dfn-bwin-DBE.mps,germany50-UUM.mps,ta1-UUM.mps,ta2-UUE.mps}/{decompositions, LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+------------------------------------------SUPPLY NETWORK PLANNING OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/supply_network_planning/{snp-02-004-104.mps,snp-04-052-052.mps,snp-06-004-052.mps,snp-10-004-052.mps,snp-10-052-052.mps}/{decompositions, LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+------------------------------------------FIXED COST NETWORK FLOW OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/fixed_cost_network_flow/{g200x740.mps,h50x2450.mps,h80x6320.mps,h80x6320d.mps,k16x240b.mps}/{decompositions, LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+------------------------------------------RANDOM OUTPUT FOLDERS---------------------------------------------------------------------
+mkdir -p /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/fixed_cost_network_flow/{g200x740.mps,h50x2450.mps,h80x6320.mps,h80x6320d.mps,k16x240b.mps}/{decompositions, LROutputs,Relaxed_Constraint_Statistics,Subproblem_Statistics}
+
+
+"blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps", "neos-3656078-kumeu.mps", "neos-4338804-snowy.mps", "log_file.txt", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"
 
 ----------------------------------------------------transfer all bash files to m3-----------------------------------------------
  
@@ -54,6 +86,8 @@ mkdir -p /home/jakew/p2016050003/jakew/edge_disjoint/output/EJOR_Larger_Graphs/{
  
 scp -r /home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts/Cost266_uue.mps jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/experiment_scripts
 
+scp -r /home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts/random_MIPLIB jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/experiment_scripts/experiment_scripts
+
 ------------------------------------------------------get all outputs-------------------------------------------------
 
 // NSGA decompositions
@@ -73,6 +107,12 @@ rsync -avz --rsh=ssh --include='*redund_duplicates_removed.csv' --include='*/' -
 rsync -avz --rsh=ssh --include='*duplicates_redund_duplicates_removed.csv' --include='*/' --exclude='*' jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/supply_network_planning /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs
 
 rsync -avz --rsh=ssh --include='*combined_decomps.csv' --include='*/' --exclude='*' /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs/supply_network_planning jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/
+
+rsync -avz --rsh=ssh --include='*combined_decomps.csv' --exclude='*'  /media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs/random_MIPLIB jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB
+
+rsync -avz --rsh=ssh /media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs/random_MIPLIB jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB 
+
+rsync -avz --rsh=ssh jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB 
 
 
 --------------TRANSFER COMBINED DECOMPS BACK TO THE SERVER -------
@@ -113,11 +153,17 @@ rsync -avz --rsh=ssh /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massi
 
 --download all outputs except for decomps--------------------------------------------------------------------
 
-rsync -avz --rsh=ssh --exclude='decompositions*' jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/fixed_cost_network_flow/k16x240b.mps /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs/fixed_cost_network_flow
+rsync -avz --rsh=ssh --exclude='decompositions*' jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/ /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs
+
+rsync -avz --rsh=ssh --exclude='decompositions*' jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB /media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs
 
 ------------------------------------------------delete output files keep structure ------------------------------------------
 
-find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/network_flow/cost266-UUE.mps -type f -exec rm -v {} \;
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/cost266-UUE.mps -type f -exec rm -v {} \;
+
+rm -rf /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB
+
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/ -type f -exec rm -v {} \;
 
 find ./parent -mindepth 1 -name four -prune -o -exec rm -rf {} \;
 
@@ -128,16 +174,40 @@ LR_outputs.csv
 
 ---- Download problem decomp file----
 
-scp jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/supply_network_planning/snp-10-004-052.mps/decompositions/Combined/problem_decomps.csv /home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/snp10_04
+scp jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/network_design/cost266-UUE.mps/decompositions/Combined/problem_decomps.csv /home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/cost266-UUE.mps
 
 ----delete all files except for decompositions
 
 find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output -mindepth 1 -name decompositions -prune -o -type f -exec rm -v '{}' \;
 
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/splice1k1.mps -mindepth 1 -name "decompositions" -prune -o -type f -exec rm -v '{}' \;
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/neos-3656078-kumeu.mps -mindepth 1 -name "decompositions" -prune -o -type f -exec rm -v '{}' \;
+
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB -name decompositions -type d 
+
+
+-exec echo "rm -v '{/*}'" \;
+
+--- Delete all files within folder Instance_Statistics without deleting the folder itself -----
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output -type f -and -path '*/Instance_Statistics/*' -exec echo "rm -v '{}'" \;
+
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output -type f -and -path '*/Instance_Statistics/*' -exec rm -v '{}' \;
+
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/ -type f -and -path '*/Instance_Statistics/*' -exec echo "rm -v '{}'" \;
+
+
+-- download for error checking
+
+scp jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/traininstance2.mps/decompositions/Combined/combined_decomps_traininstance2.mps_duplicates_removed.csv /home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/random_MIPLIB
+
+
 ----delete all files except for decompositions
 
-find /home/jake/PhD/Decomposition/Massive/Machine_Learning/Massive_Outputs/network_design/germany50-UUM.mps -mindepth 1 -name decompositions -prune -o -type f -exec rm -v '{}' \;
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/Ranking -mindepth 1 -name decompositions -prune -o -type f -exec rm -v '{}' \;
 
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/Ranking -mindepth 1 -name decompositions -prune -o -type f -exec echo "rm -v '{}' \;"
+
+find /home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/random_MIPLIB/ -mindepth 1 -name decompositions -prune -o -type f -exec echo "rm -v '{}' \;"
 
 find ./parent -mindepth 1 -name four -prune -o -exec rm -rf {} \;
 

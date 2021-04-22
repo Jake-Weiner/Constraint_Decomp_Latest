@@ -374,7 +374,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     double mip_subproblem_solve_time = max(0.9 * sp.getSubproblemRunTime(),0.1);
     // double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.1);
     // 1 minute max to solving the LP of subproblem
-    double lp_subproblem_solve_time = 5;
+    double lp_subproblem_solve_time = 60;
     // flag to see if CPLEX at least finishes processing the root node
     bool root_node_finished = true;
     int subproblem_idx = sp.getSubproblemIdx();
@@ -417,7 +417,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
                 if (cplex.getNnodes() == 0){
                     root_node_finished = false;
                     cout << "root node still not finished after an additional 60s" << endl;
-                    cplex.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/MIP_problem.mps");
+                    // cplex.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/MIP_problem.mps");
+
                 }
                 // otherwise take the objective from the root node
                 else{
@@ -488,32 +489,15 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
     IloModel relax(*sp.envPtr);
     relax.add(sp.model);
     relax.add(IloConversion(*sp.envPtr, sp.variables, ILOFLOAT));
-    // cout << sp.variables;
-    // cout << sp.model;
 
-    // IloModel relax = sp.model;
-    // relax.add(sp.model);
-
-    //  // create the obj function for the subproblem
-    // for (int i = 0; i < sp.variables.getSize(); i++) {
-    //     //original index -- get coeff
-    //     sp.model.add(IloConversion(*sp.envPtr, sp.variables[i], ILOFLOAT)); 
-    //     // obj_exp += (coeff * sp.variables[i]);
-    //     // if (debug_printing){
-    //     //    cout << coeff << "x_" << original_var_idx << " ";
-    //     // }
-    // }
-    // cout << sp.model;
-    // relax.add(IloConversion(*sp.envPtr, sp.variables, ILOFLOAT)); 
-    // sp.model.getClone();
      // try and gather statistics from cplex object. If there is an error, set the LB to inf so the solution can be dicarded
     try{
         IloCplex cplex_relaxed(relax);
        // cout << cplex_relaxed.getModel() << endl;
         cplex_relaxed.setParam(IloCplex::Threads, 1); // solve using 1 thread only
         cplex_relaxed.setParam(IloCplex::TiLim, lp_subproblem_solve_time);
+        cplex_relaxed.setParam(IloCplex::RootAlg, IloCplex::Barrier); // use barrier method
         cplex_relaxed.setOut((*(sp.envPtr)).getNullStream());
-        cout << "cplex allocated solve time is " << lp_subproblem_solve_time << endl;
         // get the best dual bound
         bool solve_relaxed_status = cplex_relaxed.solve();
         // if optimal LP solution can't be found
@@ -526,8 +510,8 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
             if (root_node_finished == false){
                 // s.lb += cplex_relaxed.getBestObjValue();
                 // s.lb += cplex_relaxed.getObjValue();
-                cplex_relaxed.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/LP_problem.mps");
-                exit(0);
+                // cplex_relaxed.exportModel("/home/jake/PhD/Decomposition/Massive/Machine_Learning/LP_problem.mps");
+                // exit(0);
                 cout << "cplex_relaxed best obj val is " << cplex_relaxed.getBestObjValue() << endl;
                 cout << "cplex_relaxed obj val is " << cplex_relaxed.getObjValue() << endl;
                 cout << "cplex solve status is " << cplex_relaxed.getCplexStatus() << endl;

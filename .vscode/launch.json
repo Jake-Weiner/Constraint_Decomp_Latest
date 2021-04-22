@@ -10,11 +10,11 @@
             "request": "launch",
             "program": "/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/main_test",
             "args": ["--input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/random_MIPLIB"
-            ,"--input_instance_name=splice1k1.mps"
+            ,"--input_instance_name=neos-4387871-tavua.mps"
             ,"--run_generic_MIP_solver=false"
             ,"--maxIter=1" 
-            ,"--total_LR_time_lim=15"
-            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/random_MIPLIB/error_checking_splice1k1.mps.csv"
+            ,"--total_LR_time_lim=330"
+            ,"--con_vec_filename=/home/jake/PhD/Decomposition/Massive/Machine_Learning/error_checking/random_MIPLIB/neos-4387871-tavua.csv"
             ,"--run_gather_statistics=true"
             ,"--debug_printing=false"],
             "stopAtEntry": true,

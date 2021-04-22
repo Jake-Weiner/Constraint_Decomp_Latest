@@ -124,6 +124,38 @@ def train_all_excl_test(models):
                 pickle.dump(reg_model, pickle_output_fs)
             print("Finished model {} for problem type {}".format(model_name, "all_problem_types"))
 
+#create a model trained on all instances available
+def train_all_instances(models):
+    # train on all instances in the dataset except for 1 instance to be tested
+    df_all_problems_list = []
+    for problem_type_idx, problem_type in enumerate(problem_types):
+        # create output folders if they don't already exist
+        for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
+            input_data_filepath = processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
+            df = pd.read_csv(input_data_filepath)
+            df['Instance Name'] = instance_name
+            df_all_problems_list.append(df)
+
+    df_all_problems_combined = pd.concat(df_all_problems_list, keys=instance_names_training_flat_list)
+    # reset the indexes
+    df_all_problems_combined.reset_index(drop=True, inplace=True)
+
+    target_np = df_all_problems_combined['Decomp Score'].to_numpy()
+    features_np = df_all_problems_combined.drop(
+        columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
+                 'Decomp Score', 'Instance Name']).to_numpy()
+    # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
+    for model_name, model in models:
+        reg_model = model.fit(features_np, target_np)
+        # store models with pickle
+        with open(
+                regression_models_pickle_output_folder + "/" + model_name + "_" + "all_network_instances" + ".pkl",
+                'wb') as pickle_output_fs:
+            pickle.dump(reg_model, pickle_output_fs)
+        print("Finished model {} for problem type {}".format(model_name, "all_network_instances"))
+
+
+
 
 def train_problem_excl_test(models):
     # train DT model on each problem type except for 1 instance left for testing
@@ -197,9 +229,10 @@ def main():
     # models.append(('Stacking', get_stacking()))
     models.append(('Voting', get_voting()))
     Path(regression_models_pickle_output_folder).mkdir(parents=True, exist_ok=True)
-    train_problem_excl_test(models)
-    train_all_excl_test(models)
-    train_problem_all_instance(models)
+    # train_problem_excl_test(models)
+    # train_all_excl_test(models)
+    # train_problem_all_instance(models)
+    train_all_instances(models)
 
 
 # get a stacking ensemble of models

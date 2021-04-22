@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#SBATCH --job-name=snp-06-004-052.mps_No_Const_Relaxed_Gather_Statistics
+#SBATCH --cpus-per-task=1
+#SBATCH --time=01:00:00
+#SBATCH --mem-per-cpu=8192
+
+module load gcc/5.4.0
+module load boost/1.67.0-gcc5
+module load cplex/12.8.0
+./batch2

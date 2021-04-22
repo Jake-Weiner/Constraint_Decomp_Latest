@@ -64,6 +64,8 @@ def main():
     print(pca.explained_variance_ratio_)
     df_new = pd.DataFrame({"PCA 1" : projected[:, 0], "PCA 2" : projected[:,1], "Problem Type": Y})
     print(np.square(pca.components_)[1])
+
+    print(df_new)
     # print(df_new)
     # groups = df_new.groupby("Problem Type")
     #

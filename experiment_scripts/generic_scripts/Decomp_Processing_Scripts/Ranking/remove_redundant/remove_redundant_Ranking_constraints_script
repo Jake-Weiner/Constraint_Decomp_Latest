@@ -1,0 +1,39 @@
+#!/bin/bash
+
+module load pagmo/.2.13.0
+module load cplex/12.8.0
+module load boost/1.67.0-gcc5
+module unload gcc/5.4.0
+
+BIND="-B /usr/local/ -B /home:/home -B /mnt/lustre:/mnt/lustre"
+SIF="/usr/local/pagmo/2.13.0/pagmo.sif"
+
+instance_name="Instance_XXXXX"
+problem_type="ProblemType_XXXXX"
+input_files_path="/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/input_files/${problem_type}"
+executable_path="/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/executables"
+decomp_folder="/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/${problem_type}/${instance_name}/decompositions/Ranking"
+log_files_path="/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/logs"
+
+EXE="$executable_path/main_test --input_root_folder=$input_files_path "\
+"--printLevel=3 "\
+"--input_instance_name=$instance_name "\
+"--run_constraint_redundancy=true "\
+"--decomps_to_remove_red_const_file=${decomp_folder}/BATCHNUMBER "\
+"--redundant_const_removed_output_file=${decomp_folder}/${instance_name}_BATCHNUMBER_redund_removed.csv "\
+" > \"$log_files_path/${instance_name}_ranking_BATCHNUMBER_remove_redund_constraints.txt\" "
+
+NEED_NEW_LIBS="/opt/pagmo/lib:/usr/lib/x86_64-linux-gnu"
+
+SET_COMMAND="SINGULARITYENV_LD_LIBRARY_PATH=${NEED_NEW_LIBS} "
+
+echo "${SET_COMMAND} singularity exec $BIND  $SIF ${EXE}"
+eval ${SET_COMMAND} singularity exec $BIND  $SIF ${EXE}
+
+
+
+
+
+
+
+
