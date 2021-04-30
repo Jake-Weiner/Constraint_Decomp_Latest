@@ -30,9 +30,6 @@ processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learnin
 
 model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
 
-
-
-
 def collateAllPredictions():
     for problem_type_idx, problem_type in enumerate(problem_types):
         model_aggregates_outputs_folder = model_comparisons_outputs_root_folder + "/" + problem_type
@@ -40,17 +37,8 @@ def collateAllPredictions():
         df_list = []
         key = 'Ranking Method'
         for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
-            model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "batch_results.csv"
+            model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "predicted_decomp_scores.csv"
             df = pd.read_csv(model_comparisons_path)
-            print(df)
-            # best_decomp_score_min = df["Best Decomp Score"].min()
-            # best_decomp_score_max = df["Best Decomp Score"].max()
-            # best_decomp_scores_np = df["Best Decomp Score"].values.reshape(-1,1)
-            # scaler = MinMaxScaler()
-            # best_decomp_scores_np_scaled = scaler.fit_transform(best_decomp_scores_np)
-            # df["Best Decomp Score Scaled"] = best_decomp_scores_np_scaled
-            print(df)
-
             # remove .csv extension from files
             filename_trimmed = os.path.splitext(instance_name)[0]
             df.rename(columns={'Best Decomp Score': filename_trimmed}, inplace=True)
@@ -69,7 +57,7 @@ def collateAllScaledPredictions():
         df_list = []
         key = 'Ranking Method'
         for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
-            model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "batch_results.csv"
+            model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "predicted_decomp_scores.csv"
             df = pd.read_csv(model_comparisons_path)
             best_decomp_scores_np = df["Best Decomp Score"].values.reshape(-1,1)
             scaler = MinMaxScaler()
@@ -90,7 +78,7 @@ def collateAllScaledPredictions():
 def main():
     collateAllPredictions()
     collateAllScaledPredictions()
-    
+
 #store the important features in a list
 if __name__ == "__main__":
     main()

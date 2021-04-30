@@ -24,7 +24,6 @@ plt.style.use('ggplot')
 
 #global vars
 problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-# problem_types = ["network_design", "fixed_cost_network_flow"]
 
 instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                           ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
@@ -43,7 +42,6 @@ heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
 features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
 
-# data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
 data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
 
 class Test_Type_Enum:
@@ -51,11 +49,8 @@ class Test_Type_Enum:
     DIFFERENT_PROBLEM = 2
     ALL_PROBLEMS = 3
 
-
-
-
+# get the decomp score from the top 8 predicted decomposition using heuristic scores
 def getBestHeuristicDecomps():
-
     # get the best decomposition scores based on predicted Heuristic outputs
     for heuristic_name in heuristic_names:
         for problem_type_idx, problem_type in enumerate(problem_types):
@@ -63,18 +58,21 @@ def getBestHeuristicDecomps():
                 best_decomp_score_folder = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name
                 Path(best_decomp_score_folder).mkdir(parents=True, exist_ok=True)
                 # test if output file exists
-                my_file = Path(best_decomp_score_folder + "/" + "batch_results.csv")
+                my_file = Path(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv")
                 # write headers if file does not exist
                 if not my_file.is_file():
-                    with open(best_decomp_score_folder + "/" + "batch_results.csv", "w") as batch_outputs_fs:
-                        batch_outputs_fs.write(
-                            "Ranking Method,Best Decomp Score" + "\n")
+                    with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
+                        predicted_decomp_scores_output_fs.write(
+                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
 
-                with open(best_decomp_score_folder + "/" + "batch_results.csv", "a+") as batch_outputs_fs:
+                with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
                     input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
                     # read in collated data, which contains the decomp value
                     df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
+                    #get both best and worst actual decomposition scores to use for scaling purposes
+                    true_min_decomp_score = df_collated["Decomp Score"].min()
+                    true_max_decomp_score = df_collated["Decomp Score"].max()
                     scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
 
                     heuristic_scores_df = pd.read_csv(
@@ -87,23 +85,27 @@ def getBestHeuristicDecomps():
                     else:
                         best_heur_values_decomp_indexes = heuristic_scores_df.nlargest(8, heuristic_name + " Scores")[
                             'Decomposition Index']
-                    decomp_scores = []
+                    best_decomp_scores_from_predictions = []
 
-                    # for each decomp index of the best 10 predicted decomps, get the actual decomp scores
+                    # for each decomp index of the best 8 predicted decomps, get the actual decomp scores
                     for decomp_idx in best_heur_values_decomp_indexes:
-                        decomp_scores.append(
+                        best_decomp_scores_from_predictions.append(
                             df_collated[df_collated['Decomposition Index'] == decomp_idx][
                                 "Decomp Score"].values[0])
                     # calculate both mean and stddev of best predicted decomps
-                    best_score = min(decomp_scores)
-                    batch_outputs_fs.write(
-                        "{},{} \n".format(heuristic_name, best_score))
+                    best_score = min(best_decomp_scores_from_predictions)
+                    best_score_scaled = (
+                                (best_score - true_min_decomp_score) / (true_max_decomp_score - true_min_decomp_score))
+                    #calculate RMSE
+                    rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
+                                                        heuristic_scores_df[heuristic_name + " Scores"]))
+                    predicted_decomp_scores_output_fs.write(
+                        "{},{},{} \n".format(heuristic_name, best_score_scaled, rmse))
                 print("Finished {}".format(instance_name))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(heuristic_name))
 
-#fix ml training problem
-# getBestMLSameProblem
+#get the best decomp score amongst the top 8 predicted decompositions
 def getBestMLDecomps():
     # get the best decomposition scores based on predicted ML outputs
     for ML_name in ML_names:
@@ -112,19 +114,21 @@ def getBestMLDecomps():
                 best_decomp_score_folder = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name
                 Path(best_decomp_score_folder).mkdir(parents=True, exist_ok=True)
                 # test if output file exists
-                my_file = Path(best_decomp_score_folder + "/" + "batch_results.csv")
+                my_file = Path(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv")
                 # write headers if file does not exist
                 if not my_file.is_file():
-                    with open(best_decomp_score_folder + "/" + "batch_results.csv", "w") as batch_outputs_fs:
-                        batch_outputs_fs.write(
-                            "Ranking Method,Best Decomp Score" + "\n")
+                    with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
+                        predicted_decomp_scores_output_fs.write(
+                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
 
-                with open(best_decomp_score_folder + "/" + "batch_results.csv", "a+") as batch_outputs_fs:
+                with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
                     input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
                     # read in collated data, which contains the decomp value
                     df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
+                    true_min_decomp_score = df_collated["Decomp Score"].min()
+                    true_max_decomp_score = df_collated["Decomp Score"].max()
                     scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
                     #there are 4 different trained algorithms - same problem, all problems, different problem
                     for data_trained_on in data_trained_on_list:
@@ -150,69 +154,22 @@ def getBestMLDecomps():
                                 df_collated[df_collated['Decomposition Index'] == decomp_idx]["Decomp Score"].values[0])
                         # calculate best decomp score amongst the top 8 predicted decomps
                         best_decomp_score = min(decomp_scores)
-                        batch_outputs_fs.write(
-                            "{}_{},{}\n".format(ML_name, data_trained_on, best_decomp_score))
+                        best_score_scaled = ((best_decomp_score - true_min_decomp_score) / (
+                                    true_max_decomp_score - true_min_decomp_score))
+                        rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
+                                                 ml_scores_df['ML predicted val']))
+                        predicted_decomp_scores_output_fs.write(
+                            "{}_{},{},{}\n".format(ML_name, data_trained_on, best_score_scaled,rmse))
                     print("Finished {}".format(instance_name))
                 print("Finished {}".format(data_trained_on))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(ML_name))
     return
 
-def getBestMLAllProblems():
-    return
-
-def getBestMLOtherProblems():
-    return
-
 def main():
-    #first test, same problemTest_Type_Enum
-
     getBestMLDecomps()
     getBestHeuristicDecomps()
-    #
-    # # read in scores file
-    # data_trained_on_list = ["network_design", "fixed_cost_network_flow",  "supply_network_planning", "all_problem_types"]
 
-
-
-
-
-                    # for heuristics_name in heuristic_names:
-                    #     heuristic_scores_df = pd.read_csv(
-                    #         scores_folder + "/" + ML_name + "_" + data_trained_on + ".csv")
-                    #     # get the decomp indexes of the best n decompisitions as predicted by the ML model
-                    #     smallest_ml_values_decomp_indexes = ml_scores_df.nsmallest(10, 'ML predicted val')[
-                    #         'Decomposition Index']
-                    #     decomp_scores = []
-                    #     for decomp_idx in smallest_ml_values_decomp_indexes:
-                    #         decomp_scores.append(df_collated[df_collated['Decomposition Index'] == decomp_idx][
-                    #                                  "Decomp Score"].values[0])
-                        #read in scores for ML model predictions
-                # read in collated
-                # remove default index and Decomp index from dataframe to store features
-                # X = df.drop(columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)'])
-                # X_np = X.to_numpy()
-                # Path(
-                #     model_prediction_output_folder + "/" + problem_type).mkdir(
-                #     parents=True, exist_ok=True)
-                # print("for problem type " + problem_type)
-                #
-                # for model_name in models:
-                #     for data_trained_on in data_trained_on_list:
-                #         with open(regression_models_pickle_input_folder + "/" + model_name + "_" + data_trained_on + ".pkl",
-                #                   'rb') as pickle_input_fs:
-                #             model = pickle.load(pickle_input_fs)
-                #             print(type(model.predict(X_np)))
-                #             df_ml = pd.DataFrame()
-                #             df_ml['Decomposition Index'] = df['Decomposition Index']
-                #             df_ml['ML predicted val'] = pd.Series(model.predict(X_np))
-                #             ML_output_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + str(batch_number) + "/" + "Ranking_Method_Scores"
-                #             Path(ML_output_folder).mkdir(parents=True, exist_ok=True)
-                #             ML_output_filename = model_name + "_" + data_trained_on + ".csv"
-                #             df_ml.to_csv(ML_output_folder + "/" + ML_output_filename)
-                #         print("Finished problem type {}, model {}, trained on {}".format(problem_type,model_name, data_trained_on))
-
-#store the important features in a list
 if __name__ == "__main__":
 
     main()
