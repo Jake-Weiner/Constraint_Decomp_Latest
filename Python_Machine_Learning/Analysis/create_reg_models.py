@@ -91,6 +91,9 @@ def train_problem_all_instance(models):
                 pickle.dump(reg_model, pickle_output_fs)
             print("Finished model {} for problem type {}".format(model_name, problem_type))
 
+
+#re-write this but generating RMSE for training data
+
 def train_all_excl_test(models):
     # train on all instances in the dataset except for 1 instance to be tested
     df_all_problems_list = []
@@ -154,9 +157,6 @@ def train_all_instances(models):
             pickle.dump(reg_model, pickle_output_fs)
         print("Finished model {} for problem type {}".format(model_name, "all_network_instances"))
 
-
-
-
 def train_problem_excl_test(models):
     # train DT model on each problem type except for 1 instance left for testing
     for problem_type_idx, problem_type in enumerate(problem_types):
@@ -176,7 +176,6 @@ def train_problem_excl_test(models):
             features_np = df_training.drop(
                 columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
                          'Decomp Score', 'Instance Name']).to_numpy()
-            # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
             for model_name, model in models:
                 reg_model = model.fit(features_np, target_np)
                 # store models with pickle

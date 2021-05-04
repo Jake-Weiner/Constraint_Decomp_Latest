@@ -29,6 +29,8 @@ processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learnin
 
 model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
 
+p_val_threshold = 0.01
+
 #for each problem, output the aggregates for each ML model for SAME and DIFFERENT training
 def calculateProblemTypeTrainingAggregates():
     df_problem_list = []
@@ -101,6 +103,7 @@ def calculateSameAllProblemAggregates(same_all_switch):
 
         ranking_method_best_decomp_scores_dict = dict()
         ranking_method_RMSE_scores_dict = dict()
+        ranking_method_p_vals_dict = dict()
         for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
             # if "g200x740" not in instance_name and "h806320d.mps" not in instance_name and "ta1" not in instance_name and "ta2" not in instance_name:
             model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "predicted_decomp_scores.csv"
@@ -118,22 +121,31 @@ def calculateSameAllProblemAggregates(same_all_switch):
                     if line_number != 0:
                         ranking_method = line_split[0]
                         # look at either same results or all results in batch file results
+                        print(ranking_method)
                         if identifier in ranking_method or ranking_method in heuristic_methods:
                             original_decomp_score = float(line_split[1])
                             rmse_score = float(line_split[2])
+                            p_val = float(line_split[3])
                             # if ranking method has not been seen, create the key and then append the score
                             if not ranking_method in ranking_method_best_decomp_scores_dict:
                                 ranking_method_best_decomp_scores_dict[ranking_method] = []
                                 ranking_method_RMSE_scores_dict[ranking_method] = []
+
+                                ranking_method_p_vals_dict[ranking_method] = []
                             ranking_method_best_decomp_scores_dict[ranking_method].append(original_decomp_score)
                             ranking_method_RMSE_scores_dict[ranking_method].append(rmse_score)
+                            ranking_method_p_vals_dict[ranking_method].append(1 if p_val < p_val_threshold else 0)
         ranking_methods = [ranking_method.split('_')[0] for ranking_method in ranking_method_best_decomp_scores_dict]
         mean_decomp_scores = [statistics.mean(ranking_method_best_decomp_scores_dict[ranking_method]) for ranking_method in ranking_method_best_decomp_scores_dict]
+        print("For problem {}".format(problem_type))
+        print("Scores are {}".format([ranking_method_best_decomp_scores_dict[ranking_method] for ranking_method in ranking_method_best_decomp_scores_dict]))
         stdev_decomp_scores = [statistics.stdev(ranking_method_best_decomp_scores_dict[ranking_method]) for ranking_method in ranking_method_best_decomp_scores_dict]
         rmse_scores = [statistics.mean(ranking_method_RMSE_scores_dict[ranking_method]) for ranking_method in ranking_method_RMSE_scores_dict]
-        df = pd.DataFrame(zip(ranking_methods,mean_decomp_scores,stdev_decomp_scores, rmse_scores), columns=['ML Method', 'Mean Score', 'Score Std','Mean RMSE'])
+        p_vals = [statistics.mean(ranking_method_p_vals_dict[ranking_method]) for ranking_method in
+                       ranking_method_p_vals_dict]
+        df = pd.DataFrame(zip(ranking_methods,mean_decomp_scores,stdev_decomp_scores, rmse_scores, p_vals), columns=['ML Method', 'Mean Score', 'Score Std','Mean RMSE','p vals'])
         problem_aggregate_df_list.append(df)
-        print(df.iloc[:,0:2])
+
 
     df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=['ML Method'],
                                                                            how='outer'), problem_aggregate_df_list)

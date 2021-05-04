@@ -3,21 +3,9 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-import statistics
-from sklearn.model_selection import cross_validate
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
+
 from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression
-from sklearn import svm
-from sklearn.linear_model import SGDRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn import tree
-from sklearn.neural_network import MLPRegressor
-from sklearn.model_selection import train_test_split
-import os
-import statistics
-import pickle
+import scipy
 import math
 import textwrap
 plt.style.use('ggplot')
@@ -44,10 +32,8 @@ model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Ma
 
 data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
 
-class Test_Type_Enum:
-    SAME_PROBLEM = 1
-    DIFFERENT_PROBLEM = 2
-    ALL_PROBLEMS = 3
+ranking_methods = ML_names + heuristic_names
+print(ranking_methods)
 
 # get the decomp score from the top 8 predicted decomposition using heuristic scores
 def getBestHeuristicDecomps():
@@ -63,7 +49,7 @@ def getBestHeuristicDecomps():
                 if not my_file.is_file():
                     with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
                         predicted_decomp_scores_output_fs.write(
-                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
+                            "Ranking Method,Best Decomp Score,RMSE,p val" + "\n")
 
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
@@ -94,13 +80,18 @@ def getBestHeuristicDecomps():
                                 "Decomp Score"].values[0])
                     # calculate both mean and stddev of best predicted decomps
                     best_score = min(best_decomp_scores_from_predictions)
+
                     best_score_scaled = (
                                 (best_score - true_min_decomp_score) / (true_max_decomp_score - true_min_decomp_score))
                     #calculate RMSE
-                    rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
+                    test_rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
                                                         heuristic_scores_df[heuristic_name + " Scores"]))
+                    z_score = ((best_score - df_collated["Decomp Score"].mean()) / df_collated[
+                        "Decomp Score"].std())
+                    p_val = scipy.stats.norm.sf(abs(z_score))  # one-sided
+
                     predicted_decomp_scores_output_fs.write(
-                        "{},{},{} \n".format(heuristic_name, best_score_scaled, rmse))
+                        "{},{},{},{} \n".format(heuristic_name, best_score_scaled, test_rmse, p_val))
                 print("Finished {}".format(instance_name))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(heuristic_name))
@@ -119,12 +110,12 @@ def getBestMLDecomps():
                 if not my_file.is_file():
                     with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
                         predicted_decomp_scores_output_fs.write(
-                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
+                            "Ranking Method,Best Decomp Score,RMSE,p val" + "\n")
 
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
-                    input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
+
                     # read in collated data, which contains the decomp value
                     df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
                     true_min_decomp_score = df_collated["Decomp Score"].min()
@@ -145,6 +136,8 @@ def getBestMLDecomps():
                             ml_scores_df = pd.read_csv(
                                 scores_folder + "/" + ML_name + "_" + data_trained_on + ".csv")
                             # get the decomp indexes of the best n decompositions as predicted by the ML model
+
+                        print(ml_scores_df)
                         smallest_ml_values_decomp_indexes = ml_scores_df.nsmallest(8, 'ML predicted val')[
                             'Decomposition Index']
                         decomp_scores = []
@@ -154,21 +147,29 @@ def getBestMLDecomps():
                                 df_collated[df_collated['Decomposition Index'] == decomp_idx]["Decomp Score"].values[0])
                         # calculate best decomp score amongst the top 8 predicted decomps
                         best_decomp_score = min(decomp_scores)
+                        #scale the score using true min and max decomp values
                         best_score_scaled = ((best_decomp_score - true_min_decomp_score) / (
                                     true_max_decomp_score - true_min_decomp_score))
-                        rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
+                        #calculate test rmse using predicted decomp scores vs and actual decomp scores
+                        test_rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
                                                  ml_scores_df['ML predicted val']))
+                        # get the training rmse val
+                        # p-values for predicted decomp score. Is this score considered statistically significant
+                        z_score = ((best_decomp_score - df_collated["Decomp Score"].mean()) / df_collated[
+                            "Decomp Score"].std())
+                        p_val = scipy.stats.norm.sf(abs(z_score))  # one-sided
                         predicted_decomp_scores_output_fs.write(
-                            "{}_{},{},{}\n".format(ML_name, data_trained_on, best_score_scaled,rmse))
+                            "{}_{},{},{},{}\n".format(ML_name, data_trained_on, best_score_scaled,test_rmse,p_val))
                     print("Finished {}".format(instance_name))
                 print("Finished {}".format(data_trained_on))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(ML_name))
     return
 
+#how many predictions are statistically significant...
 def main():
     getBestMLDecomps()
-    getBestHeuristicDecomps()
+    # getBestHeuristicDecomps()
 
 if __name__ == "__main__":
 
