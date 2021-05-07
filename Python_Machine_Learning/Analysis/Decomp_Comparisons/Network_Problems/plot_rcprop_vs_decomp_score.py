@@ -40,14 +40,14 @@ def plotRCPropVsScore():
     for problem_type_idx, problem_type in enumerate(problem_types):
         for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
             df = pd.read_csv(features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv")
-            rc_prop_np = df['Relaxed Constraint Prop_Relaxed_Constraint_Statistics_single_stats'].to_numpy()
+            rc_prop_np = df['Relaxed Constraint Prop_Relaxed_Constraint_Statistics_single_stats'].to_numpy() * 100
             decomp_score_np = df['Decomp Score'].to_numpy()
             plt.figure()
             plt.ylabel("Decomp Score")
-            plt.xlabel("RC Prop")
+            plt.xlabel("Relaxed Constraint (%)")
             # plot prediction vs actual gap
             plt.scatter(rc_prop_np, decomp_score_np)
-            plt.title('Decomp Score vs RC prop ' + instance_name)
+            plt.title('Decomp Score vs Relaxed Constraint (%)')
             plt.tight_layout()
             plt.savefig(
                 model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" + instance_name.split(".")[0] + "_Score_vs_RCProp")

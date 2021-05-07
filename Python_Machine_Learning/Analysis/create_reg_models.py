@@ -92,8 +92,7 @@ def train_problem_all_instance(models):
             print("Finished model {} for problem type {}".format(model_name, problem_type))
 
 
-#re-write this but generating RMSE for training data
-
+#train model on all data except for the test instance
 def train_all_excl_test(models):
     # train on all instances in the dataset except for 1 instance to be tested
     df_all_problems_list = []

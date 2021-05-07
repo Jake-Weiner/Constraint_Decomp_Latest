@@ -102,7 +102,8 @@ def calculateSameAllProblemAggregates(same_all_switch):
     for problem_type_idx, problem_type in enumerate(problem_types):
 
         ranking_method_best_decomp_scores_dict = dict()
-        ranking_method_RMSE_scores_dict = dict()
+        ranking_method_test_RMSE_scores_dict = dict()
+        ranking_method_train_RMSE_scores_dict = dict()
         ranking_method_p_vals_dict = dict()
         for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
             # if "g200x740" not in instance_name and "h806320d.mps" not in instance_name and "ta1" not in instance_name and "ta2" not in instance_name:
@@ -124,49 +125,56 @@ def calculateSameAllProblemAggregates(same_all_switch):
                         print(ranking_method)
                         if identifier in ranking_method or ranking_method in heuristic_methods:
                             original_decomp_score = float(line_split[1])
-                            rmse_score = float(line_split[2])
-                            p_val = float(line_split[3])
+                            test_rmse_score = float(line_split[2])
+                            try:
+                                train_rmse_score = float(line_split[3])
+                            except:
+                                train_rmse_score = line_split[3]
+                            p_val = float(line_split[4])
                             # if ranking method has not been seen, create the key and then append the score
                             if not ranking_method in ranking_method_best_decomp_scores_dict:
                                 ranking_method_best_decomp_scores_dict[ranking_method] = []
-                                ranking_method_RMSE_scores_dict[ranking_method] = []
-
+                                ranking_method_test_RMSE_scores_dict[ranking_method] = []
+                                ranking_method_train_RMSE_scores_dict[ranking_method] = []
                                 ranking_method_p_vals_dict[ranking_method] = []
                             ranking_method_best_decomp_scores_dict[ranking_method].append(original_decomp_score)
-                            ranking_method_RMSE_scores_dict[ranking_method].append(rmse_score)
+                            ranking_method_test_RMSE_scores_dict[ranking_method].append(test_rmse_score)
+                            ranking_method_train_RMSE_scores_dict[ranking_method].append(train_rmse_score)
                             ranking_method_p_vals_dict[ranking_method].append(1 if p_val < p_val_threshold else 0)
         ranking_methods = [ranking_method.split('_')[0] for ranking_method in ranking_method_best_decomp_scores_dict]
         mean_decomp_scores = [statistics.mean(ranking_method_best_decomp_scores_dict[ranking_method]) for ranking_method in ranking_method_best_decomp_scores_dict]
-        print("For problem {}".format(problem_type))
-        print("Scores are {}".format([ranking_method_best_decomp_scores_dict[ranking_method] for ranking_method in ranking_method_best_decomp_scores_dict]))
+        # print("For problem {}".format(problem_type))
+        # print("Scores are {}".format([ranking_method_best_decomp_scores_dict[ranking_method] for ranking_method in ranking_method_best_decomp_scores_dict]))
         stdev_decomp_scores = [statistics.stdev(ranking_method_best_decomp_scores_dict[ranking_method]) for ranking_method in ranking_method_best_decomp_scores_dict]
-        rmse_scores = [statistics.mean(ranking_method_RMSE_scores_dict[ranking_method]) for ranking_method in ranking_method_RMSE_scores_dict]
+        test_rmse_scores = [statistics.mean(ranking_method_test_RMSE_scores_dict[ranking_method]) for ranking_method in ranking_method_test_RMSE_scores_dict]
+        train_rmse_scores = [statistics.mean(ranking_method_train_RMSE_scores_dict[ranking_method]) if ranking_method not in heuristic_methods else "NA" for ranking_method in
+                            ranking_method_test_RMSE_scores_dict]
         p_vals = [statistics.mean(ranking_method_p_vals_dict[ranking_method]) for ranking_method in
                        ranking_method_p_vals_dict]
-        df = pd.DataFrame(zip(ranking_methods,mean_decomp_scores,stdev_decomp_scores, rmse_scores, p_vals), columns=['ML Method', 'Mean Score', 'Score Std','Mean RMSE','p vals'])
+        df = pd.DataFrame(zip(ranking_methods,mean_decomp_scores,stdev_decomp_scores, train_rmse_scores, test_rmse_scores, p_vals), columns=['Ranking Method', '\\bar{Score}', '\\bar{\sigma}','\\bar{Train RMSE}','\\bar{Test RMSE}','\\bar{p vals}'])
         problem_aggregate_df_list.append(df)
 
 
-    df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=['ML Method'],
+    df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=['Ranking Method'],
                                                                            how='outer'), problem_aggregate_df_list)
 
     # rename GCG1 to GCG OS
-    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['GCG1'], 'GCG OS')
+    df_merged_features['Ranking Method'] = df_merged_features['Ranking Method'].replace(['GCG1'], 'GCG OS')
     # rename SGD to OLS + L2
-    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['SGD'], 'OLS + L2')
+    df_merged_features['Ranking Method'] = df_merged_features['Ranking Method'].replace(['SGD'], 'OLS + L2')
     # rename SVM to SVR
-    df_merged_features['ML Method'] = df_merged_features['ML Method'].replace(['SVM'], 'SVR')
-    # rename ML Method column to Ranking Method
-    df_merged_features.rename(columns={"ML Method" : "Ranking Method", "Mean Score_x" : "Mean Score",'Score Std_x' : "Score Std",
-                                       "Mean RMSE_x" : "Mean RMSE", "Mean Score_y" : "Mean Score","Score Std_y" : "Score Std",
-                                       "Mean RMSE_y" : "Mean RMSE"}, inplace=True)
-
-
-
+    df_merged_features['Ranking Method'] = df_merged_features['Ranking Method'].replace(['SVM'], 'SVR')
+    # rename Ranking Method column to Ranking Method
+    df_merged_features.rename(columns={"\\bar{Score}_x" : "\\bar{Score}", "\\bar{Score}_y" : "\\bar{Score}",
+    "\\bar{\sigma}_x" : "\\bar{\sigma}", "\\bar{\sigma}_y" : "\\bar{\sigma}",
+    "\\bar{Train RMSE}_x" : "\\bar{Train RMSE}", "\\bar{Train RMSE}_y" : "\\bar{Train RMSE}",
+    "\\bar{Test RMSE}_x" : "\\bar{Test RMSE}", "\\bar{Test RMSE}_x" : "\\bar{Test RMSE}",
+    "\\bar{p vals}_x" : "\\bar{p vals}", "\\bar{p vals}_y" : "\\bar{p vals}"}, inplace=True)
     df_merged_features.to_csv(model_comparisons_outputs_root_folder + "/" + same_all_switch + "_problem_aggregates.csv")
     return
 
 def main():
+
     same_all_switch = "ALL"
     calculateSameAllProblemAggregates(same_all_switch)
     # calculateProblemTypeTrainingAggregates()
