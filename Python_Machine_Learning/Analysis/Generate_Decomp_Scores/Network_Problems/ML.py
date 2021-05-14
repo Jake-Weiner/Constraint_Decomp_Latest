@@ -24,7 +24,6 @@ plt.style.use('ggplot')
 #global vars
 models = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP', 'Stacking', 'Voting']
 problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
-# problem_types = ["network_design", "fixed_cost_network_flow"]
 instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
@@ -67,17 +66,6 @@ def generateScoresSameProblem():
                     Path(ML_output_folder).mkdir(parents=True, exist_ok=True)
                     ML_output_filename = saved_model_name + ".csv"
                     df_ml.to_csv(ML_output_folder + "/" + ML_output_filename)
-
-                    # #plot ML score against actual
-                    # plt.figure()
-                    # plt.ylabel("Predicted Score")
-                    # plt.xlabel("Decomp Score")
-                    # # plot prediction vs actual gap
-                    # plt.scatter(Y_np, model.predict(X_np))
-                    # plt.title('Predicted Score vs Decomp Score ' + problem_type + ' - ' + model_name)
-                    # plt.tight_layout()
-                    # plt.savefig(
-                    #     ML_output_folder + "/" + saved_model_name + "_prediction")
                 print("Finished problem type {}, model {}".format(problem_type,model_name))
 
     return
@@ -119,16 +107,6 @@ def generateScoresAllProblems():
                     # ML_output_filename = saved_model_name + ".csv"
                     # df_ml.to_csv(ML_output_folder + "/" + ML_output_filename)
 
-                    # #plot ML score against actual
-                    # plt.figure()
-                    # plt.ylabel("Predicted Score")
-                    # plt.xlabel("Decomp Score")
-                    # # plot prediction vs actual gap
-                    # plt.scatter(Y_np, model.predict(X_np))
-                    # plt.title('Predicted Score vs Decomp Score ' + problem_type + ' - ' + model_name)
-                    # plt.tight_layout()
-                    # plt.savefig(
-                    #     ML_output_folder + "/" + saved_model_name + "_prediction")
         print("Finished problem type {}, model {}".format(problem_type,model_name))
     return
 
@@ -165,25 +143,19 @@ def gernerateScoresOtherProblems():
                             Path(ML_output_folder).mkdir(parents=True, exist_ok=True)
                             ML_output_filename = saved_model_name + ".csv"
                             df_ml.to_csv(ML_output_folder + "/" + ML_output_filename)
-
-                    # #plot ML score against actual
-                    # plt.figure()
-                    # plt.ylabel("Predicted Score")
-                    # plt.xlabel("Decomp Score")
-                    # # plot prediction vs actual gap
-                    # plt.scatter(Y_np, model.predict(X_np))
-                    # plt.title('Predicted Score vs Decomp Score ' + problem_type + ' - ' + model_name)
-                    # plt.tight_layout()
-                    # plt.savefig(
-                    #     ML_output_folder + "/" + saved_model_name + "_prediction")
                 print("Finished problem type {}, model {}".format(problem_type, model_name))
 
     return
-
-#def scores for all instances
-
-#def scores for other problem types
-
+#plot ML score against actual
+def plotPredictionVsActual(actual, predicted, output_path):
+    plt.figure()
+    plt.ylabel("Predicted Score")
+    plt.xlabel("Decomp Score")
+    # plot prediction vs actual gap
+    plt.scatter(actual, predicted)
+    plt.title('Predicted Score vs Decomp Score ')
+    plt.tight_layout()
+    plt.savefig(output_path)
 def main():
     # generateScoresSameProblem()
     generateScoresAllProblems()

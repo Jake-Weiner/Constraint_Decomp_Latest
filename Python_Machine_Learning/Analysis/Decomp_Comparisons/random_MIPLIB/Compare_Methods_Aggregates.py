@@ -20,7 +20,7 @@ import os
 problem_types = ["random_MIPLIB"]
 instance_names = [
     ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
-     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
+     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps"]]
 
 ML_models = ['Voting']
 heuristic_methods = ["GCG1", "Goodness", "MW", "RBA"]
@@ -60,9 +60,9 @@ def collateAllScaledPredictions():
             model_comparisons_path = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name + "/" "predicted_decomp_scores.csv"
             df = pd.read_csv(model_comparisons_path)
             best_decomp_scores_np = df["Best Decomp Score"].values.reshape(-1,1)
-            scaler = MinMaxScaler()
-            best_decomp_scores_np_scaled = scaler.fit_transform(best_decomp_scores_np)
-            df["Best Decomp Score"] = best_decomp_scores_np_scaled
+            # scaler = MinMaxScaler()
+            # best_decomp_scores_np_scaled = scaler.fit_transform(best_decomp_scores_np)
+            df["Best Decomp Score"] = best_decomp_scores_np
             # remove .csv extension from files
             filename_trimmed = os.path.splitext(instance_name)[0]
             df.rename(columns={'Best Decomp Score': filename_trimmed}, inplace=True)
@@ -76,7 +76,7 @@ def collateAllScaledPredictions():
             model_comparisons_outputs_root_folder + "/" + problem_type + "_scaled.csv")
 
 def main():
-    collateAllPredictions()
+    # collateAllPredictions()
     collateAllScaledPredictions()
 
 #store the important features in a list

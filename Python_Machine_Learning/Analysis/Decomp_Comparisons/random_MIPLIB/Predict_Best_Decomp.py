@@ -37,11 +37,12 @@ processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learnin
 # prepare models
 ML_names = ['Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
+data_trained_on_list = ["all_network_instances"]
 
 features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
 
-data_trained_on_list = ["all_network_instances"]
+
 
 class Test_Type_Enum:
     SAME_PROBLEM = 1
@@ -123,7 +124,6 @@ def getBestMLDecomps():
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
-                    input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
                     # read in collated data, which contains the decomp value
                     df_collated = pd.read_csv(features_collated_folder + "/collated.csv")
                     true_min_decomp_score = df_collated["Decomp Score"].min()

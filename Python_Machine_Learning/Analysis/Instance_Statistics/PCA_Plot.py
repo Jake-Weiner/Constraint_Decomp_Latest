@@ -65,7 +65,7 @@ def main():
     ax.set_ylabel("Principal Component 2 - Explained Variance Ratio = {:.2f}".format(pca.explained_variance_ratio_[1]))
     ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
     for name, group in groups:
-        ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=6, label=name)
+        ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=10, label=name)
     ax.legend()
     # Save and remove excess whitespace
     plt.savefig(output_folder + "/PCA_Analysis_linear" + ".pdf", format='pdf', bbox_inches='tight')
@@ -86,7 +86,7 @@ def main():
         ax.set_ylabel("Principal Component 2")
         ax.margins(0.05)  # Optional, just adds 5% padding to the autoscaling
         for name, group in groups:
-            ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=6, label=name)
+            ax.plot(group["PCA 1"], group["PCA 2"], marker='o', linestyle='', ms=10, label=name)
         ax.legend()
         # plt.xlim([-2, 2])
         # plt.savefig(output_folder + "/PCA_Analysis.pdf")

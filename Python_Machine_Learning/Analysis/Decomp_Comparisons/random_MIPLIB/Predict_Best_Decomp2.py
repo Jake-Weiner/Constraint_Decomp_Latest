@@ -12,13 +12,14 @@ import textwrap
 plt.style.use('ggplot')
 
 #global vars
-problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning"]
 
-instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
-                          ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
-                          ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
-                           "snp-10-052-052.mps"]]
+problem_types = ["random_MIPLIB"]
+instance_names = [
+    ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
+     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps"]]
 
+#need to fix last row error
+# , "splice1k1.mps"]]
 features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 
 regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
@@ -27,13 +28,14 @@ processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learnin
 training_rmse_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons/RMSE_training_scores"
 
 # prepare models
-ML_names = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP', 'Stacking', 'Voting']
+ML_names = ['Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
+data_trained_on_list = ["all_network_instances"]
 
 features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
 model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
 
-data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
+
 
 ranking_methods = ML_names + heuristic_names
 
@@ -47,7 +49,7 @@ def getBestPredictedDecomps():
     # get the best decomposition scores based on predicted ML outputs
     for ranking_method in ranking_methods:
         for problem_type_idx, problem_type in enumerate(problem_types):
-            for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
+            for instance_idx, instance_name in enumerate(instance_names[problem_type_idx]):
                 best_decomp_score_folder = model_comparisons_outputs_root_folder + "/" + problem_type + "/" + instance_name
                 Path(best_decomp_score_folder).mkdir(parents=True, exist_ok=True)
                 # test if output file exists
@@ -56,7 +58,7 @@ def getBestPredictedDecomps():
                 if not my_file.is_file():
                     with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
                         predicted_decomp_scores_output_fs.write(
-                            "Ranking Method,Best Decomp Score,Test RMSE, Training RMSE,p val" + "\n")
+                            "Ranking Method,Best Decomp Score,Test RMSE,p val" + "\n")
 
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
@@ -64,28 +66,14 @@ def getBestPredictedDecomps():
                     # read in collated data, which contains the decomp value
                     true_instance_df = pd.read_csv(features_collated_folder + "/collated.csv")
                     scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
+                    #ML measures
                     if ranking_method in ML_names:
                         predicted_decomp_score_column_name = 'ML predicted val'
                         #there are 4 different trained algorithms - same problem, all problems, different problem
                         for data_trained_on in data_trained_on_list:
                             # use model trained on same problem data
-                            if data_trained_on == problem_type:
-                                predicted_decomp_scores_df = pd.read_csv(scores_folder + "/" + ranking_method + "_" + problem_type + "_" + instance_name + ".csv")
-                                training_rmse = getTrainingRMSE(data_trained_on,instance_name,ranking_method,TrainingTypeEnum.SAME)
-                            # use model trained on all problem data
-                            elif data_trained_on == "all_problem_types":
-                                predicted_decomp_scores_df = pd.read_csv(
-                                    scores_folder + "/" + ranking_method + "_" + "all_problem_types" + "_" + instance_name + ".csv")
-                                training_rmse = getTrainingRMSE(data_trained_on, instance_name, ranking_method,
-                                                                TrainingTypeEnum.ALL)
-                            # use model trained on different problem types
-                            else:
-                                predicted_decomp_scores_df = pd.read_csv(
-                                    scores_folder + "/" + ranking_method + "_" + data_trained_on + ".csv")
-                                training_rmse = getTrainingRMSE(data_trained_on, instance_name, ranking_method,
-                                                                TrainingTypeEnum.DIFFERENT)
-                                # get the decomp indexes of the best n decompositions as predicted by the ML model
-
+                            predicted_decomp_scores_df = pd.read_csv(scores_folder + "/" + ranking_method + "_" + data_trained_on + ".csv")
+                            # get the decomp indexes of the best n decompositions as predicted by the ML model
                             best_predicted_decomp_indexes = predicted_decomp_scores_df.nsmallest(8, 'ML predicted val')[
                                 'Decomposition Index']
                             
@@ -93,7 +81,7 @@ def getBestPredictedDecomps():
                             test_rmse = getTestRMSE(true_instance_df["Decomp Score"],
                                                         predicted_decomp_scores_df[predicted_decomp_score_column_name])
                             predicted_decomp_scores_output_fs.write(
-                                "{}_{},{},{},{},{}\n".format(ranking_method, data_trained_on, best_score_scaled, test_rmse, training_rmse,
+                                "{}_{},{},{},{}\n".format(ranking_method, data_trained_on, best_score_scaled, test_rmse,
                                                           p_val))
 
                     #heuristic measures
@@ -117,7 +105,7 @@ def getBestPredictedDecomps():
                         test_rmse = getTestRMSE(true_instance_df["Decomp Score"],
                                                 predicted_decomp_scores_df[predicted_decomp_score_column_name])
                         predicted_decomp_scores_output_fs.write(
-                            "{},{},{},{},{}\n".format(ranking_method, best_score_scaled, test_rmse, "NA",
+                            "{},{},{},{}\n".format(ranking_method, best_score_scaled, test_rmse,
                                                       p_val))
                     print("Finished {}".format(instance_name))
                 print("Finished {}".format(data_trained_on))
@@ -147,41 +135,25 @@ def getResultsFromIndexes(true_instance_df,best_predicted_decomp_indexes):
 
     return best_score_scaled, p_val
 
+#
+#
+# # alpha to critical
+# alpha = 0.05
+# n_sided = 2 # 2-sided test
+# z_crit = stats.norm.ppf(1-alpha/n_sided)
+# print(z_crit) # 1.959963984540054
+#
+# # critical to alpha
+# alpha = stats.norm.sf(z_crit) * n_sided
+# print(alpha) # 0.05
+
 # calculate test rmse using predicted decomp scores vs and actual decomp scores
 def getTestRMSE(true_decomp_scores, predicted_decomp_scores):
     test_rmse = math.sqrt(mean_squared_error(true_decomp_scores,
                                             predicted_decomp_scores))
     return test_rmse
 
-# get the training RMSE scores from the input path for the given problem type, instance name and model name
-def getTrainingRMSE(data_trained_on, instance_name, model_name, training_type):
 
-    if training_type == TrainingTypeEnum.SAME:
-        training_rmse_input_path = training_rmse_folder + "/" + "RMSE_training_scores_problem_types_excl_test.csv"
-    elif training_type == TrainingTypeEnum.DIFFERENT:
-        training_rmse_input_path = training_rmse_folder + "/" + "RMSE_training_scores_" + data_trained_on + ".csv"
-    elif training_type == TrainingTypeEnum.ALL:
-        training_rmse_input_path = training_rmse_folder + "/" + "RMSE_training_scores_all_problem_types.csv"
-
-    training_rmse_score = -9999999999
-    with open(training_rmse_input_path, "r") as training_rmse_score_input_fs:
-
-        csvreader = csv.reader(training_rmse_score_input_fs, delimiter=",")
-        for line_number, line_split in enumerate(csvreader):
-            if line_number > 0:
-                # training scores are in the format of problem_type, instance_name, Ranking Method, Training RMSE score
-                if training_type == TrainingTypeEnum.SAME:
-                    if line_split[0] == data_trained_on and line_split[1] == instance_name and line_split[2] == model_name:
-                        training_rmse_score = float(line_split[3])
-                # training scores are in the format of problem_type, Ranking Method, Training RMSE score
-                elif training_type == TrainingTypeEnum.DIFFERENT:
-                    if line_split[0] == data_trained_on and line_split[1] == model_name:
-                        training_rmse_score = float(line_split[2])
-                # training scores are in the format of problem_type, Ranking Method, Training RMSE score
-                elif training_type == TrainingTypeEnum.ALL:
-                    if line_split[1] == instance_name and line_split[2] == model_name:
-                        training_rmse_score = float(line_split[3])
-    return training_rmse_score
 #how many predictions are statistically significant...
 def main():
     getBestPredictedDecomps()

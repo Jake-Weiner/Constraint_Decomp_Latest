@@ -42,6 +42,7 @@ def getBestDecompScores():
         for instance_idx, instance_name in enumerate(instance_names_testing[problem_type_idx]):
             input_data_filepath = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated" + "/" + "collated.csv"
             df_collated = pd.read_csv(input_data_filepath)
+            print(df_collated.shape)
             best_decomp_scores.append(df_collated["Decomp Score"].min())
         print("For {}, Best Decomp Scores = [{}]".format(problem_type,best_decomp_scores))
 
