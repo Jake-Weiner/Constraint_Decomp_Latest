@@ -19,19 +19,19 @@ instance_names_testing = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM
                           ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
                            "snp-10-052-052.mps"]]
 
-features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+features_calculated_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
-regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
-model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-training_rmse_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons/RMSE_training_scores"
+regression_models_pickle_input_folder = "/home/jake/PhD/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
+model_prediction_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
+training_rmse_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons/RMSE_training_scores"
 
 # prepare models
 ML_names = ['OLM', 'SVM', 'SGD', 'KNN', 'RF', 'MLP', 'Stacking', 'Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
 
-features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
+features_calculated_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
+model_comparisons_outputs_root_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons"
 
 data_trained_on_list = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "all_problem_types"]
 

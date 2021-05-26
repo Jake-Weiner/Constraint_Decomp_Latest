@@ -53,6 +53,7 @@ def main():
 
 
     problem_types = ["network_design", "fixed_cost_network_flow", "supply_network_planning", "random_MIPLIB"]
+    updated_problem_type_names = ["Network Design", "Fixed Cost Network Flow", "Supply Network Planning", "Random MIPLIB"]
     instance_names = [["cost266-UUE.mps", "dfn-bwin-DBE.mps", "germany50-UUM.mps", "ta1-UUM.mps", "ta2-UUE.mps"],
                       ["g200x740.mps", "h50x2450.mps", "h80x6320d.mps", "k16x240b.mps"],
                       ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
@@ -82,7 +83,7 @@ def main():
                         feature_list.append((stat_type + "_" + feature_type, df_temp['Scaled Data'].mean()))
                     elif feature_type == "stddev":
                         feature_list.append((stat_type + "_" + feature_type, df_temp['Scaled Data'].std()))
-            print(feature_list)
+
              # = scaler.transform(df_temp['Raw Data'])
             for feature_type in other_features:
                 Instance_Statistics = getRequiredNormVals( raw_results_root_folder + "/" + problem_type + "/" + instance_name + "/" + "Instance_Statistics" + "/" + "Instance_Statistics.csv")
@@ -112,7 +113,7 @@ def main():
                     output_fs.write(feature_list[len(feature_list) - 1][0] + "\n")
 
             with open(output_folder + "/" + "Instance_Features_all.csv", "a+") as output_fs:
-                output_fs.write(instance_name + "," + problem_type + ",")
+                output_fs.write(instance_name + "," + updated_problem_type_names[problem_idx] + ",")
                 for feature_tuple in feature_list[0:len(feature_list) - 2]:
                     output_fs.write(str(feature_tuple[1]) + ",")
                 output_fs.write(str(feature_list[len(feature_list) - 1][1]) + "\n")
