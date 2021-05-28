@@ -29,18 +29,18 @@ instance_names = [
     ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
      "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
-features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+features_calculated_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
-regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
-model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+regression_models_pickle_input_folder = "/home/jake/PhD/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
+model_prediction_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 # prepare models
 ML_names = ['Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
 data_trained_on_list = ["all_network_instances"]
 
-features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
+features_calculated_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
+model_comparisons_outputs_root_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons"
 
 
 
@@ -63,7 +63,9 @@ def getBestHeuristicDecomps():
                 if not my_file.is_file():
                     with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
                         predicted_decomp_scores_output_fs.write(
-                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
+                            "Ranking Method,Best Decomp Score" + "\n")
+                        # predicted_decomp_scores_output_fs.write(
+                        #     "Ranking Method,Best Decomp Score,RMSE" + "\n")
 
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
@@ -97,9 +99,11 @@ def getBestHeuristicDecomps():
                     best_score_scaled = ((best_score - true_min_decomp_score) / (true_max_decomp_score - true_min_decomp_score))
 
                     rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"], heuristic_scores_df[heuristic_name + " Scores"]))
-                    print("MSE is {}".format(math.sqrt(mse)))
+
                     predicted_decomp_scores_output_fs.write(
-                        "{},{},{} \n".format(heuristic_name, best_score_scaled, rmse))
+                        "{},{} \n".format(heuristic_name, best_score_scaled))
+                    # predicted_decomp_scores_output_fs.write(
+                    #     "{},{},{} \n".format(heuristic_name, best_score_scaled, rmse))
                 print("Finished {}".format(instance_name))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(heuristic_name))
@@ -119,7 +123,9 @@ def getBestMLDecomps():
                 if not my_file.is_file():
                     with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "w") as predicted_decomp_scores_output_fs:
                         predicted_decomp_scores_output_fs.write(
-                            "Ranking Method,Best Decomp Score,RMSE" + "\n")
+                            "Ranking Method,Best Decomp Score" + "\n")
+                        # predicted_decomp_scores_output_fs.write(
+                        #     "Ranking Method,Best Decomp Score,RMSE" + "\n")
 
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
@@ -143,10 +149,12 @@ def getBestMLDecomps():
                     best_decomp_score = min(decomp_scores)
                     best_score_scaled = (
                                 (best_decomp_score - true_min_decomp_score) / (true_max_decomp_score - true_min_decomp_score))
-                    rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
-                                             ml_scores_df['ML predicted val']))
+                    # rmse = math.sqrt(mean_squared_error(df_collated["Decomp Score"],
+                    #                          ml_scores_df['ML predicted val']))
                     predicted_decomp_scores_output_fs.write(
-                        "{},{},{}\n".format(ML_name, best_score_scaled, rmse))
+                        "{},{}\n".format(ML_name, best_score_scaled))
+                    # predicted_decomp_scores_output_fs.write(
+                    #     "{},{},{}\n".format(ML_name, best_score_scaled, rmse))
                     print("Finished {}".format(instance_name))
             print("Finished {}".format(problem_type))
         print("Finished {}".format(ML_name))

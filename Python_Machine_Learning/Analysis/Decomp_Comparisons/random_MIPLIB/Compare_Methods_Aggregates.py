@@ -20,15 +20,15 @@ import os
 problem_types = ["random_MIPLIB"]
 instance_names = [
     ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
-     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps"]]
+     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
 ML_models = ['Voting']
 heuristic_methods = ["GCG1", "Goodness", "MW", "RBA"]
 
-model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+model_prediction_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
-model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
+model_comparisons_outputs_root_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons"
 
 def collateAllPredictions():
     for problem_type_idx, problem_type in enumerate(problem_types):
@@ -47,7 +47,7 @@ def collateAllPredictions():
     # print("Finished reading in csvs for instance " + instance_name)
     # # merge all features into single csv
         df_merged_features = functools.reduce(lambda left, right: pd.merge(left, right, on=[key],
-                                                    how='outer'), df_list)
+                                                    how='inner'), df_list)
         print(df_merged_features)
         df_merged_features.to_csv(
             model_comparisons_outputs_root_folder + "/" + problem_type + ".csv")
@@ -76,8 +76,8 @@ def collateAllScaledPredictions():
             model_comparisons_outputs_root_folder + "/" + problem_type + "_scaled.csv")
 
 def main():
-    # collateAllPredictions()
-    collateAllScaledPredictions()
+    collateAllPredictions()
+    # collateAllScaledPredictions()
 
 #store the important features in a list
 if __name__ == "__main__":

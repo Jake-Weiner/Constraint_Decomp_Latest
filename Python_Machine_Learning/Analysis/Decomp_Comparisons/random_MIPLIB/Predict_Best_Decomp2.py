@@ -16,24 +16,24 @@ plt.style.use('ggplot')
 problem_types = ["random_MIPLIB"]
 instance_names = [
     ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
-     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps"]]
+     "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
 #need to fix last row error
 # , "splice1k1.mps"]]
-features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+features_calculated_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
-regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
-model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-training_rmse_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons/RMSE_training_scores"
+regression_models_pickle_input_folder = "/home/jake/PhD/Machine_Learning/Processed_Results_Old/Machine_Learning_Outputs/regression_models"
+model_prediction_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
+training_rmse_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons/RMSE_training_scores"
 
 # prepare models
 ML_names = ['Voting']
 heuristic_names = ["GCG1", "Goodness", "MW", "RBA"]
 data_trained_on_list = ["all_network_instances"]
 
-features_calculated_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
-model_comparisons_outputs_root_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Model_Comparisons"
+features_calculated_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
+model_comparisons_outputs_root_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Model_Comparisons"
 
 
 
@@ -63,7 +63,7 @@ def getBestPredictedDecomps():
                 with open(best_decomp_score_folder + "/" + "predicted_decomp_scores.csv", "a+") as predicted_decomp_scores_output_fs:
                     # read in features into dataframe
                     features_collated_folder = features_calculated_output_folder + "/" + problem_type + "/" + instance_name + "/" + "Features_Collated"
-                    # read in collated data, which contains the decomp value
+                    # read in collated data, which contains the decomp scores
                     true_instance_df = pd.read_csv(features_collated_folder + "/collated.csv")
                     scores_folder = features_calculated_folder + "/" + problem_type + "/" + instance_name + "/" + "Decomp_Method_Scores"
                     #ML measures
