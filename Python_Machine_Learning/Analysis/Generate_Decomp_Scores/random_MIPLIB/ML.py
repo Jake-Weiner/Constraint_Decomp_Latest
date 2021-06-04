@@ -22,7 +22,7 @@ import textwrap
 plt.style.use('ggplot')
 
 #global vars
-models = ['Voting']
+models = ['OLM']
 problem_types = ["random_MIPLIB"]
 instance_names = [
     ["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps",
@@ -30,11 +30,11 @@ instance_names = [
 # egression_models_pickle_output_folder + "/" + model_name + "_" + "all_network_instances" + ".pkl"
 
 data_trained_on_list = ["all_network_instances"]
-features_calculated_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+features_calculated_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
-regression_models_pickle_input_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
-model_prediction_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+regression_models_pickle_input_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
+model_prediction_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/DT_evaluation"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
 
 

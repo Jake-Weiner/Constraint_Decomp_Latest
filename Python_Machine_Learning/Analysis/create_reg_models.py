@@ -27,11 +27,11 @@ instance_names = [
         ["snp-02-004-104.mps", "snp-04-052-052.mps", "snp-06-004-052.mps", "snp-10-004-052.mps",
          "snp-10-052-052.mps"]]
 
-processed_results_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Features_Calculated"
+processed_results_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Features_Calculated"
 
 # for each instance index in problem type, loop through all others to train on those. Then test instance is the index remaining
 
-regression_models_pickle_output_folder = "/home/jake/PhD/Decomposition/Massive/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
+regression_models_pickle_output_folder = "/home/jake/PhD/Machine_Learning/Processed_Results/Machine_Learning_Outputs/regression_models"
 
 def get_stacking():
 # define the base models
@@ -109,23 +109,26 @@ def train_all_excl_test(models):
     df_all_problems_combined.reset_index(drop=True, inplace=True)
 
     # for each problem type, train each model on all instances except for test instance
-    for inner_instance_idx, inner_instance_name in enumerate(instance_names_training_flat_list):
+    for inner_instance_idx, test_instance in enumerate(instance_names_training_flat_list):
         # df_training = df_list[df_list[]]
-        df_training = df_all_problems_combined[df_all_problems_combined['Instance Name'] != inner_instance_name]
+        df_training = df_all_problems_combined[df_all_problems_combined['Instance Name'] != test_instance].copy()
+        #dataframe should no longer contain any decompositions for the test instances
+        assert df_training[df_training['Instance Name'] == test_instance].empty, "Dataframe should be empty"
         target_np = df_training['Decomp Score'].to_numpy()
         features_np = df_training.drop(
             columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
                      'Decomp Score', 'Instance Name']).to_numpy()
-        # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
+
         for model_name, model in models:
             reg_model = model.fit(features_np, target_np)
             # store models with pickle
             with open(
-                    regression_models_pickle_output_folder + "/" + model_name + "_" + "all_problem_types" + "_" + inner_instance_name + ".pkl",
+                    regression_models_pickle_output_folder + "/" + model_name + "_" + "all_problem_types" + "_" + test_instance + ".pkl",
                     'wb') as pickle_output_fs:
                 pickle.dump(reg_model, pickle_output_fs)
             print("Finished model {} for problem type {}".format(model_name, "all_problem_types"))
 
+#this model is used for random MIPLIB
 #create a model trained on all instances available
 def train_all_instances(models):
     # train on all instances in the dataset except for 1 instance to be tested
@@ -145,19 +148,25 @@ def train_all_instances(models):
     target_np = df_all_problems_combined['Decomp Score'].to_numpy()
     features_np = df_all_problems_combined.drop(
         columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
-                 'Decomp Score', 'Instance Name']).to_numpy()
-    # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
-    for model_name, model in models:
-        reg_model = model.fit(features_np, target_np)
-        # store models with pickle
-        with open(
-                regression_models_pickle_output_folder + "/" + model_name + "_" + "all_network_instances" + ".pkl",
-                'wb') as pickle_output_fs:
-            pickle.dump(reg_model, pickle_output_fs)
-        print("Finished model {} for problem type {}".format(model_name, "all_network_instances"))
+                 'Decomp Score', 'Instance Name'])
+    # features_np = df_all_problems_combined.drop(
+    #     columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
+    #              'Decomp Score', 'Instance Name']).to_numpy()
+    print(features_np)
+    # # X_train, X_test, Y_train, Y_test = train_test_split(X_np, Bound_np, test_size = 0.25, shuffle = True, random_state = 1)
+    # for model_name, model in models:
+    #     reg_model = model.fit(features_np, target_np)
+    #     print(reg_model.coef_)
+    #     # store models with pickle
+    #     with open(
+    #             regression_models_pickle_output_folder + "/" + model_name + "_" + "all_network_instances" + ".pkl",
+    #             'wb') as pickle_output_fs:
+    #         pickle.dump(reg_model, pickle_output_fs)
+    #     print("Finished model {} for problem type {}".format(model_name, "all_network_instances"))
+
 
 def train_problem_excl_test(models):
-    # train DT model on each problem type except for 1 instance left for testing
+    # train regression model on each problem type except for 1 instance left for testing
     for problem_type_idx, problem_type in enumerate(problem_types):
         df_list = []
         # create output folders if they don't already exist
@@ -166,11 +175,14 @@ def train_problem_excl_test(models):
             df = pd.read_csv(input_data_filepath)
             df['Instance Name'] = instance_name
             df_list.append(df)
+            # print(df)
         df_combined = pd.concat(df_list, keys=instance_names[problem_type_idx])
         # for each problem type, train each model on all instances except for test instance
-        for inner_instance_idx, inner_instance_name in enumerate(instance_names[problem_type_idx]):
+        for inner_instance_idx, test_instance in enumerate(instance_names[problem_type_idx]):
             # df_training = df_list[df_list[]]
-            df_training = df_combined[df_combined['Instance Name'] != inner_instance_name]
+            df_training = df_combined[df_combined['Instance Name'] != test_instance]
+            #training data should not contain any instances from problem type
+            assert df_training[df_training['Instance Name'] == test_instance].empty, "Dataframe should be empty"
             target_np = df_training['Decomp Score'].to_numpy()
             features_np = df_training.drop(
                 columns=[df.columns[0], 'Decomposition Index', 'Normalised Gap (%)', 'LR Solve Time(s)',
@@ -179,7 +191,7 @@ def train_problem_excl_test(models):
                 reg_model = model.fit(features_np, target_np)
                 # store models with pickle
                 with open(
-                        regression_models_pickle_output_folder + "/" + model_name + "_" + problem_type + "_" + inner_instance_name + ".pkl",
+                        regression_models_pickle_output_folder + "/" + model_name + "_" + problem_type + "_" + test_instance + ".pkl",
                         'wb') as pickle_output_fs:
                     pickle.dump(reg_model, pickle_output_fs)
                 print("Finished model {} for problem type {}".format(model_name, problem_type))
@@ -218,14 +230,14 @@ def main():
     cfv_results = []
 
     models = []
-    # models.append(('OLM', LinearRegression()))
+    models.append(('OLM', LinearRegression()))
     # models.append(('SVM', svm.SVR()))
     # models.append(('SGD', SGDRegressor()))
     # models.append(('KNN', KNeighborsRegressor()))
     # models.append(('RF', RandomForestRegressor()))
     # models.append(('MLP', MLPRegressor()))
     # models.append(('Stacking', get_stacking()))
-    models.append(('Voting', get_voting()))
+    # models.append(('Voting', get_voting()))
     Path(regression_models_pickle_output_folder).mkdir(parents=True, exist_ok=True)
     # train_problem_excl_test(models)
     # train_all_excl_test(models)

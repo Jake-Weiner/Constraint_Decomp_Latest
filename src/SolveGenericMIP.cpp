@@ -32,7 +32,7 @@ CPLEX_Return_struct SolveGenericMIP::solve(bool randomSeed, bool LP){
     cplex.setParam(IloCplex::TiLim, solver_time_lim);
     cplex.setParam(IloCplex::Threads, 1);
     cplex.setParam(IloCplex::ClockType, 1); // use CPU runtime not wallclock.
-    if (randomSeed == true){
+    if (randomSeed == false){
         cplex.setParam(IloCplex::Param::RandomSeed, 0); // set random seed to 0 for consistency in testing
     }
     // cplex.setParam(IloCplex::RootAlg,IloCplex::Dual);

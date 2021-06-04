@@ -56,13 +56,13 @@ def main():
     instance_names = [["blp-ic98.mps", "dws008-01.mps", "30n20b8.mps", "air03.mps", "traininstance2.mps", "neos-4387871-tavua.mps", "neos-4338804-snowy.mps", "air05.mps", "neos-4954672-berkel.mps", "splice1k1.mps"]]
 
 
+    # filenames which do not require any normalisation
     subproblem_filenames = ["Bin_props.csv", "Const_props.csv", "Cont_props.csv", "Densities.csv", "Equality_props.csv",
                             "Int_props.csv", "Var_props.csv"]
     relaxed_constraint_filenames = ["single_stats.csv", "Bin_props.csv", "Int_props.csv", "Cont_props.csv"]
 
     raw_data_root_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Massive_Outputs"
     processed_results_folder = "/media/jake/Jakes_Harddrive/Machine_Learning/Processed_Results"
-
     statistics_types_folders = ["Relaxed_Constraint_Statistics", "Subproblem_Statistics"]
 
     for problem_idx, problem_type in enumerate(problem_types):
@@ -73,10 +73,11 @@ def main():
                 Path(
                     processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Subproblem_Statistics").mkdir(
                     parents=True, exist_ok=True)
-                relative_path = problem_type + "/" + instance_name +  "/Subproblem_Statistics" + "/" + subproblem_filename
+                # copy across the subproblem files
                 copyfile(raw_data_root_folder + "/" + problem_type + "/" + instance_name +  "/Subproblem_Statistics" + "/" + subproblem_filename,
                          processed_results_folder + "/" + problem_type + "/" + instance_name + "/" + "Normalised_Data" + "/" + "Subproblem_Statistics" + "/" + subproblem_filename)
 
+            #copy across the relaxed constraint tiles
             for relaxed_constraint_filename in relaxed_constraint_filenames:
                 # create output folders if they don't already exists
                 Path(

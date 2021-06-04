@@ -246,10 +246,6 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
                 }
                 model.add(subproblem_constraints_cplex);
             }
-            // IloModel model2 = IloModel(*sp.envPtr);
-            // model2.add(subproblem_constraints_cplex);
-            // model2.add(IloConversion(*sp.envPtr, subproblem_vars_cplex, ILOFLOAT));
-            // cout << model2 << endl;
             sp.model = model;
             sp.variables = subproblem_vars_cplex;
             if (debug_printing && subproblem_idx==1){
@@ -369,7 +365,7 @@ int ConDecomp_LaPSO_Connector::solveSubproblemCplex(CPLEX_MIP_Subproblem& sp, So
         }
     }
 
-    // 90% of the allocate subproblem solve time is dedicated to solving the MIP
+    // 90% of the allocated subproblem solve time is dedicated to solving the MIP
     // 10% is dedicated to solving the LP
     double mip_subproblem_solve_time = max(0.9 * sp.getSubproblemRunTime(),0.1);
     // double lp_subproblem_solve_time = max(0.1 * sp.getSubproblemRunTime(),0.1);

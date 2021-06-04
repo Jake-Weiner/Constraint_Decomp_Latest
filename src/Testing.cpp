@@ -114,6 +114,7 @@ void Testing::RunMIPTesting(MIP_Problem& MP)
         cout << "solving generic MIP File" << endl;
         SolveGenericMIP SGM(MIP_Problem_File, para.set_generic_MIP_time);
         bool random_seed = PA.get_generic_MIP_randomSeed_flag();
+        cout << "random seed is " << random_seed << endl;
         CPLEX_Return_struct MIP_results = SGM.solve(random_seed, false);
         // if the results are required for testing purposes with Parsed MIP
         // store the bound and obj value
@@ -131,7 +132,10 @@ void Testing::RunMIPTesting(MIP_Problem& MP)
         // use the same runtime as the MPS file
         MIP_Problem_CPLEX_Solver MPCS(MP, para.set_generic_MIP_time);
         bool solve_as_LP = false;
-        CPLEX_Return_struct MIP_results = MPCS.solve(PA.get_parsed_MIP_randomSeed_flag(), solve_as_LP);
+        bool random_seed = PA.get_generic_MIP_randomSeed_flag();
+        cout << "random seed is " << random_seed << endl;
+        // use same random seed as generic MIP Parse testing
+        CPLEX_Return_struct MIP_results = MPCS.solve(random_seed, solve_as_LP);
         // populate the Mip Parsing Structure with Parsed MIP information
         MPTS.Parsed_bound = MIP_results.bound;
         MPTS.Parsed_obj_val = MIP_results.obj_val;

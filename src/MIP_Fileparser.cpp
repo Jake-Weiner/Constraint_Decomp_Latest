@@ -17,7 +17,6 @@ bool variablesBegin(vector<string>& line_split);
 bool marker(const vector<string>& line_split);
 bool intOrgCheck(const vector<string>& line_split);
 bool intEndCheck(vector<string>& line_split);
-bool checkForVariable(const vector<string>& line_split);
 bool objFnCheck(const string& word, const string& objFnSymbol);
 bool RHSSectionCheck(vector<string>& line_split);
 bool BoundsSectionCheck(vector<string>& line_split);
@@ -158,74 +157,14 @@ void MIP_Fileparser::parse(file_type ft, string filename)
     }
 }
 
+
+// user defined format
 void MIP_Fileparser::parserUser(string filename)
 {
-    // {
-    // need to complete
+   
     return;
 }
-//     int num_constraints_lineidx = 0;
-//     int num_variables_lineidx = 1;
-//     //read in constraint matrix file
-//     ifstream input(filename);
-//     int line_count = 0;
-//     int current_constraint_number = 0;
-//     if (input.is_open()) {
-//         while (!input.eof()) {
-//             string line;
-//             getline(input, line);
-//             if (line.empty()) {
-//                 continue;
-//             }
-//             //read number constraints/variables
-//             if (line_count == num_constraints_lineidx) {
-//                 num_edges = stoi(line);
-//                 setHGEdgesSize(stoi(line));
-//                 line_count++;
-//                 continue;
-//             } else if (line_count == num_variables_lineidx) {
-//                 num_nodes = stoi(line);
-//                 initNodes(num_nodes);
-//                 setHGNodesSize(stoi(line));
-//                 line_count++;
-//                 continue;
-//             }
 
-//             vector<string> line_split;
-//             // check for non empty line
-//             boost::split(line_split, line, boost::is_any_of(" "), boost::token_compress_on);
-//             vector<int> nodes_idxs_in_constraint;
-//             for (int node_idx = 0; node_idx < line_split.size(); node_idx++) {
-//                 int node_value;
-//                 try {
-//                     node_value = stoi(line_split[node_idx]);
-//                     if (node_value == 1) {
-//                         nodes_idxs_in_constraint.push_back(node_idx);
-//                         HG_nodes[node_idx].addEdgeIdx(current_constraint_number);
-//                     }
-//                 } catch (exception invalid_argument) {
-//                     cout << "invalid stoi = " << line_split[node_idx] << endl;
-//                     cout << "line split = ";
-//                     for (auto& field : line_split) {
-//                         cout << field;
-//                     }
-//                     cout << endl;
-//                     cout << "node idx = " << node_idx << endl;
-//                     cout << "line number = " << line_count << endl;
-//                     cout << "line is " << line << endl;
-//                 }
-//             }
-//             HG_Edge current_constraint = HG_Edge(current_constraint_number, nodes_idxs_in_constraint);
-//             HG_edges[current_constraint_number] = current_constraint;
-//             current_constraint_number += 1;
-//             line_count++;
-//         }
-//     }
-
-//     if (current_constraint_number != num_edges) {
-//         cout << "error - number of constraints read does not match constraint number in input file" << endl;
-//     }
-// }
 
 bool checkForConstraint(const vector<string>& line_split)
 {
@@ -283,13 +222,7 @@ bool intEndCheck(vector<string>& line_split)
     return false;
 }
 
-bool checkForVariable(const vector<string>& line_split)
-{
-    if (boost::starts_with(line_split[0], "x")) {
-        return true;
-    }
-    return false;
-}
+
 
 bool objFnCheck(const string& word, const string& objFnSymbol)
 {
@@ -376,13 +309,6 @@ void MIP_Fileparser::extractVariableInfo(vector<string>& line_split, const strin
                 exit(EXIT_FAILURE);
             }
         }
-
-        // if (line_split[i].compare("OBJ") ==0 ){
-        //     cout << "objective var found " << endl;
-        //     cout << obj_function_symbol << endl;
-        //     cout << "OBJ" << endl;
-        // }
-        // string word_trimmed = trim(line_split[i]);
 
         if (objFnCheck(line_split[i], obj_function_symbol)) {
             int obj_var_idx = MII.getVariableIdx(variable_name);

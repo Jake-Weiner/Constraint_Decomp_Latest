@@ -1,0 +1,35 @@
+#!/bin/bash
+
+INPUT_FILE="/home/jake/PhD/Decomposition/Input/dataset/network_design/Instance_Statistics.csv"
+OUTPUT_FILE="/home/jake/PhD/Decomposition/Output/testing/Parser_Tests/network_design.csv"
+executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
+
+if test -f $INPUT_FILE; then
+    echo "$INPUT_FILE exists."
+else
+    echo "$INPUT_FILE does not exist" 
+    exit 99
+fi
+
+line_number=0
+
+while IFS=, read instance_name MIP_num_var MIP_num_bin MIP_num_int MIP_num_cont MIP_num_cons MIP_num_non_zeroes
+do	
+	
+	if [ ! "$line_number" -eq "0" ]; then
+		echo "starting main_test"
+		echo "For File $instance_name"
+		echo "$instance_name $MIP_num_var $MIP_num_bin $MIP_num_int $MIP_num_cont $MIP_num_cons $MIP_num_non_zeroes"
+		$executable_path/main_test --input_root_folder=/home/jake/PhD/Decomposition/Input/dataset/network_design \
+		--printLevel=3 \
+		--input_instance_name=$instance_name \
+		--set_generic_MIP_time=10 --run_generic_MIP_solver=false \
+		--run_MIP_Parse_testing=true \
+		--parsed_mip_random_seed=false \
+		--generic_mip_random_seed=false \
+		--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Output/testing/Parser_Tests/network_design.csv \
+		--MIP_num_var=$MIP_num_var --MIP_num_cons=$MIP_num_cons --MIP_num_bin=$MIP_num_bin --MIP_num_cont=$MIP_num_cont --MIP_num_int=$MIP_num_int --MIP_num_non_zeroes=$MIP_num_non_zeroes >> /home/jake/PhD/Decomposition/Output/testing/Parser_Tests/network_design.txt
+	fi
+((line_number=line_number+1))
+done < $INPUT_FILE
+

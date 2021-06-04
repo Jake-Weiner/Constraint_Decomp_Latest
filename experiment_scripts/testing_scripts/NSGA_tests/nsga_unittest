@@ -1,0 +1,28 @@
+#!/bin/bash
+
+INPUT_DIR="/home/jake/PhD/Decomposition/Input/dataset"
+executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
+instance_name="neos-787933.mps"
+nsga_output_folder="/home/jake/PhD/Decomposition/Output/testing/NSGA_Tests"
+
+if test -f $INPUT_FILE; then
+    echo "$INPUT_FILE exists."
+else
+    echo "$INPUT_FILE does not exist" 
+    exit 99
+fi
+
+$executable_path/main_test --input_root_folder=$INPUT_DIR \
+--subproblem_var_prop=0.1:0.2:0.3:0.4:0.5:0.6:0.8:0.9 --printLevel=3 \
+--output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/Preliminary_Tests \
+--nsga_vector_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition_Output/nsga_tests/Decomps \
+--nsga_decomp_output_file=$nsga_output_folder/$instance_name \
+--solve_generic_MIP_output_root_folder=/home/jake/PhD/Decomposition/Constraint_Decomposition/output/generic_MIP \
+--MIP_Parse_testing_output_filename=/home/jake/PhD/Decomposition/Output/testing/Parser_Tests/Parser_test_Results.csv \
+--input_instance_name=$instance_name \
+--set_ub=40417 --maxCPU=1000 \
+--nsga_pop_size=8 --nsga_gen=5 --decomp_type=NSGA \
+--set_generic_MIP_time=100 \
+--run_NSGA_testing=true --run_MIP_Parse_testing=false \
+--parsed_mip_random_seed=false generic_mip_random_seed=false \
+ --run_generic_MIP_solver=false --run_lapso=false --run_nsga_decomp=false \
