@@ -7,6 +7,8 @@
 #include "HG_Edge.h"
 #include <ilcplex/ilocplex.h>
 
+
+// mip set up to further improve decomposition created to minimise the size of the largest subproblem and the number of constraints relaxed
 typedef IloArray<IloNumVarArray> NumVarMatrix;
 
 using namespace std;
@@ -26,8 +28,6 @@ class DecompMIP {
     private:
     vector<bool> z; // constraint relaxation array
     NumVarMatrix x; // variable matrix
-    
-
 };
 
 #endif

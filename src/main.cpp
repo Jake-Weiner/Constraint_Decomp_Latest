@@ -2,12 +2,12 @@
 #include "ConstraintFileProcessing.h"
 #include "Decomp.hpp"
 #include "DecompMIP.h"
-#include "Decomposition_Statistics.h"
+#include "DecompositionStatistics.h"
 #include "GreedyDecompCreator.h"
 #include "Hypergraph.h"
 #include "LRHandler.h"
 #include "MIPProblemProbe.h"
-#include "MIP_Fileparser.h"
+#include "MIPFileparser.h"
 #include "MIP_Problem_CPLEX_Solver.h"
 #include "MIP_to_Hypergraph.h"
 #include "Param.h"
@@ -36,10 +36,10 @@
 #include <string>
 #include <vector>
 
-using Decomposition_Statistics::Instance;
-using Decomposition_Statistics::LROutputs;
-using Decomposition_Statistics::RelaxedConstraints;
-using Decomposition_Statistics::Subproblems;
+using DecompositionStatistics::Instance;
+using DecompositionStatistics::LROutputs;
+using DecompositionStatistics::RelaxedConstraints;
+using DecompositionStatistics::Subproblems;
 using std::cout;
 using std::endl;
 using std::string;
@@ -68,7 +68,7 @@ void solveLapso(int& argc, const char** argv, MIP_Problem& MP, MIPProblemProbe& 
     if (capture_statistics) {
         //generate relaxed constraint statistics
         std::shared_ptr<RelaxedConstraints> rcs_ptr = std::make_shared<RelaxedConstraints>(decomposition_idx);
-        rcs_ptr->generate_statistics(MPP, con_relax_vector);
+        rcs_ptr->generateStatistics(MPP, con_relax_vector);
         // write out raw relaxed constraint statistics
         w.writeRawRelaxedConstraintStatistics(LOF, rcs_ptr);
         w.writeRelaxedConstraintSingleValues(LOF, rcs_ptr);
@@ -162,7 +162,7 @@ int main(int argc, const char** argv)
     }
 
     // Parse in MIP file into self made structure
-    MIP_Fileparser MIP_FP;
+    MIPFileparser MIP_FP;
     cout << "Parsing MPS File" << endl;
     MIP_FP.parse(file_type::MPS, MIP_Problem_File);
     MIP_Problem MP = MIP_FP.getMIPProblem();

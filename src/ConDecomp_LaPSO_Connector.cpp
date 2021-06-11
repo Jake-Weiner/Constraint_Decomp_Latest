@@ -21,7 +21,7 @@
 
 using namespace boost;
 using namespace std;
-using Decomposition_Statistics::Subproblems;
+using DecompositionStatistics::Subproblems;
 
 ConDecomp_LaPSO_Connector::ConDecomp_LaPSO_Connector(ConnectorRequirements& CR)
 {

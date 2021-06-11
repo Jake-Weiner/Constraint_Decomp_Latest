@@ -12,7 +12,7 @@
 
 // forward declare decomposition statistics namespace with structs. Otherwise
 // circular dependency occurs
-namespace Decomposition_Statistics{
+namespace DecompositionStatistics{
     struct SubproblemConstraintStatistics;
     struct SubproblemVariableStatistics;
     struct RelaxedConstraintStatistics;
@@ -22,10 +22,10 @@ namespace Decomposition_Statistics{
 
 
 
-using Decomposition_Statistics::SubproblemConstraintStatistics;
-using Decomposition_Statistics::SubproblemVariableStatistics;
-using Decomposition_Statistics::RelaxedConstraintStatistics;
-using Decomposition_Statistics::RawInstanceConstrVals;
+using DecompositionStatistics::SubproblemConstraintStatistics;
+using DecompositionStatistics::SubproblemVariableStatistics;
+using DecompositionStatistics::RelaxedConstraintStatistics;
+using DecompositionStatistics::RawInstanceConstrVals;
 
 class MIPProblemProbe{
     public:
@@ -45,7 +45,7 @@ class MIPProblemProbe{
         // get prop of var types from constraint indices provided
         std::tuple<vector<double>, vector<double>, vector<double>> getVariableProps(const std::vector<int>& constraint_idxs);
         // get variable props from single constraint
-        std::tuple<double, double, double> getVariablePropsConstraint(const int& constraint_idx);
+        std::tuple<double, double, double> getConstraintVarTypes(const int& constraint_idx);
 
         // given a vector of constraints, count the total number of variables
         int getVarCount(const std::vector<int>& constraint_idxs);

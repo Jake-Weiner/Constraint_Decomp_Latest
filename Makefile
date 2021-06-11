@@ -285,32 +285,32 @@ src/DecompMIP.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/DecompMIP.cpp.s
 .PHONY : src/DecompMIP.cpp.s
 
-src/Decomposition_Statistics.o: src/Decomposition_Statistics.cpp.o
+src/DecompositionStatistics.o: src/DecompositionStatistics.cpp.o
 
-.PHONY : src/Decomposition_Statistics.o
+.PHONY : src/DecompositionStatistics.o
 
 # target to build an object file
-src/Decomposition_Statistics.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o
-.PHONY : src/Decomposition_Statistics.cpp.o
+src/DecompositionStatistics.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o
+.PHONY : src/DecompositionStatistics.cpp.o
 
-src/Decomposition_Statistics.i: src/Decomposition_Statistics.cpp.i
+src/DecompositionStatistics.i: src/DecompositionStatistics.cpp.i
 
-.PHONY : src/Decomposition_Statistics.i
+.PHONY : src/DecompositionStatistics.i
 
 # target to preprocess a source file
-src/Decomposition_Statistics.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.i
-.PHONY : src/Decomposition_Statistics.cpp.i
+src/DecompositionStatistics.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.i
+.PHONY : src/DecompositionStatistics.cpp.i
 
-src/Decomposition_Statistics.s: src/Decomposition_Statistics.cpp.s
+src/DecompositionStatistics.s: src/DecompositionStatistics.cpp.s
 
-.PHONY : src/Decomposition_Statistics.s
+.PHONY : src/DecompositionStatistics.s
 
 # target to generate assembly for a file
-src/Decomposition_Statistics.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.s
-.PHONY : src/Decomposition_Statistics.cpp.s
+src/DecompositionStatistics.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.s
+.PHONY : src/DecompositionStatistics.cpp.s
 
 src/GreedyDecompCreator.o: src/GreedyDecompCreator.cpp.o
 
@@ -474,6 +474,33 @@ src/LaPSO.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/LaPSO.cpp.s
 .PHONY : src/LaPSO.cpp.s
 
+src/MIPFileparser.o: src/MIPFileparser.cpp.o
+
+.PHONY : src/MIPFileparser.o
+
+# target to build an object file
+src/MIPFileparser.cpp.o:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o
+.PHONY : src/MIPFileparser.cpp.o
+
+src/MIPFileparser.i: src/MIPFileparser.cpp.i
+
+.PHONY : src/MIPFileparser.i
+
+# target to preprocess a source file
+src/MIPFileparser.cpp.i:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPFileparser.cpp.i
+.PHONY : src/MIPFileparser.cpp.i
+
+src/MIPFileparser.s: src/MIPFileparser.cpp.s
+
+.PHONY : src/MIPFileparser.s
+
+# target to generate assembly for a file
+src/MIPFileparser.cpp.s:
+	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPFileparser.cpp.s
+.PHONY : src/MIPFileparser.cpp.s
+
 src/MIPProblemProbe.o: src/MIPProblemProbe.cpp.o
 
 .PHONY : src/MIPProblemProbe.o
@@ -500,33 +527,6 @@ src/MIPProblemProbe.s: src/MIPProblemProbe.cpp.s
 src/MIPProblemProbe.cpp.s:
 	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIPProblemProbe.cpp.s
 .PHONY : src/MIPProblemProbe.cpp.s
-
-src/MIP_Fileparser.o: src/MIP_Fileparser.cpp.o
-
-.PHONY : src/MIP_Fileparser.o
-
-# target to build an object file
-src/MIP_Fileparser.cpp.o:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o
-.PHONY : src/MIP_Fileparser.cpp.o
-
-src/MIP_Fileparser.i: src/MIP_Fileparser.cpp.i
-
-.PHONY : src/MIP_Fileparser.i
-
-# target to preprocess a source file
-src/MIP_Fileparser.cpp.i:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.i
-.PHONY : src/MIP_Fileparser.cpp.i
-
-src/MIP_Fileparser.s: src/MIP_Fileparser.cpp.s
-
-.PHONY : src/MIP_Fileparser.s
-
-# target to generate assembly for a file
-src/MIP_Fileparser.cpp.s:
-	$(MAKE) -f CMakeFiles/main_test.dir/build.make CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.s
-.PHONY : src/MIP_Fileparser.cpp.s
 
 src/MIP_Problem.o: src/MIP_Problem.cpp.o
 
@@ -906,9 +906,9 @@ help:
 	@echo "... src/DecompMIP.o"
 	@echo "... src/DecompMIP.i"
 	@echo "... src/DecompMIP.s"
-	@echo "... src/Decomposition_Statistics.o"
-	@echo "... src/Decomposition_Statistics.i"
-	@echo "... src/Decomposition_Statistics.s"
+	@echo "... src/DecompositionStatistics.o"
+	@echo "... src/DecompositionStatistics.i"
+	@echo "... src/DecompositionStatistics.s"
 	@echo "... src/GreedyDecompCreator.o"
 	@echo "... src/GreedyDecompCreator.i"
 	@echo "... src/GreedyDecompCreator.s"
@@ -927,12 +927,12 @@ help:
 	@echo "... src/LaPSO.o"
 	@echo "... src/LaPSO.i"
 	@echo "... src/LaPSO.s"
+	@echo "... src/MIPFileparser.o"
+	@echo "... src/MIPFileparser.i"
+	@echo "... src/MIPFileparser.s"
 	@echo "... src/MIPProblemProbe.o"
 	@echo "... src/MIPProblemProbe.i"
 	@echo "... src/MIPProblemProbe.s"
-	@echo "... src/MIP_Fileparser.o"
-	@echo "... src/MIP_Fileparser.i"
-	@echo "... src/MIP_Fileparser.s"
 	@echo "... src/MIP_Problem.o"
 	@echo "... src/MIP_Problem.i"
 	@echo "... src/MIP_Problem.s"

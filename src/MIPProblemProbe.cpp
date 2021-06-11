@@ -1,5 +1,5 @@
 #include "MIPProblemProbe.h"
-#include "Decomposition_Statistics.h"
+#include "DecompositionStatistics.h"
 #include <math.h>
 #include <unordered_map>
 
@@ -155,7 +155,7 @@ std::tuple<vector<double>, vector<double>, vector<double>> MIPProblemProbe::getV
 
     // need to keep count of bin, int and cont vars as well as total number of variables seen so far
     for (const auto& con_idx : constraint_idxs) {
-        std::tuple<double, double, double> con_var_props = getVariablePropsConstraint(con_idx);
+        std::tuple<double, double, double> con_var_props = getConstraintVarTypes(con_idx);
         bin_props.push_back(get<0>(con_var_props));
         int_props.push_back(get<1>(con_var_props));
         cont_props.push_back(get<2>(con_var_props));
@@ -163,7 +163,7 @@ std::tuple<vector<double>, vector<double>, vector<double>> MIPProblemProbe::getV
     return std::make_tuple(bin_props, int_props, cont_props);
 }
 
-std::tuple<double, double, double> MIPProblemProbe::getVariablePropsConstraint(const int& constraint_idx)
+std::tuple<double, double, double> MIPProblemProbe::getConstraintVarTypes(const int& constraint_idx)
 {
 
     //total variable count in the constraint idx's provided
@@ -253,6 +253,15 @@ void MIPProblemProbe::getSubproblemVariableStatistics(SubproblemVariableStatisti
     svs.obj_val_range = max - min;
 }
 
+/**
+ * This function calculates the constraint statistics for the given constraint indicies
+ * 
+ * @param scs structure to populate statistics into
+ * @param constraint_idxs list of constraint indicies
+ * 
+ * 
+ */
+ 
 void MIPProblemProbe::getSubproblemConstraintStatistics(SubproblemConstraintStatistics& scs, const std::vector<int>& constraint_idxs)
 {
 
@@ -298,6 +307,7 @@ void MIPProblemProbe::getRelaxedConstraintStatistics(RelaxedConstraintStatistics
     //   // get block equality/inequality constraint props
     // equality_prop = MPP.getEqualityConstraintProp(relaxed_constraint_indices
 
+    // number of equality constraints
     int equality_const_count = 0;
     vector<double> bin_props;
     vector<double> int_props;
@@ -312,7 +322,7 @@ void MIPProblemProbe::getRelaxedConstraintStatistics(RelaxedConstraintStatistics
             }
 
             // var props of relaxed constraints
-            std::tuple<double, double, double> con_var_props = getVariablePropsConstraint(constraint_idx);
+            std::tuple<double, double, double> con_var_props = getConstraintVarTypes(constraint_idx);
             bin_props.push_back(get<0>(con_var_props));
             int_props.push_back(get<1>(con_var_props));
             cont_props.push_back(get<2>(con_var_props));
@@ -328,7 +338,7 @@ void MIPProblemProbe::getRelaxedConstraintStatistics(RelaxedConstraintStatistics
             exit(EXIT_FAILURE);
         }
     }
-
+    // proportion of relaxed constraints which are equality constraints
     rcs.equality_const_prop = static_cast<double>(equality_const_count) / static_cast<double>(constraint_idxs.size());
     rcs.relaxed_const_var_props = std::make_tuple(bin_props, int_props, cont_props);
 }

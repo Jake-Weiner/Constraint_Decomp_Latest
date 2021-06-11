@@ -1,6 +1,6 @@
 #include "Testing.h"
 #include "ConDecomp_LaPSO_Connector.h"
-#include "Decomposition_Statistics.h"
+#include "DecompositionStatistics.h"
 #include "Hypergraph.h"
 #include "LRHandler.h"
 #include "LaPSO.hpp"
@@ -46,7 +46,7 @@ void Testing::solveLapso(MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, 
     if (capture_statistics) {
         //generate relaxed constraint statistics
         std::shared_ptr<RelaxedConstraints> rcs_ptr = std::make_shared<RelaxedConstraints>(decomposition_idx);
-        rcs_ptr->generate_statistics(MPP, con_relax_vector);
+        rcs_ptr->generateStatistics(MPP, con_relax_vector);
         // write out raw relaxed constraint statistics
         w.writeRawRelaxedConstraintStatistics(LOF, rcs_ptr);
         w.writeRelaxedConstraintSingleValues(LOF, rcs_ptr);

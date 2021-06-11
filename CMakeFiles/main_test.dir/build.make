@@ -70,18 +70,18 @@ CMakeFiles/main_test.dir/src/Testing.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/Testing.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Testing.cpp -o CMakeFiles/main_test.dir/src/Testing.cpp.s
 
-CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o: CMakeFiles/main_test.dir/flags.make
-CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o: src/Decomposition_Statistics.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomposition_Statistics.cpp
+CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o: CMakeFiles/main_test.dir/flags.make
+CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o: src/DecompositionStatistics.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/DecompositionStatistics.cpp
 
-CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomposition_Statistics.cpp > CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.i
+CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/DecompositionStatistics.cpp > CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.i
 
-CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Decomposition_Statistics.cpp -o CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.s
+CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/DecompositionStatistics.cpp -o CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.s
 
 CMakeFiles/main_test.dir/src/RelaxedConstraintRedundancyChecker.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/RelaxedConstraintRedundancyChecker.cpp.o: src/RelaxedConstraintRedundancyChecker.cpp
@@ -382,18 +382,18 @@ CMakeFiles/main_test.dir/src/Hypergraph.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/Hypergraph.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/Hypergraph.cpp -o CMakeFiles/main_test.dir/src/Hypergraph.cpp.s
 
-CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o: CMakeFiles/main_test.dir/flags.make
-CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o: src/MIP_Fileparser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Fileparser.cpp
+CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o: CMakeFiles/main_test.dir/flags.make
+CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o: src/MIPFileparser.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jake/PhD/Decomposition/Constraint_Decomp_Latest/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o -c /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPFileparser.cpp
 
-CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Fileparser.cpp > CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.i
+CMakeFiles/main_test.dir/src/MIPFileparser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main_test.dir/src/MIPFileparser.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPFileparser.cpp > CMakeFiles/main_test.dir/src/MIPFileparser.cpp.i
 
-CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIP_Fileparser.cpp -o CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.s
+CMakeFiles/main_test.dir/src/MIPFileparser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main_test.dir/src/MIPFileparser.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jake/PhD/Decomposition/Constraint_Decomp_Latest/src/MIPFileparser.cpp -o CMakeFiles/main_test.dir/src/MIPFileparser.cpp.s
 
 CMakeFiles/main_test.dir/src/HG_Edge.cpp.o: CMakeFiles/main_test.dir/flags.make
 CMakeFiles/main_test.dir/src/HG_Edge.cpp.o: src/HG_Edge.cpp
@@ -424,7 +424,7 @@ CMakeFiles/main_test.dir/src/HG_Node.cpp.s: cmake_force
 # Object files for target main_test
 main_test_OBJECTS = \
 "CMakeFiles/main_test.dir/src/Testing.cpp.o" \
-"CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o" \
+"CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o" \
 "CMakeFiles/main_test.dir/src/RelaxedConstraintRedundancyChecker.cpp.o" \
 "CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.o" \
 "CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.o" \
@@ -448,7 +448,7 @@ main_test_OBJECTS = \
 "CMakeFiles/main_test.dir/src/Decomp.cpp.o" \
 "CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o" \
 "CMakeFiles/main_test.dir/src/Hypergraph.cpp.o" \
-"CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o" \
+"CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o" \
 "CMakeFiles/main_test.dir/src/HG_Edge.cpp.o" \
 "CMakeFiles/main_test.dir/src/HG_Node.cpp.o"
 
@@ -456,7 +456,7 @@ main_test_OBJECTS = \
 main_test_EXTERNAL_OBJECTS =
 
 main_test: CMakeFiles/main_test.dir/src/Testing.cpp.o
-main_test: CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o
+main_test: CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o
 main_test: CMakeFiles/main_test.dir/src/RelaxedConstraintRedundancyChecker.cpp.o
 main_test: CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.o
 main_test: CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.o
@@ -480,7 +480,7 @@ main_test: CMakeFiles/main_test.dir/src/DecompMIP.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Decomp.cpp.o
 main_test: CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o
 main_test: CMakeFiles/main_test.dir/src/Hypergraph.cpp.o
-main_test: CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o
+main_test: CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o
 main_test: CMakeFiles/main_test.dir/src/HG_Edge.cpp.o
 main_test: CMakeFiles/main_test.dir/src/HG_Node.cpp.o
 main_test: CMakeFiles/main_test.dir/build.make

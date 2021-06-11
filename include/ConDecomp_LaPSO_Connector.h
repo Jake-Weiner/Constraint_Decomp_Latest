@@ -7,7 +7,7 @@
 #include "MIP_Problem.h"
 #include "Subproblem_Constraints.h"
 #include "Variable.h"
-#include "Decomposition_Statistics.h"
+#include "DecompositionStatistics.h"
 #include "Util.h"
 #include <ilcplex/ilocplex.h>
 #include <map>
@@ -17,7 +17,7 @@
 
 using namespace LaPSO;
 using namespace std;
-using Decomposition_Statistics::Subproblems;
+using DecompositionStatistics::Subproblems;
 
 class IloSmartPointer { 
     IloEnv* ptr; //  

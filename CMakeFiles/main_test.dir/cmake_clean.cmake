@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/main_test.dir/src/Testing.cpp.o"
-  "CMakeFiles/main_test.dir/src/Decomposition_Statistics.cpp.o"
+  "CMakeFiles/main_test.dir/src/DecompositionStatistics.cpp.o"
   "CMakeFiles/main_test.dir/src/RelaxedConstraintRedundancyChecker.cpp.o"
   "CMakeFiles/main_test.dir/src/ConstraintFileProcessing.cpp.o"
   "CMakeFiles/main_test.dir/src/GreedyDecompCreator.cpp.o"
@@ -24,7 +24,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/main_test.dir/src/Decomp.cpp.o"
   "CMakeFiles/main_test.dir/src/MIP_to_Hypergraph.cpp.o"
   "CMakeFiles/main_test.dir/src/Hypergraph.cpp.o"
-  "CMakeFiles/main_test.dir/src/MIP_Fileparser.cpp.o"
+  "CMakeFiles/main_test.dir/src/MIPFileparser.cpp.o"
   "CMakeFiles/main_test.dir/src/HG_Edge.cpp.o"
   "CMakeFiles/main_test.dir/src/HG_Node.cpp.o"
   "main_test.pdb"

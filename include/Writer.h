@@ -4,13 +4,13 @@
 #include <vector>
 #include <string>
 #include "Util.h"
-#include "Decomposition_Statistics.h"
+#include "DecompositionStatistics.h"
 #include <memory>
 
-using Decomposition_Statistics::RelaxedConstraints;
-using Decomposition_Statistics::Subproblems;
-using Decomposition_Statistics::Instance;
-using Decomposition_Statistics::LROutputs;
+using DecompositionStatistics::RelaxedConstraints;
+using DecompositionStatistics::Subproblems;
+using DecompositionStatistics::Instance;
+using DecompositionStatistics::LROutputs;
 
 class Writer{
 

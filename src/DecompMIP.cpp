@@ -1,5 +1,5 @@
 #include "DecompMIP.h"
-#include "MIP_Fileparser.h"
+#include "MIPFileparser.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <limits>
@@ -147,7 +147,7 @@ int num_subproblems, bool print, const char* outfile, const int solver_time,  bo
         if (warm_start == true){
             cplex.addMIPStart(constraint_var,con_vars);
         }
-        cplex.setParam(IloCplex::Threads, 4); // solve using 1 thread only
+        cplex.setParam(IloCplex::Threads, 1); // solve using 1 thread only
         cplex.setParam(IloCplex::TiLim, solver_time);
         cout << "solving MIP..." << endl;
 
@@ -159,7 +159,7 @@ int num_subproblems, bool print, const char* outfile, const int solver_time,  bo
 
         // Optimize the problem and obtain solution.
         if (!cplex.solve()) {
-            env.error() << "Failed to optimize LP" << endl;
+            env.error() << "Failed to optimize IP" << endl;
             throw(-1);
         }
 
