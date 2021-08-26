@@ -2,7 +2,7 @@
 
 INPUT_DIR="/home/jake/PhD/Decomposition/Input/Unit_Testing/Hypergraph"
 executable_path="/home/jake/PhD/Decomposition/Constraint_Decomp_Latest"
-instance_name="test1.mps"
+instance_name="test3.mps"
 
 if test -f $INPUT_FILE; then
     echo "$INPUT_FILE exists."
@@ -14,6 +14,6 @@ fi
 $executable_path/main_test --input_root_folder=$INPUT_DIR \
 --input_instance_name=$instance_name \
 --run_Hypergraph_Partitioning_testing=true \
---con_vec_filename=$INPUT_DIR/test_case1_con_vec.csv
+--con_vec_filename=$INPUT_DIR/test_case3_con_vec.csv
 
 

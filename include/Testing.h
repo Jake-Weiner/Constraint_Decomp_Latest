@@ -27,7 +27,7 @@ class Testing{
         Testing(int& argc, const char** argv);
         void RunMIPTesting(MIP_Problem& MP);
         void testEmptyConVec(MIP_Problem& MP, Hypergraph& HG);
-    
+        void runHypergraphPartitioning(Hypergraph& HG);
     private:
         void solveLapso(MIP_Problem& MP, MIPProblemProbe& MPP, Hypergraph& HG, vector<int>& con_relax_vector,
             const LaPSOOutputFilenames& LOF, int decomposition_idx,

@@ -192,6 +192,9 @@ int main(int argc, const char** argv)
         exit(0);
     }
 
+    if (PA.get_run_Hypergraph_Partitioning_testing_flag()){
+        test_obj.runHypergraphPartitioning(HG);
+    }
     //test constraint redundancy for decompositions
     if (PA.get_run_constraint_redundancy_flag()) {
         ConstraintFileProcessing CFP;

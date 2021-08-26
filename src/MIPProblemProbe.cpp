@@ -261,32 +261,33 @@ void MIPProblemProbe::getSubproblemVariableStatistics(SubproblemVariableStatisti
  * 
  * 
  */
- 
 void MIPProblemProbe::getSubproblemConstraintStatistics(SubproblemConstraintStatistics& scs, const std::vector<int>& constraint_idxs)
 {
 
     int equality_const_count = 0;
-    double RHS_sum = 0.00;
-    double abs_RHS_sum = 0.00;
-    double largest_RHSLHS_ratio_sum = 0.00;
-    double max_rhs = std::numeric_limits<double>::min();
-    double min_rhs = std::numeric_limits<double>::max();
-    int non_zero_count = 0;
+    double block_RHS_sum = 0.00;
+    double block_abs_RHS_sum = 0.00;
+    double block_largest_RHSLHS_ratio_sum = 0.00;
+    // keep track of largest and smallest RHS values within given constraint indicies
+    double max_block_rhs = std::numeric_limits<double>::min();
+    double min_block_rhs = std::numeric_limits<double>::max();
+    int block_non_zero_count = 0;
     for (const auto& constraint_idx : constraint_idxs) {
         if (MP_ptr->constraintIndexValidity(constraint_idx)) {
             if (MP_ptr->constraints[constraint_idx].getBoundType() == Equal) {
                 ++equality_const_count;
             }
-            abs_RHS_sum += abs(MP_ptr->getConstraint(constraint_idx).getRHS());
-            RHS_sum += MP_ptr->getConstraint(constraint_idx).getRHS();
-            largest_RHSLHS_ratio_sum += abs(MP_ptr->getConstraint(constraint_idx).getLargestRHSLHSRatio());
-            if (MP_ptr->getConstraint(constraint_idx).getRHS() > max_rhs) {
-                max_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
+            block_abs_RHS_sum += abs(MP_ptr->getConstraint(constraint_idx).getRHS());
+            block_RHS_sum += MP_ptr->getConstraint(constraint_idx).getRHS();
+            block_largest_RHSLHS_ratio_sum += abs(MP_ptr->getConstraint(constraint_idx).getLargestRHSLHSRatio());
+            // if current constraint RHS is greater than the max RHS - set max RHS
+            if (MP_ptr->getConstraint(constraint_idx).getRHS() > max_block_rhs) {
+                max_block_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
             }
-            if (MP_ptr->getConstraint(constraint_idx).getRHS() < min_rhs) {
-                min_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
+            if (MP_ptr->getConstraint(constraint_idx).getRHS() < min_block_rhs) {
+                min_block_rhs = MP_ptr->getConstraint(constraint_idx).getRHS();
             }
-            non_zero_count += MP_ptr->getConstraint(constraint_idx).getNumVar();
+            block_non_zero_count += MP_ptr->getConstraint(constraint_idx).getNumVar();
         } else {
             cout << "Invalid Constraint Index in getBlockEqualityConstraintProp(). Index requested is: " << constraint_idx << endl;
             exit(EXIT_FAILURE);
@@ -294,11 +295,11 @@ void MIPProblemProbe::getSubproblemConstraintStatistics(SubproblemConstraintStat
     }
 
     scs.equality_prop = (static_cast<double>(equality_const_count) / static_cast<double>(constraint_idxs.size()));
-    scs.average_RHS_val = RHS_sum / static_cast<double>(constraint_idxs.size());
-    scs.average_abs_RHS_val = abs_RHS_sum / static_cast<double>(constraint_idxs.size());
-    scs.average_largest_RHSLHS_ratio = largest_RHSLHS_ratio_sum / static_cast<double>(constraint_idxs.size());
-    scs.largest_RHS_range = max_rhs - min_rhs;
-    scs.num_non_zeroes = non_zero_count;
+    scs.average_RHS_val = block_RHS_sum / static_cast<double>(constraint_idxs.size());
+    scs.average_abs_RHS_val = block_abs_RHS_sum / static_cast<double>(constraint_idxs.size());
+    scs.average_largest_RHSLHS_ratio = block_largest_RHSLHS_ratio_sum / static_cast<double>(constraint_idxs.size());
+    scs.largest_RHS_range = max_block_rhs - min_block_rhs;
+    scs.num_non_zeroes = block_non_zero_count;
 }
 
 void MIPProblemProbe::getRelaxedConstraintStatistics(RelaxedConstraintStatistics& rcs, const std::vector<int>& constraint_idxs)

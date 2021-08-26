@@ -32,23 +32,19 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     int nodes_seen = 0;
     //perform BFS on Hypergraph - stop when all nodes have been considered
     while (nodes_seen != node_idx_seen.size()) {
-        // pick first unseen node iff it has an edge attached
+        // pick first unseen node
         int node_idx_selected;
-        for (int i = 0; i < node_idx_seen.size(); i++) {
+        for (int i = 0; i < node_idx_seen.size(); ++i) {
             if (node_idx_seen[i] == false) {
-                // if (nodes[i].getEdgeIdxsSize() == 0){
-                //     node_idx_seen[i] = true;
-                //     continue;
-                // }
                 node_idx_selected = i;
                 break;
             }
         }
-
         HG_Node node_selected = HG_nodes[node_idx_selected];
         node_idx_seen[node_idx_selected] = true;
+        // another node has been seen
         ++nodes_seen;
-        // find the partition with the the selected node belongs to
+        // find the edges and nodes belonging to the partition with the the selected node
         findPartition(node_selected, node_idx_seen, edge_idx_seen, nodes_seen);
     }
     return;
@@ -56,19 +52,15 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
 
 void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen)
 {
-
     vector<int> node_partition;
     vector<int> edge_partition;
     node_partition.push_back(starting_node.getNodeIdx());
     queue<HG_Edge> Q;
 
-    // for each node, add neighbour nodes to the queue which haven't been seen before
-
-    // add edges attached to node which haven't been seen before
+    // for each node add edges attached to node which haven't been seen before
     for (auto& edge_idx : starting_node.getEdgeIdxs()) {
         if (edge_idx_seen[edge_idx] == false) {
             Q.push(HG_edges[edge_idx]);
-            // cout << "edge idx to be added " << edge_idx << endl;
             edge_partition.push_back(edge_idx);
             edge_idx_seen[edge_idx] = true;
         }
@@ -80,10 +72,9 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
         for (auto& node_idx : current_edge.getNodeIdxs()) {
             if (node_idx_seen[node_idx] == false) {
                 node_idx_seen[node_idx] = true;
-                nodes_seen++;
+                ++nodes_seen;
                 HG_Node node_added = HG_nodes[node_idx];
                 node_partition.push_back(node_idx);
-                int current_edge_idx = current_edge.getEdgeIdx();
                 // add edges attached to the node to the queue if they haven't been seen previously
                 for (auto& edge_idx : node_added.getEdgeIdxs()) {
                     if (edge_idx_seen[edge_idx] == false) {
@@ -102,7 +93,7 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
         exit(1);
     }
 
-    Partition_Struct ps = { node_partition, edge_partition };
+    Partition_Struct ps = {node_partition, edge_partition };
     PS.push_back(ps);
     if (node_partition.size() > largest_partition) {
         largest_partition = node_partition.size();

@@ -11,7 +11,6 @@ using pagmo::Decomp;
 using pagmo::nsga2;
 using pagmo::population;
 using std::vector;
-
 using std::ostream;
 
 #define largest_sp_idx 0

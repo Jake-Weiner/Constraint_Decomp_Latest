@@ -253,21 +253,27 @@ void Testing::testEmptyConVec(MIP_Problem& MP, Hypergraph& HG)
     exit(EXIT_SUCCESS);
 }
 
-// // test the parsed in hypergraph partitioning
-// if (PA.get_run_Hypergraph_Partitioning_testing_flag()) {
-//     MP.printConstraints();
-//     cout << "running hypergraph partitioning test" << endl;
+void Testing::runHypergraphPartitioning(Hypergraph& HG){
+// test the parsed in hypergraph partitioning
+     // Parse in parameters
+    mainParam::Param para;
+    para.parse(argc, argv);
 
-//     bool test_partitioning = true;
-//     vector<vector<int>> test_decompositions = readInConVecFromFile(para.general_decomp_file);
-//     // partition function will print error message if partitioing was unsuccessful
-//     for (const auto& test_convec : test_decompositions) {
-//         HG.partition(test_convec, test_partitioning);
-//         HG.printPartitions();
-//     }
+    // Manipulate/transform parameters from char to required values through Adapter
+    ParamAdapter PA(para);
+    cout << "running hypergraph partitioning test" << endl;
 
-//     exit(0);
-// }
+    bool test_partitioning = true;
+    vector<vector<int>> test_decompositions = readInConVecFromFile(para.con_vec_filename);
+    cout << "read in con vec file " << endl;
+    // partition function will print error message if partitioing was unsuccessful
+    for (const auto& test_convec : test_decompositions) {
+        HG.partition(test_convec, test_partitioning);
+        HG.printPartitions();
+    }
+
+    exit(0);
+}
 
 // // test NSGA writing
 // if (PA.get_run_NSGA_testing_flag()) {
@@ -377,6 +383,7 @@ void Testing::testEmptyConVec(MIP_Problem& MP, Hypergraph& HG)
 //     }
 // }
 
+// This test is taken from Fishers tutorial paper. The starting dual values for correctness can be changed as required.
 // if (PA.get_run_LR_testing_flag() == true) {
 //     //test_instance 1, relaxing constraint 1
 //     cout << "running LR testing" << endl;

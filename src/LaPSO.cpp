@@ -195,7 +195,7 @@ void Problem::setDualBoundsEqual(const std::vector<int>& idxs)
 }
 
 void Problem::setDualBoundsLesser(const std::vector<int>& idxs)
-{
+{ 
     for (auto& idx : idxs) {
         // printf("constraint idx is %d", idx);
         dualLB[idx] = -INF;
@@ -240,6 +240,7 @@ void Problem::solve(UserHooks& hooks)
 
     Status status = OK;
 
+    // check dual value validity
     for (int i = 0; i < dsize; ++i) { // check initial point is valid
         //check the dual values
         if (current_solution->dual[i] < dualLB[i]) {
@@ -290,13 +291,6 @@ void Problem::solve(UserHooks& hooks)
         printf("Initial LB=%g UB=%g\n", best_solution->lb, best_solution->ub);
     int noImproveIter = 0, nReset = 0, maxNoImprove = 1000;
 
-    // int current_lb_time_limits_idx = 0;
-    // double last_lb_comparison;
-
-    // best_lb_tracking.push_back(best_solution->lb);
-    // double average_lb = current_solution->lb;
-    // average_lb_tracking.push_back(average_lb);
-    // timing_tracking.push_back(cpuTime());
 
     // initial best lower_bound
     bestLB = current_solution->lb;
@@ -309,15 +303,6 @@ void Problem::solve(UserHooks& hooks)
             printf("best_solution lower bound so far is %f \n", best_solution->lb);
         }
 
-        // for (int dual_idx =0; dual_idx < best_solution->dual.size(); ++dual_idx){
-        //     cout << "Dual[" << dual_idx << "] = " <<  best_solution->dual[dual_idx] << std::endl;
-        // }
-
-        // cpu time is within the limit
-        // best_lb_tracking.push_back(best_solution->lb);
-        // double average_lb = current_solution->lb;
-        // average_lb_tracking.push_back(average_lb);
-        // timing_tracking.push_back(cpuTime());
         if (param.printLevel > 1 && nIter % param.printFreq == 0)
             printf("Iteration %d --------------------\n", nIter);
 

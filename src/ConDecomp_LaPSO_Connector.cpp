@@ -261,10 +261,11 @@ void ConDecomp_LaPSO_Connector::initSubproblems(const vector<Partition_Struct>& 
     return;
 }
 
+// update the reduced costs
 Status ConDecomp_LaPSO_Connector::reducedCost(Solution& s)
 {
     //reset the reduced costs to the original costs
-    for (int i = 0; i < s.rc.size(); i++) {
+    for (int i = 0; i < s.rc.size(); ++i) {
         s.rc[i] = original_costs[i];
     }
 
