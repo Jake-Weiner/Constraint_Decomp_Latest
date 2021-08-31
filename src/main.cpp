@@ -210,11 +210,13 @@ int main(int argc, const char** argv)
 
     // run NSGA if desired
     if (PA.get_run_nsga_decomp_flag() == true) {
-        Problem_Adapter ProblemAdapter;
+        ProblemAdapter ProblemAdapter;
         // write out to a file the different decompositions found
         bool print_objectives = false;
         cout << "pareto opt sol filepath is " << string(para.nsga_pareto_optimal_output_file) << endl;
-        ProblemAdapter.createNSGADecomps(HG, para.nsga_gen, string(para.nsga_decomp_output_file), string(para.nsga_pareto_optimal_output_file), para.nsga_pop_size, print_objectives);
+        NSGAParameters nsga_parameters = {para.nsga_gen, para.nsga_pop_size};
+        NSGAOutputs nsga_outputs = { string(para.nsga_decomp_output_file), string(para.nsga_pareto_optimal_output_file)};
+        ProblemAdapter.createNSGADecomps(HG, nsga_parameters, nsga_outputs, print_objectives);
     }
 
     if (PA.get_run_gather_statistics_flag() == true) {

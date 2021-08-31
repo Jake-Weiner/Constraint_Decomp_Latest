@@ -21,12 +21,12 @@ typedef std::pair<unsigned int,unsigned int> pair_int;
 void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double con_relaxed, double LSP, bool print_objectives);
 void writeParetoOptimalToFile(const string& outfile_name, const population& pop, const vector<size_t>& pareto_idxs);
 
-Problem_Adapter::Problem_Adapter(){};
+ProblemAdapter::ProblemAdapter(){};
 
-
-
-void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
-    const string& output_file, const string& pareto_optimal_sols, const int& pop_size, const bool& print_objectives)
+void ProblemAdapter::createNSGADecomps(Hypergraph& HG,
+                                        const NSGAParameters& nsga_params,
+                                        const NSGAOutputs& output_files,
+                                        const bool& print_objectives)
 {
     // vector<individual_information_struct> ris;
     Decomp udp = Decomp(HG.getNumEdges(), HG);
@@ -44,9 +44,9 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     // pop size must be at least 14 to greedily seed, although it must be in multiples
     // of 4
     bool greedy = true;
-    if (pop_size > 14 && greedy == true){
+    if (nsga_params.pop_size > 14 && greedy == true){
         vector<vector<double>> greedy_population = udp.greedy_seeding();
-        int pop_size_wo_greedy = pop_size - greedy_population.size();
+        int pop_size_wo_greedy = nsga_params.pop_size - greedy_population.size();
         population pop_greedy{ prob, pop_size_wo_greedy };
         for (auto& individual : greedy_population) {
             pop_greedy.push_back(individual);
@@ -54,7 +54,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
         pop = pop_greedy;
     }
     else{
-        population non_greedy{ prob, pop_size };
+        population non_greedy{ prob, nsga_params.pop_size };
         pop = non_greedy;
     }
 
@@ -64,12 +64,12 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     // Decompositions are written out to a file in case the process is interrupted on MASSIVE
     // if file doesn't exist, create it 
     std::ofstream outfile;
-    outfile.open(output_file, std::ofstream::app);
+    outfile.open(output_files.all_decomps_output_filepath, std::ofstream::app);
 
     if(outfile){
         // evolving the population 1 generation at a time in order to capture all solutions (placed into pop_total) that would otherwise be thrown away
         int gen_counter = 0;
-        while (gen_counter < (num_gen - 1)) {
+        while (gen_counter < (nsga_params.num_gen - 1)) {
             cout << "number of generations evolved is " << gen_counter << endl;
             for (int pop_idx = 0; pop_idx < pop.size(); pop_idx++) {
                 // write every individual to the output file, duplicates can be processed later
@@ -83,7 +83,7 @@ void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
                 cout << non_dom_idx << " " ;
             }
             cout << endl;
-            writeParetoOptimalToFile(pareto_optimal_sols, pop, non_dom_sols);
+            writeParetoOptimalToFile(output_files.pareto_decomps_output_filepath, pop, non_dom_sols);
             ++gen_counter;
             //pareto optimal convergence... 
         }

@@ -17,15 +17,24 @@
 #include "Util.h"
 #include "Hypergraph.h"
 
+struct NSGAParameters{
+    int num_gen;
+    int pop_size;
+};
 
-class Problem_Adapter{
+struct NSGAOutputs{
+    const string all_decomps_output_filepath;
+    const string pareto_decomps_output_filepath;
+};
+
+class ProblemAdapter{
 
     public:
-
-        Problem_Adapter();
-
-        void createNSGADecomps(Hypergraph& HG, const int& num_gen, 
-        const string& output_file, const string& pareto_optimal_sols, const int& pop_size, const bool& print_objective);
+        ProblemAdapter();
+        void createNSGADecomps(Hypergraph& HG,
+                                const NSGAParameters& nsga_params,
+                                const NSGAOutputs& output_files,
+                                const bool& print_objectives);
 };
 
 #endif
