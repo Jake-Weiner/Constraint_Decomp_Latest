@@ -61,6 +61,11 @@ vector_double Decomp::fitness(const vector_double& dv) const
 // 
 vector<vector<double>> Decomp::greedy_seeding(){
     
+
+    cout << "Starting Greedy Seeding" << endl;
+
+    std::clock_t c_start = std::clock();
+
     int sum_nodes_in_edges = 0;
 
     // get the total number of non zeroes summed up across all constraints/hyperedges
@@ -116,6 +121,11 @@ vector<vector<double>> Decomp::greedy_seeding(){
         }
         individual_idx++;
     }
+
+    cout << "Finished Greedy Seeding" << endl;
+    std::clock_t c_end = std::clock();
+    long double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
     return initial_population;
 }
 

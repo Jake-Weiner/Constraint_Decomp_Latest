@@ -6,6 +6,9 @@
 #include <iostream>
 #include <queue>
 #include <string>
+#include <ctime>
+
+
 
 using std::cout;
 using std::endl;
@@ -13,6 +16,10 @@ using std::vector;
 
 void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
 {
+
+    cout << "Starting Hypergraph Partitioning" << endl;
+    std::clock_t c_start = std::clock();
+
     // overall algorithm
     // List keeping track of seen edges
     // vector<bool> edge_idx_seen;
@@ -47,6 +54,10 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
         // find the edges and nodes belonging to the partition with the the selected node
         findPartition(node_selected, node_idx_seen, edge_idx_seen, nodes_seen);
     }
+
+    std::clock_t c_end = std::clock();
+    long double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
     return;
 }
 
@@ -56,7 +67,6 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
     vector<int> edge_partition;
     node_partition.push_back(starting_node.getNodeIdx());
     queue<HG_Edge> Q;
-
     // for each node add edges attached to node which haven't been seen before
     for (auto& edge_idx : starting_node.getEdgeIdxs()) {
         if (edge_idx_seen[edge_idx] == false) {
@@ -65,7 +75,6 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
             edge_idx_seen[edge_idx] = true;
         }
     }
-
     while (!Q.empty()) {
         HG_Edge current_edge = Q.front();
         // for each node in the hyperedge, add the node to the node_partition if it hasn't already been added
@@ -87,13 +96,12 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
         }
         Q.pop();
     }
-
     if (node_partition.empty()) {
         cout << "empty node partition" << endl;
         exit(1);
     }
-
-    Partition_Struct ps = {node_partition, edge_partition };
+    // create partition struct containg indicies of all nodes and edges
+    Partition_Struct ps = {node_partition, edge_partition};
     PS.push_back(ps);
     if (node_partition.size() > largest_partition) {
         largest_partition = node_partition.size();

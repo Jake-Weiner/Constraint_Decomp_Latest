@@ -23,6 +23,8 @@ void writeParetoOptimalToFile(const string& outfile_name, const population& pop,
 
 Problem_Adapter::Problem_Adapter(){};
 
+
+
 void Problem_Adapter::createNSGADecomps(Hypergraph& HG, const int& num_gen,
     const string& output_file, const string& pareto_optimal_sols, const int& pop_size, const bool& print_objectives)
 {
