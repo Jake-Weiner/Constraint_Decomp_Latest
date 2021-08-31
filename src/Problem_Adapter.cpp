@@ -18,6 +18,7 @@ using std::ostream;
 
 typedef std::pair<unsigned int,unsigned int> pair_int;
 
+// local function declarations
 void writeDecompToFile(ofstream& outfile, const vector<double>& con_vec, double con_relaxed, double LSP, bool print_objectives);
 void writeParetoOptimalToFile(const string& outfile_name, const population& pop, const vector<size_t>& pareto_idxs);
 
@@ -41,8 +42,11 @@ void ProblemAdapter::createNSGADecomps(Hypergraph& HG,
     //population pop_total;
     // Greedy Seeding of the initial pop
 
-    // pop size must be at least 14 to greedily seed, although it must be in multiples
+    // pop size must be at least 14 to greedily seed, and must be in multiples
     // of 4
+    cout << "Initialising Starting Population" << endl;
+    std::clock_t c_start = std::clock();
+    
     bool greedy = true;
     if (nsga_params.pop_size > 14 && greedy == true){
         vector<vector<double>> greedy_population = udp.greedy_seeding();
@@ -59,7 +63,9 @@ void ProblemAdapter::createNSGADecomps(Hypergraph& HG,
     }
 
     cout << "initialised initial population" << endl;
-    cout << "starting to evolve population" << endl;
+    std::clock_t c_end = std::clock();
+    long double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
 
     // Decompositions are written out to a file in case the process is interrupted on MASSIVE
     // if file doesn't exist, create it 
@@ -76,7 +82,13 @@ void ProblemAdapter::createNSGADecomps(Hypergraph& HG,
                 writeDecompToFile(outfile, pop.get_x()[pop_idx], pop.get_f()[pop_idx][0], pop.get_f()[pop_idx][1], print_objectives);
             }
             // evolve the population
+            cout << "Evolving population" << endl;
+            std::clock_t c_start = std::clock();
             pop = algo.evolve(pop);
+            std::clock_t c_end = std::clock();
+            cout << "evolved population" << endl;
+            long double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+            std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
             std::vector<size_t> non_dom_sols = pagmo::non_dominated_front_2d(pop.get_f());
             cout << "printing out non-dominated sol idxs" << endl;
             for (const auto& non_dom_idx : non_dom_sols){
