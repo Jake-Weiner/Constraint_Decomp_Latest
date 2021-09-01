@@ -1,0 +1,4 @@
+#!/bin/bash
+
+for i in {0..4}; do sbatch "./remove_redundant_constraints_job_script_${i}"; done
+

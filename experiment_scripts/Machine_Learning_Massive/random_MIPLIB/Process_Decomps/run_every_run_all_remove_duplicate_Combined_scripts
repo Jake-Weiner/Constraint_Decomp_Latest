@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# this script will iterate through every folder and run the run_all bash script for each test
+cd Combined
+cd duplicate
+./run_all_remove_duplicate_Combined_constraints

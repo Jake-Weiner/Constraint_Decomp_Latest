@@ -1,0 +1,12 @@
+#!/bin/bash
+
+local_copy="/home/jake/PhD/Decomposition/Massive/Machine_Learning/experiment_scripts/generic_scripts/Decomp_Creation_Scripts/No_Constraints_Relaxed/no_con_relaxed_con_vec.csv"
+problem_type="supply_network_planning"
+
+for INSTANCE_NAME in snp-02-004-104.mps snp-04-052-052.mps snp-06-004-052.mps snp-10-004-052.mps snp-10-052-052.mps
+do
+	scp $local_copy jakew@monarch-dtn.erc.monash.edu:/home/jakew/p2016050003/jakew/Machine_Learning_Decompositions/output/No_Con_Relaxed/$problem_type/$INSTANCE_NAME/decompositions/
+done
+
+
+

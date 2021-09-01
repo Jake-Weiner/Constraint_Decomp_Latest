@@ -32,6 +32,8 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     vector<bool> edge_idx_seen;
     edge_idx_seen.resize(HG_edges.size(), false);
 
+    // cout<< "No. Nodes " << HG_nodes.size() << endl;
+    cout<< "No. Relaxed Edges " << relaxed_edges.size() << endl;
     for (const auto& edge_idx : relaxed_edges) {
         edge_idx_seen[edge_idx] = true;        
     }
@@ -68,19 +70,19 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
     vector<int> node_partition;
     vector<int> edge_partition;
     node_partition.push_back(starting_node.getNodeIdx());
-    queue<HG_Edge> Q;
+    queue<HG_Edge*> Q;
     // for each node add edges attached to node which haven't been seen before
     for (auto& edge_idx : starting_node.getEdgeIdxs()) {
         if (edge_idx_seen[edge_idx] == false) {
-            Q.push(HG_edges[edge_idx]);
+            Q.push(&HG_edges[edge_idx]);
             edge_partition.push_back(edge_idx);
             edge_idx_seen[edge_idx] = true;
         }
     }
     while (!Q.empty()) {
-        HG_Edge current_edge = Q.front();
+        HG_Edge* current_edge = Q.front();
         // for each node in the hyperedge, add the node to the node_partition if it hasn't already been added
-        for (auto& node_idx : current_edge.getNodeIdxs()) {
+        for (auto& node_idx : current_edge->getNodeIdxs()) {
             if (node_idx_seen[node_idx] == false) {
                 node_idx_seen[node_idx] = true;
                 ++nodes_seen;
@@ -89,7 +91,7 @@ void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_see
                 // add edges attached to the node to the queue if they haven't been seen previously
                 for (auto& edge_idx : node_added.getEdgeIdxs()) {
                     if (edge_idx_seen[edge_idx] == false) {
-                        Q.push(HG_edges[edge_idx]);
+                        Q.push(&HG_edges[edge_idx]);
                         edge_idx_seen[edge_idx] = true;
                         edge_partition.push_back(edge_idx);
                     }
