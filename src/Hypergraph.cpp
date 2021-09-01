@@ -17,8 +17,7 @@ using std::vector;
 void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
 {
 
-    cout << "Starting Hypergraph Partitioning" << endl;
-    std::clock_t c_start = std::clock();
+    
 
     // overall algorithm
     // List keeping track of seen edges
@@ -39,22 +38,28 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     }
 
     int nodes_seen = 0;
+
+    cout << "Starting Find Partition Loop" << endl;
+    std::clock_t c_start = std::clock();
     //perform BFS on Hypergraph - stop when all nodes have been considered
+    int last_seen_node_idx = 0;
     while (nodes_seen != node_idx_seen.size()) {
         // pick first unseen node
         int node_idx_selected;
-        for (int i = 0; i < node_idx_seen.size(); ++i) {
+        for (int i = last_seen_node_idx; i < node_idx_seen.size(); ++i) {
             if (node_idx_seen[i] == false) {
                 node_idx_selected = i;
                 break;
             }
         }
-        HG_Node node_selected = HG_nodes[node_idx_selected];
+       
+        // HG_Node node_selected = HG_nodes[node_idx_selected];
         node_idx_seen[node_idx_selected] = true;
         // another node has been seen
         ++nodes_seen;
         // find the edges and nodes belonging to the partition with the the selected node
-        findPartition(node_selected, node_idx_seen, edge_idx_seen, nodes_seen);
+        findPartition(HG_nodes[node_idx_selected], node_idx_seen, edge_idx_seen, nodes_seen);
+        last_seen_node_idx = node_idx_selected;
     }
 
 
@@ -65,7 +70,7 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     return;
 }
 
-void Hypergraph::findPartition(HG_Node starting_node, vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen)
+void Hypergraph::findPartition(const HG_Node& starting_node, vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen)
 {
     vector<int> node_partition;
     vector<int> edge_partition;

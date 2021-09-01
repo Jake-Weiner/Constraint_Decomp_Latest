@@ -27,8 +27,10 @@ public:
         return edge_idxs.size();
     }
 
+    int getNodeIdx() const;
     int getNodeIdx();
     vector<int> getEdgeIdxs();
+    vector<int> getEdgeIdxs() const;
     void removeEdgeIdx(int edge_idx);
     bool edgeIdxExists(int edge_idx_checked);
 private:

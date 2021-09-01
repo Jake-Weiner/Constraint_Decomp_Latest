@@ -116,7 +116,7 @@ public:
 
     
 private:
-    void findPartition(HG_Node starting_node,  vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen);
+    void findPartition(const HG_Node& starting_node,  vector<bool>& node_idx_seen, vector<bool>& edge_idx_seen, int& nodes_seen);
     int num_nodes;
     int num_edges;
     vector<HG_Edge> HG_edges;
