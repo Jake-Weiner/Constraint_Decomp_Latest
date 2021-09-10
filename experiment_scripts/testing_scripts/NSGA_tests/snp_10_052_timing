@@ -16,6 +16,6 @@ $executable_path/main_test --input_root_folder=$INPUT_DIR \
 --printLevel=3 \
 --nsga_decomp_output_file=$nsga_output_folder/$instance_name \
 --input_instance_name=$instance_name \
---nsga_pop_size=32 --nsga_gen=1 \
+--nsga_pop_size=32 --nsga_gen=2 \
 --run_nsga_decomp=true \
-> $nsga_output_folder/$instance_name_timing_log.txt
+> $nsga_output_folder/${instance_name}_timing_log.txt

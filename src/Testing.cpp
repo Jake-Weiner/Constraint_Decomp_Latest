@@ -266,6 +266,11 @@ void Testing::runHypergraphPartitioning(Hypergraph& HG){
     bool test_partitioning = true;
     vector<vector<int>> test_decompositions = readInConVecFromFile(para.con_vec_filename);
     cout << "read in con vec file " << endl;
+    for (const auto& con_vec : test_decompositions) {
+        for (const auto& con_idx : con_vec) {
+            cout << con_idx << endl;
+        }
+    }
     // partition function will print error message if partitioing was unsuccessful
     for (const auto& test_convec : test_decompositions) {
         HG.partition(test_convec, test_partitioning);

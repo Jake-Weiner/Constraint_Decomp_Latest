@@ -44,7 +44,7 @@ class Hypergraph {
 public:
  
     Hypergraph(){};
-    Hypergraph(vector<HG_Edge> HG_edges, vector<HG_Node> HG_nodes){
+    Hypergraph(const vector<HG_Edge>& HG_edges, const vector<HG_Node>& HG_nodes){
 
         this->HG_edges = HG_edges;
         this->HG_nodes = HG_nodes;

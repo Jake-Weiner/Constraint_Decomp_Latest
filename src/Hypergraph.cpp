@@ -16,9 +16,6 @@ using std::vector;
 
 void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
 {
-
-    
-
     // overall algorithm
     // List keeping track of seen edges
     // vector<bool> edge_idx_seen;
@@ -44,7 +41,7 @@ void Hypergraph::identifyPartitions(const vector<int>& relaxed_edges)
     //perform BFS on Hypergraph - stop when all nodes have been considered
     int last_seen_node_idx = 0;
     while (nodes_seen != node_idx_seen.size()) {
-        // pick first unseen node
+        // pick first unseen node after the last index which was selected
         int node_idx_selected;
         for (int i = last_seen_node_idx; i < node_idx_seen.size(); ++i) {
             if (node_idx_seen[i] == false) {
@@ -198,32 +195,7 @@ void Hypergraph::partitionValidity(const vector<int>& relaxed_edge_idxs)
     }
 }
 
-/* Reduce the graph by removing edges based on the constraints relaxed */
-//
 
-void Hypergraph::updateNodes(const vector<double>& constraints_selected, vector<HG_Node>& updated_nodes)
-{
-    // copy the original node information
-    for (auto& node : HG_nodes) {
-        updated_nodes[node.getNodeIdx()] = HG_Node{ node.getNodeIdx(), node.getEdgeIdxs() };
-    }
-    // ensure constraint vector input matches number of edges in HG
-    if (constraints_selected.size() != HG_edges.size()) {
-        cout << "incorrect input vector size of relaxed constraints" << endl;
-    }
-    int edge_idx = 0;
-    for (auto& constraint_decision : constraints_selected) {
-        HG_Edge current_edge = HG_edges[edge_idx];
-        // 1 is edge relaxation
-        if (constraint_decision == 1) {
-            for (auto& node_idx : current_edge.getNodeIdxs()) {
-                //remove edge idx attached to node
-                updated_nodes[node_idx].removeEdgeIdx(current_edge.getEdgeIdx());
-            }
-        }
-        edge_idx++;
-    }
-}
 //unit testing flag to test if partioning algorithm should be checked
 
 // partition the hypergraph based on selected constraints
